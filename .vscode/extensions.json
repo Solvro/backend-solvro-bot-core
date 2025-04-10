@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "EditorConfig.EditorConfig",
+    "jripouteau.adonis-vscode-extension",
+    "fill-labs.dependi",
+    "yzhang.markdown-all-in-one",
+    "bierner.markdown-preview-github-styles",
+    "YoavBls.pretty-ts-errors"
+  ],
+}

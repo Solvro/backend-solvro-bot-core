@@ -1,9 +1,13 @@
 # backend-solvro-bot-core
 
+[Github project 🗂️](https://github.com/orgs/Solvro/projects/40) |
+[Github team 👥](https://github.com/orgs/Solvro/teams/solvro-bot) |
+[Google drive 💾](https://drive.google.com/drive/folders/1YeTG061qQ5Y9_eGXIXAa4POcpaZerIN5)
+
 ## Services
 
-- [Transcriber](https://github.com/Solvro/backend-solvro-bot-transcriber)
-- [Office cam](https://github.com/Solvro/hardware-solvro-bot-office-cam)
+- [Transcriber 🎙️](https://github.com/Solvro/backend-solvro-bot-transcriber)
+- [Office cam 📹](https://github.com/Solvro/hardware-solvro-bot-office-cam)
 
 ## Development
 

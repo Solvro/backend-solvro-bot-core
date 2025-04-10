@@ -30,3 +30,15 @@ Suggested commit message specification: https://www.conventionalcommits.org
 
 > [!TIP]
 > Press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>X</kbd> and search *@recommended* to see recommended Visual Studio Code extensions for this workspace. 
+
+### Resources
+
+#### Discord.js
+
+[library docs](https://discord.js.org/docs) |
+[Discord docs](https://discord.com/developers/docs)
+
+#### AdonisJS
+
+[docs](https://docs.adonisjs.com) |
+[tutorials](https://adocasts.com/)

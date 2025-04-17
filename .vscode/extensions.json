@@ -5,6 +5,10 @@
     "fill-labs.dependi",
     "yzhang.markdown-all-in-one",
     "bierner.markdown-preview-github-styles",
-    "YoavBls.pretty-ts-errors"
-  ],
+    "YoavBls.pretty-ts-errors",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "adonisjs.vscode-edge",
+    "jripouteau.japa-vscode"
+  ]
 }

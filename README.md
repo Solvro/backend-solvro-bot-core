@@ -36,6 +36,7 @@ Suggested commit message specification: https://www.conventionalcommits.org
 #### Discord.js
 
 [library docs](https://discord.js.org/docs) |
+[developer guide](https://discordjs.guide) |
 [Discord docs](https://discord.com/developers/docs)
 
 #### AdonisJS

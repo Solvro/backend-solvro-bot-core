@@ -2,8 +2,13 @@ import { client, SlashCommand } from '#app/discord/index'
 import env from '#start/env'
 import { BaseCommand } from '@adonisjs/core/ace'
 import type { CommandOptions } from '@adonisjs/core/types/ace'
-import { CommandInteraction, REST, Routes, SlashCommandBuilder } from 'discord.js'
-
+import {
+  CommandInteraction,
+  REST,
+  SlashCommandBuilder,
+  Routes,
+  RESTPutAPIApplicationCommandsResult,
+} from 'discord.js'
 export default class DeployCommands extends BaseCommand {
   static commandName = 'discord:deploy'
   static description = 'Deploy slash commands with Discord REST API'
@@ -23,7 +28,6 @@ export default class DeployCommands extends BaseCommand {
     commands.push(testCommand.data.toJSON())
 
     const rest = new REST({ version: '10' }).setToken(env.get('DISCORD_TOKEN'))
-
     try {
       console.log(`Started refreshing ${commands.length} application (/) commands.`)
 
@@ -32,7 +36,7 @@ export default class DeployCommands extends BaseCommand {
         {
           body: commands,
         }
-      )) as { length: number }
+      )) as RESTPutAPIApplicationCommandsResult
 
       console.log(`Successfully reloaded ${data.length} application (/) commands.`)
     } catch (error) {

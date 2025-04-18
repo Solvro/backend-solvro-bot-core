@@ -18,6 +18,8 @@ export default await Env.create(new URL('../', import.meta.url), {
   HOST: Env.schema.string({ format: 'host' }),
   LOG_LEVEL: Env.schema.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']),
   DISCORD_TOKEN: Env.schema.string(),
+  DISCORD_CLIENT_ID: Env.schema.string(),
+  DISCORD_GUILD_ID: Env.schema.string(),
   /*
   |----------------------------------------------------------
   | Variables for configuring database connection

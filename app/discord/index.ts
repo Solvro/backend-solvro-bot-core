@@ -7,12 +7,19 @@ import {
   MessageFlags,
   SlashCommandBuilder,
 } from 'discord.js'
+import testCommand from '#app/discord/commands/utility/user'
+
+export const commands = [testCommand]
 
 class DiscordClient extends Client {
   commands: Collection<string, SlashCommand>
-  constructor() {
+  constructor(slashCommands?: SlashCommand[]) {
     super({ intents: [GatewayIntentBits.Guilds] })
-    this.commands = new Collection()
+    if (slashCommands) {
+      this.commands = new Collection(slashCommands.map((command) => [command.data.name, command]))
+    } else {
+      this.commands = new Collection()
+    }
   }
 
   async start() {
@@ -25,14 +32,7 @@ export interface SlashCommand {
   execute(interaction: CommandInteraction): Promise<void>
 }
 
-export const client = new DiscordClient()
-
-const testCommand: SlashCommand = {
-  data: new SlashCommandBuilder().setName('test').setDescription('Test command'),
-  async execute(interaction) {
-    await interaction.reply('This is a test command')
-  },
-}
+export const client = new DiscordClient(commands)
 
 client.commands.set(testCommand.data.name, testCommand)
 

@@ -1,7 +1,9 @@
 import { client } from '#app/discord/index'
-import userInfoCmd from '#app/discord/commands/utility/user'
-import recordCmd from '#app/discord/commands/transcriber/record'
+import { commands } from '#app/discord/index'
 
-client.commands.set(userInfoCmd.name(), userInfoCmd)
-client.commands.set(recordCmd.name(), recordCmd)
+commands.forEach((command) => {
+  console.info(`Command: ${command.name()}`)
+  client.commands.set(command.name(), command)
+})
+
 await client.start()

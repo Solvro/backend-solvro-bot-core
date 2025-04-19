@@ -1,10 +1,10 @@
-import { CommandInteraction, SlashCommandBuilder, MessageFlags } from 'discord.js'
+import { CommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { StaticCommand } from '#app/discord/commands/commands'
 
 const command: StaticCommand = new StaticCommand(
   new SlashCommandBuilder().setName('user').setDescription('Get user info'),
   async (interaction: CommandInteraction) => {
-    await interaction.deferReply({ flags: MessageFlags.Ephemeral })
+    await interaction.deferReply({ ephemeral: true })
     const user = interaction.user
     const member = interaction.member
     const guild = interaction.guild

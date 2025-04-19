@@ -1,47 +1,48 @@
-import { DynamicCommand, SlashCommand } from '#app/discord/commands/commands'
+import { SlashCommand, StaticCommand } from '#app/discord/commands/commands'
 import { client } from '#app/discord/index'
 import env from '#start/env'
-import { CommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
+import { ChannelType, CommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
 
 const COMMAND_NAME = 'record'
 const OPTION_CHANNEL = 'channel'
-const command: SlashCommand = new DynamicCommand(
-  COMMAND_NAME,
-  async () => {
-    try {
-      const guild = await client.guilds.fetch(env.get('DISCORD_GUILD_ID'))
-      const channels = await guild.channels.fetch()
-      const voiceChannels = channels.filter(
-        (channel): channel is NonNullable<typeof channel> =>
-          channel !== null && channel.isVoiceBased()
-      )
-      const choices = voiceChannels.map((channel) => ({ name: channel.name, value: channel.id }))
-      console.log(voiceChannels)
-      return new SlashCommandBuilder()
-        .setName(COMMAND_NAME)
-        .setDescription('Record audio from a voice channel')
-        .addStringOption((option) =>
-          option
-            .setName(OPTION_CHANNEL)
-            .setDescription('The ID of the voice channel to join')
-            .setRequired(true)
-            .addChoices(choices)
-        )
-    } catch (error) {
-      throw new Error('Failed to fetch voice channels', error)
-    } finally {
-      client.destroy()
-      await client.destroy()
-    }
-  },
+const OPTION_MEETING_NAME = 'meeting_name'
+const command: SlashCommand = new StaticCommand(
+  new SlashCommandBuilder()
+    .setName(COMMAND_NAME)
+    .setDescription('Record audio from a voice channel')
+    .addChannelOption((option) =>
+      option
+        .setName(OPTION_CHANNEL)
+        .setDescription('The ID of the voice channel to join')
+        .setRequired(true)
+        .addChannelTypes(ChannelType.GuildVoice)
+    )
+    .addStringOption((option) =>
+      option.setName(OPTION_MEETING_NAME).setDescription('Meeting name').setRequired(false)
+    ),
   async (interaction: CommandInteraction) => {
-    const channelId = interaction.options.get(OPTION_CHANNEL, true)
+    const optCh = interaction.options.get(OPTION_CHANNEL, true)
+    if (!optCh.channel) {
+      interaction.reply({
+        content: 'Invalid channel option',
+        flags: MessageFlags.Ephemeral,
+      })
+      return
+    }
+    const optMeetingName = interaction.options.get(OPTION_MEETING_NAME, true)
+    if (optMeetingName && optMeetingName.value) {
+      console.log(`Meeting name: ${optMeetingName.value}`)
+    }
+    const channelId = optCh.channel.id
     const guild = await client.guilds.fetch(env.get('DISCORD_GUILD_ID'))
-    const channel = await guild.channels.fetch(channelId.value as string)
+    const channel = await guild.channels.fetch(channelId)
 
     const response = await fetch(`http://localhost:3000/start`, {
       method: 'POST',
-      body: JSON.stringify({ channelId: String(channelId.value) }),
+      body: JSON.stringify({
+        channelId: String(channelId),
+        meetingName: optMeetingName.value ?? 'default',
+      }),
       headers: {
         'Content-Type': 'application/json',
       },

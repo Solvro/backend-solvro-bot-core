@@ -1,20 +1,11 @@
 import env from '#start/env'
-import {
-  Client,
-  Collection,
-  CommandInteraction,
-  GatewayIntentBits,
-  MessageFlags,
-  SharedSlashCommand,
-  SlashCommandBuilder,
-} from 'discord.js'
+import { Client, Collection, GatewayIntentBits, MessageFlags } from 'discord.js'
 
 import userInfoCommand from '#app/discord/commands/utility/user'
 import recordCommand from '#app/discord/commands/transcriber/record'
-import stopRecordingCommand from '#app/discord/commands/transcriber/stop_recording'
 import { SlashCommand } from './commands/commands.js'
 
-export const commands = [userInfoCommand, recordCommand, stopRecordingCommand]
+export const commands = [userInfoCommand, recordCommand]
 
 export class DiscordClient extends Client {
   commands: Collection<string, SlashCommand>

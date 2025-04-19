@@ -1,13 +1,18 @@
-import { SlashCommand } from '#app/discord/index'
-import { CommandInteraction, SlashCommandBuilder } from 'discord.js'
+import { CommandInteraction, SlashCommandBuilder, MessageFlags } from 'discord.js'
+import { StaticCommand } from '#app/discord/commands/commands'
 
-const command: SlashCommand = {
-  data: new SlashCommandBuilder()
-    .setName('user')
-    .setDescription('Provides information about the user.'),
-  async execute(interaction: CommandInteraction) {
-    await interaction.reply(`This command was run by ${interaction.user.username}`)
-  },
-}
+const command: StaticCommand = new StaticCommand(
+  new SlashCommandBuilder().setName('user').setDescription('Get user info'),
+  async (interaction: CommandInteraction) => {
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral })
+    const user = interaction.user
+    const member = interaction.member
+    const guild = interaction.guild
+
+    await interaction.editReply({
+      content: `User: ${user.username} (${user.id})\nMember: ${member}\nGuild: ${guild?.name}`,
+    })
+  }
+)
 
 export default command

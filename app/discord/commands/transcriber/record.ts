@@ -37,7 +37,7 @@ const command: SlashCommand = new StaticCommand(
     const guild = await client.guilds.fetch(env.get('DISCORD_GUILD_ID'))
     const channel = await guild.channels.fetch(channelId)
 
-    const response = await fetch(`http://localhost:3000/start`, {
+    const response = await fetch(`${env.get('TRANSCRIBER_URL')}/start`, {
       method: 'POST',
       body: JSON.stringify({
         channelId: String(channelId),

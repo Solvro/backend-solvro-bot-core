@@ -1,6 +1,13 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 
+export enum RecordingStatus {
+  PENDING = 'pending',
+  IN_PROGRESS = 'in_progress',
+  COMPLETED = 'completed',
+  ERROR = 'error',
+}
+
 export default class Recording extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
@@ -18,5 +25,5 @@ export default class Recording extends BaseModel {
   declare transcription: string | null
 
   @column()
-  declare isRecording: boolean
+  declare status: RecordingStatus
 }

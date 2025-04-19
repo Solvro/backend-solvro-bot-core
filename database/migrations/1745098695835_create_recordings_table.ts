@@ -1,4 +1,5 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
+import { RecordingStatus } from '#models/recording'
 
 export default class extends BaseSchema {
   protected tableName = 'recordings'
@@ -12,7 +13,7 @@ export default class extends BaseSchema {
 
       table.text('name').nullable()
       table.text('transcription').nullable()
-      table.boolean('is_recording').defaultTo(false)
+      table.text('status').defaultTo(RecordingStatus.PENDING)
     })
   }
 

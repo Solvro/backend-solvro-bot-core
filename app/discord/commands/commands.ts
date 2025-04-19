@@ -1,7 +1,7 @@
-import { SharedSlashCommand } from 'discord.js'
+import { Interaction, SharedSlashCommand } from 'discord.js'
 
 export abstract class SlashCommand {
-  execute: (interaction: any) => Promise<void>
+  execute: (interaction: Interaction) => Promise<void>
   constructor(execute: (interaction: any) => Promise<void>) {
     this.execute = execute
   }

@@ -23,7 +23,6 @@ export class DiscordClient extends Client {
     client.once('ready', (readyClient) => {
       console.log(`Ready! Logged in as ${readyClient.user.tag}`)
     })
-
     client.on('interactionCreate', async (interaction) => {
       if (!interaction.isChatInputCommand()) return
 

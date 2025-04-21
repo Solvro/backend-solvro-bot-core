@@ -1,5 +1,7 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { BaseModel, column, manyToMany } from '@adonisjs/lucid/orm'
+import Member from './member.js'
+import type { ManyToMany } from '@adonisjs/lucid/types/relations'
 
 export enum RecordingStatus {
   PENDING = 'pending',
@@ -30,4 +32,7 @@ export default class Meeting extends BaseModel {
 
   @column.dateTime()
   declare finishedAt: DateTime | null
+
+  @manyToMany(() => Member)
+  declare members: ManyToMany<typeof Member>
 }

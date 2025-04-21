@@ -64,7 +64,7 @@ const command: SlashCommand = new StaticCommand(
       return
     }
 
-    recording.status = RecordingStatus.IN_PROGRESS
+    recording.status = RecordingStatus.RECORDING
     await recording.save()
 
     interaction.reply({

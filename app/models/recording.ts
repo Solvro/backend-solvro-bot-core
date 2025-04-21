@@ -3,7 +3,8 @@ import { BaseModel, column } from '@adonisjs/lucid/orm'
 
 export enum RecordingStatus {
   PENDING = 'pending',
-  IN_PROGRESS = 'in_progress',
+  RECORDING = 'recording',
+  STOPPING = 'stopping',
   COMPLETED = 'completed',
   ERROR = 'error',
 }

@@ -27,4 +27,7 @@ export default class Recording extends BaseModel {
 
   @column()
   declare status: RecordingStatus
+
+  @column.dateTime()
+  declare finishedAt: DateTime | null
 }

@@ -14,6 +14,7 @@ export default class extends BaseSchema {
       table.text('name').nullable()
       table.text('transcription').nullable()
       table.text('status').defaultTo(RecordingStatus.PENDING)
+      table.timestamp('finished_at').nullable()
     })
   }
 

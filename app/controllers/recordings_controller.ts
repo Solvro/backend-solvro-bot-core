@@ -2,6 +2,7 @@ import Recording, { RecordingStatus } from '#models/recording'
 import { updateRecordingValidator } from '#validators/recording'
 import type { HttpContext } from '@adonisjs/core/http'
 import vine from '@vinejs/vine'
+import { DateTime } from 'luxon'
 
 export default class RecordingsController {
   async register({ request, params, response }: HttpContext) {
@@ -17,6 +18,7 @@ export default class RecordingsController {
 
     recording.transcription = payload.transcription
     recording.status = RecordingStatus.COMPLETED
+    recording.finishedAt = DateTime.now()
     await recording.save()
 
     return response.status(204)

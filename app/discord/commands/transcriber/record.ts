@@ -46,6 +46,7 @@ const command: SlashCommand = new StaticCommand(
       method: 'POST',
       body: JSON.stringify({
         channelId: String(channelId),
+        meetingId: String(recording.id),
         meetingName: optMeetingName?.value ?? 'default',
       }),
       headers: {

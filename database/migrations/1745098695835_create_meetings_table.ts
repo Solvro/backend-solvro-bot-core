@@ -1,8 +1,8 @@
 import { BaseSchema } from '@adonisjs/lucid/schema'
-import { RecordingStatus } from '#models/recording'
+import { RecordingStatus } from '#models/meetings'
 
 export default class extends BaseSchema {
-  protected tableName = 'recordings'
+  protected tableName = 'meetings'
 
   async up() {
     this.schema.createTable(this.tableName, (table) => {
@@ -13,7 +13,7 @@ export default class extends BaseSchema {
 
       table.text('name').nullable()
       table.text('transcription').nullable()
-      table.text('status').defaultTo(RecordingStatus.PENDING)
+      table.text('recording_status').defaultTo(RecordingStatus.PENDING)
       table.timestamp('finished_at').nullable()
     })
   }

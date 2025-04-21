@@ -9,7 +9,7 @@ export enum RecordingStatus {
   ERROR = 'error',
 }
 
-export default class Recording extends BaseModel {
+export default class Meeting extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
@@ -26,7 +26,7 @@ export default class Recording extends BaseModel {
   declare transcription: string | null
 
   @column()
-  declare status: RecordingStatus
+  declare recordingStatus: RecordingStatus
 
   @column.dateTime()
   declare finishedAt: DateTime | null

@@ -1,6 +1,6 @@
 import { SlashCommand, StaticCommand } from '#app/discord/commands/commands'
 import { client } from '#app/discord/index'
-import Recording, { RecordingStatus } from '#models/recording'
+import Meeting, { RecordingStatus } from '#models/meetings'
 import env from '#start/env'
 import { ChannelType, CommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
 
@@ -36,17 +36,16 @@ const command: SlashCommand = new StaticCommand(
     const guild = await client.guilds.fetch(env.get('DISCORD_GUILD_ID'))
     const channel = await guild.channels.fetch(channelId)
 
-    const recording = await Recording.create({
+    const meeting = await Meeting.create({
       name: optMeetingName ? String(optMeetingName.value) : null,
-      status: RecordingStatus.PENDING,
+      recordingStatus: RecordingStatus.PENDING,
     })
 
-    // TODO: Pass recording ID to the transcriber
     const response = await fetch(`${env.get('TRANSCRIBER_URL')}/start`, {
       method: 'POST',
       body: JSON.stringify({
         channelId: String(channelId),
-        meetingId: String(recording.id),
+        meetingId: String(meeting.id),
         meetingName: optMeetingName?.value ?? 'default',
       }),
       headers: {
@@ -55,8 +54,8 @@ const command: SlashCommand = new StaticCommand(
     })
 
     if (!response.ok) {
-      recording.status = RecordingStatus.ERROR
-      await recording.save()
+      meeting.recordingStatus = RecordingStatus.ERROR
+      await meeting.save()
       interaction.reply({
         content: 'Failed to start recording',
         flags: MessageFlags.Ephemeral,
@@ -64,8 +63,8 @@ const command: SlashCommand = new StaticCommand(
       return
     }
 
-    recording.status = RecordingStatus.RECORDING
-    await recording.save()
+    meeting.recordingStatus = RecordingStatus.RECORDING
+    await meeting.save()
 
     interaction.reply({
       content: `Recording audio from channel: *${channel?.name}*`,

@@ -9,7 +9,9 @@ const command: SlashCommand = new StaticCommand(
     .setName('stop_recording')
     .setDescription('Stop recording and leave the voice channel'),
   async (interaction: CommandInteraction) => {
-    const meeting = await Meeting.query().where('status', RecordingStatus.RECORDING).first()
+    const meeting = await Meeting.query()
+      .where('recording_status', RecordingStatus.RECORDING)
+      .first()
     if (!meeting) {
       interaction.reply({
         content: 'No recording in progress',

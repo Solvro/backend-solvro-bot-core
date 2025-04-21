@@ -29,7 +29,14 @@ Suggested commit message specification: https://www.conventionalcommits.org
 ### Visual Studio Code extensions
 
 > [!TIP]
-> Press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>X</kbd> and search *@recommended* to see recommended Visual Studio Code extensions for this workspace. 
+> Press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>X</kbd> and search _@recommended_ to see recommended Visual Studio Code extensions for this workspace.
+
+### API Documentation 
+
+Documentation is auto-generated based on the [OpenAPI](https://www.openapis.org) specification using [AdonisJS AutoSwagger](https://github.com/ad-on-is/adonis-autoswagger).
+
+> [!IMPORTANT]
+> Navigate to [http://localhost:3333/docs](http://localhost:3333/docs) to access the [Scalar](https://scalar.com) UI, where you can explore the API endpoints interactively.
 
 ### Resources
 
@@ -42,4 +49,4 @@ Suggested commit message specification: https://www.conventionalcommits.org
 #### AdonisJS
 
 [docs](https://docs.adonisjs.com) |
-[tutorials](https://adocasts.com/)
+[tutorials](https://adocasts.com)

@@ -10,16 +10,15 @@ export default class RecordingsController {
     const validator = await vine.compile(schema)
     const { id } = await validator.validate(params)
     const payload = await request.validateUsing(updateRecordingValidator)
-
-    const recording = await Meeting.find(id)
-    if (!recording) {
+    const meetings = await Meeting.find(id)
+    if (!meetings) {
       return response.status(404).json({ message: 'Recording not found' })
     }
 
-    recording.transcription = payload.transcription
-    recording.recordingStatus = RecordingStatus.COMPLETED
-    recording.finishedAt = DateTime.now()
-    await recording.save()
+    meetings.transcription = payload.transcription
+    meetings.recordingStatus = RecordingStatus.COMPLETED
+    meetings.finishedAt = DateTime.now()
+    await meetings.save()
 
     return response.status(204)
   }

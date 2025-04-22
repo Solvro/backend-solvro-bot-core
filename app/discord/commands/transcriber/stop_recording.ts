@@ -19,6 +19,8 @@ const command: SlashCommand = new StaticCommand(
       })
       return
     }
+    meeting.recordingStatus = RecordingStatus.STOPPING
+    await meeting.save()
     const response = await fetch(`${env.get('TRANSCRIBER_URL')}/stop`, {
       method: 'POST',
     })
@@ -33,8 +35,8 @@ const command: SlashCommand = new StaticCommand(
       return
     }
 
-    meeting.recordingStatus = RecordingStatus.STOPPING
-    await meeting.save()
+    // meeting.recordingStatus = RecordingStatus.STOPPING
+    // await meeting.save()
 
     interaction.reply({ content: 'Stopped recording' })
   }

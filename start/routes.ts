@@ -10,6 +10,7 @@ import router from '@adonisjs/core/services/router'
 import AutoSwagger from 'adonis-autoswagger'
 import swagger from '#config/swagger'
 
+const HealthChecksController = () => import('#controllers/health_checks_controller')
 const RecordingsController = () => import('#controllers/recordings_controller')
 
 router.get('/', async () => {
@@ -25,5 +26,7 @@ router.get('/swagger', async () => {
 router.get('/docs', async () => {
   return AutoSwagger.default.scalar('/swagger')
 })
+
+router.get('/health', [HealthChecksController])
 
 router.patch('/recordings/:id', [RecordingsController, 'register'])

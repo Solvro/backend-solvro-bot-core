@@ -33,6 +33,8 @@ new Ignitor(APP_ROOT, { importer: IMPORTER })
   .tap((app) => {
     app.booting(async () => {
       await import('#start/env')
+    })
+    app.ready(async () => {
       await import('#app/discord/websocket')
     })
     app.listen('SIGTERM', () => app.terminate())

@@ -1,11 +1,11 @@
 import env from '#start/env'
-import { Client, Collection, GatewayIntentBits, MessageFlags } from 'discord.js'
+import { Client, Collection, GatewayIntentBits } from 'discord.js'
 
 import userInfoCommand from '#app/discord/commands/utility/user'
 import recordCommand from '#app/discord/commands/transcriber/record'
 import stopRecordingCommand from '#app/discord/commands/transcriber/stop_recording'
 import { SlashCommand } from './commands/commands.js'
-import logger from '@adonisjs/core/services/logger'
+import { interactionCreate, ready } from './event_handlers.js'
 
 export const commands = [userInfoCommand, recordCommand, stopRecordingCommand]
 
@@ -25,37 +25,8 @@ export class DiscordClient extends Client {
   }
 
   async registerListeners() {
-    this.once('ready', (readyClient) => {
-      logger.info(`Ready! Logged in as ${readyClient.user.tag}`)
-    })
-    this.on('interactionCreate', async (interaction) => {
-      if (!interaction.isChatInputCommand()) return
-
-      const command = (interaction.client as DiscordClient).commands.get(interaction.commandName)
-
-      if (!command) {
-        logger.error(`No command matching ${interaction.commandName} was found.`)
-        return
-      }
-
-      try {
-        await command.execute(interaction)
-      } catch (error) {
-        logger.error(error)
-        if (interaction.replied || interaction.deferred) {
-          await interaction.followUp({
-            content: 'There was an error while executing this command!',
-            flags: MessageFlags.Ephemeral,
-          })
-        } else {
-          await interaction.reply({
-            content: 'There was an error while executing this command!',
-            flags: MessageFlags.Ephemeral,
-          })
-        }
-      }
-      logger.trace(interaction)
-    })
+    this.once('ready', ready)
+    this.on('interactionCreate', interactionCreate)
   }
 }
 

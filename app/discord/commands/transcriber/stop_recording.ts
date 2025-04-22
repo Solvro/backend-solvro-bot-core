@@ -1,4 +1,5 @@
 import { SlashCommand, StaticCommand } from '#app/discord/commands/commands'
+import logger from '#config/logger'
 import Meeting from '#models/meetings'
 import { RecordingStatus } from '#models/meetings'
 import env from '#start/env'
@@ -29,14 +30,10 @@ const command: SlashCommand = new StaticCommand(
         content: 'Failed to stop recording',
         flags: MessageFlags.Ephemeral,
       })
-      console.log(meeting?.id)
       meeting.recordingStatus = RecordingStatus.ERROR
       await meeting.save()
       return
     }
-
-    // meeting.recordingStatus = RecordingStatus.STOPPING
-    // await meeting.save()
 
     interaction.reply({ content: 'Stopped recording' })
   }

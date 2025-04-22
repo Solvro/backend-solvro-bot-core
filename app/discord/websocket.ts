@@ -8,3 +8,4 @@ commands.forEach((command) => {
 })
 
 await client.start()
+await client.registerListeners()

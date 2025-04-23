@@ -12,9 +12,10 @@ export default class extends BaseSchema {
       table.timestamp('updated_at')
 
       table.text('name').nullable()
+      table.boolean('is_monitored').defaultTo(false)
       table.text('discord_channel_id').nullable()
       table.text('transcription').nullable()
-      table.text('recording_status').defaultTo(RecordingStatus.PENDING)
+      table.text('recording_status').nullable().defaultTo(RecordingStatus.PENDING)
       table.timestamp('finished_at').nullable()
     })
   }

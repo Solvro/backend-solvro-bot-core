@@ -29,10 +29,13 @@ export default class Meeting extends BaseModel {
   declare discordChannelId: string | null
 
   @column()
+  declare isMonitored: boolean
+
+  @column()
   declare transcription: string | null
 
   @column()
-  declare recordingStatus: RecordingStatus
+  declare recordingStatus: RecordingStatus | null
 
   @column.dateTime()
   declare finishedAt: DateTime | null

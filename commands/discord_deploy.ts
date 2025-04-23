@@ -2,7 +2,13 @@ import { commands } from '#app/discord/index'
 import env from '#start/env'
 import { BaseCommand } from '@adonisjs/core/ace'
 import type { CommandOptions } from '@adonisjs/core/types/ace'
-import { REST, Routes, RESTPutAPIApplicationCommandsResult, RESTGetAPIGuildResult, RESTGetAPIOAuth2CurrentApplicationResult } from 'discord.js'
+import {
+  REST,
+  Routes,
+  RESTPutAPIApplicationCommandsResult,
+  RESTGetAPIGuildResult,
+  RESTGetAPIOAuth2CurrentApplicationResult,
+} from 'discord.js'
 
 export default class DeployCommands extends BaseCommand {
   static commandName = 'discord:deploy'

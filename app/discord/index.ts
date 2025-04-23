@@ -4,10 +4,18 @@ import { Client, Collection, GatewayIntentBits } from 'discord.js'
 import userInfoCommand from '#app/discord/commands/utility/user'
 import recordCommand from '#app/discord/commands/transcriber/record'
 import stopRecordingCommand from '#app/discord/commands/transcriber/stop_recording'
+import monitorAttendanceCommand from '#app/discord/commands/attendance/monitor'
+import stopMonitoringAttendanceCommand from '#app/discord/commands/attendance/stop_monitoring'
 import { SlashCommand } from './commands/commands.js'
 import { interactionCreate, ready } from './event_handlers.js'
 
-export const commands = [userInfoCommand, recordCommand, stopRecordingCommand]
+export const commands = [
+  userInfoCommand,
+  recordCommand,
+  stopRecordingCommand,
+  monitorAttendanceCommand,
+  stopMonitoringAttendanceCommand,
+]
 
 export class DiscordClient extends Client {
   commands: Collection<string, SlashCommand>

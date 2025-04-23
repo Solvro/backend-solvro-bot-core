@@ -26,6 +26,9 @@ export default class Meeting extends BaseModel {
   declare name: string | null
 
   @column()
+  declare discordChannelId: string | null
+
+  @column()
   declare transcription: string | null
 
   @column()

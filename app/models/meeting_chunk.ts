@@ -1,7 +1,5 @@
 import { DateTime, Duration } from 'luxon'
 import { BaseModel, column, hasOne } from '@adonisjs/lucid/orm'
-import Meeting from './meetings.js'
-import type { HasOne } from '@adonisjs/lucid/types/relations'
 
 export default class MeetingChunk extends BaseModel {
   @column({ isPrimary: true })

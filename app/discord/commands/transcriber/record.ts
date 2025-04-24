@@ -2,7 +2,6 @@ import { SlashCommand, StaticCommand } from '#app/discord/commands/commands'
 import { client } from '#app/discord/index'
 import Meeting, { RecordingStatus } from '#models/meetings'
 import env from '#start/env'
-import logger from '@adonisjs/core/services/logger'
 import { ChannelType, CommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
 
 const COMMAND_NAME = 'record'

@@ -38,6 +38,8 @@ export async function interactionCreate(interaction: Interaction<CacheType>) {
 }
 
 export async function monitorVoiceState(oldState: VoiceState, newState: VoiceState): Promise<void> {
+  // TODO: delete this, added to test
+  oldState;
   const meeting = await Meeting.findBy({ isMonitored: true, discordChannelId: newState.channelId })
   if (!meeting) return
   if (!newState.member) return

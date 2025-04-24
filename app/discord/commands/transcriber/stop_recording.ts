@@ -1,5 +1,4 @@
 import { SlashCommand, StaticCommand } from '#app/discord/commands/commands'
-import logger from '#config/logger'
 import Meeting from '#models/meetings'
 import { RecordingStatus } from '#models/meetings'
 import env from '#start/env'

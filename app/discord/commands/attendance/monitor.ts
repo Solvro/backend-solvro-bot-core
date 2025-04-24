@@ -1,8 +1,16 @@
-import { ChannelType, CommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
+import {
+  ChannelType,
+  CommandInteraction,
+  MessageFlags,
+  Routes,
+  SlashCommandBuilder,
+} from 'discord.js'
 import { SlashCommand, StaticCommand } from '../commands.js'
 import { client } from '#app/discord/index'
 import { monitorVoiceState } from '#app/discord/event_handlers'
 import Meeting from '#models/meetings'
+import Member from '#models/member'
+import logger from '@adonisjs/core/services/logger'
 
 const OPTION_CHANNEL = 'channel'
 const command: SlashCommand = new StaticCommand(
@@ -17,22 +25,14 @@ const command: SlashCommand = new StaticCommand(
         .addChannelTypes(ChannelType.GuildVoice)
     ),
   async (interaction: CommandInteraction) => {
-    const optCh = interaction.options.get(OPTION_CHANNEL, false)
-    let voiceChannelId: string
-    if (optCh && optCh.channel) {
-      voiceChannelId = optCh.channel.id
-    } else {
-      const member = await interaction.guild?.members.fetch(interaction.user.id)
-      if (!member || !member.voice.channelId) {
-        interaction.reply({
-          content: 'You must provide voice channel or be in a voice channel to use this command',
-          flags: MessageFlags.Ephemeral,
-        })
-        return
-      }
-      voiceChannelId = member.voice.channelId
+    const voiceChannelId = await getVoiceChannelId(interaction)
+    if (!voiceChannelId) {
+      interaction.reply({
+        content: 'Please specify a voice channel or join one to use this command.',
+        flags: MessageFlags.Ephemeral,
+      })
+      return
     }
-
     const meeting = await Meeting.query()
       .orderBy('id', 'desc')
       .where('discord_channel_id', voiceChannelId)
@@ -44,9 +44,28 @@ const command: SlashCommand = new StaticCommand(
       })
       return
     }
+    const channel = await client.channels.fetch(voiceChannelId)
+    if (channel?.isVoiceBased()) {
+      channel.members.forEach(async (member) => {
+        if (member.user.bot) return
+        const memberRecord = await Member.firstOrCreate({
+          discordId: member.user.id,
+        })
+        try {
+          await memberRecord.related('meetings').attach([meeting.id])
+        } catch (error) {
+          logger.error('Error attaching member to meeting:', error)
+        }
+      })
+    }
+
     meeting.isMonitored = true
     await meeting.save()
-    client.on('voiceStateUpdate', monitorVoiceState)
+
+    if (client.listeners('voiceStateUpdate').length === 0) {
+      client.on('voiceStateUpdate', monitorVoiceState)
+    }
+
     interaction.reply({
       content: 'Monitoring voice channel for attendance',
       flags: MessageFlags.Ephemeral,
@@ -54,4 +73,17 @@ const command: SlashCommand = new StaticCommand(
   }
 )
 
+async function getVoiceChannelId(interaction: CommandInteraction): Promise<string | null> {
+  const optChannel = interaction.options.get(OPTION_CHANNEL, false)?.channel
+  if (optChannel) {
+    return optChannel.id
+  }
+
+  const member = await interaction.guild?.members.fetch(interaction.user.id)
+  if (member?.voice.channelId) {
+    return member.voice.channelId
+  }
+
+  return null
+}
 export default command

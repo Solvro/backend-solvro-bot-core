@@ -10,6 +10,11 @@ export default class extends BaseSchema {
       table.timestamp('created_at')
       table.timestamp('updated_at')
 
+      table.text('first_name').nullable()
+      table.text('last_name').nullable()
+      table.text('email').nullable()
+      table.text('phone').nullable()
+      table.text('index_number').nullable()
       table.text('discord_id').notNullable().unique()
     })
   }

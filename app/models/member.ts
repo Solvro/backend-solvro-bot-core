@@ -14,6 +14,21 @@ export default class Member extends BaseModel {
   declare updatedAt: DateTime
 
   @column()
+  declare firstName: string | null
+
+  @column()
+  declare lastName: string | null
+
+  @column()
+  declare email: string | null
+
+  @column()
+  declare phone: string | null
+
+  @column()
+  declare indexNumber: string | null
+
+  @column()
   declare discordId: string
 
   @manyToMany(() => Meeting)

@@ -8,7 +8,8 @@ import monitorAttendanceCommand from '#app/discord/commands/attendance/monitor'
 import stopMonitoringAttendanceCommand from '#app/discord/commands/attendance/stop_monitoring'
 import createMeeting from '#app/discord/commands/meeting/create_meeting'
 import { SlashCommand } from './commands/commands.js'
-import { interactionCreate, ready } from './event_handlers.js'
+import { interactionCreate, monitorVoiceState, ready } from './event_handlers.js'
+import Meeting from '#models/meetings'
 import logger from '@adonisjs/core/services/logger'
 
 export const commands = [
@@ -34,6 +35,12 @@ export class DiscordClient extends Client {
   async start() {
     this.displayAvailableCommands()
     this.registerListeners()
+
+    const meeting = await Meeting.findBy({ isMonitored: true })
+    if (meeting && this.listeners('voiceStateUpdate').length === 0) {
+      this.on('voiceStateUpdate', monitorVoiceState)
+      logger.debug('Registered attendance monitoring listener')
+    }
 
     await this.login(env.get('DISCORD_TOKEN'))
   }

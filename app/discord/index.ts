@@ -9,6 +9,7 @@ import stopMonitoringAttendanceCommand from '#app/discord/commands/attendance/st
 import createMeeting from '#app/discord/commands/meeting/create_meeting'
 import { SlashCommand } from './commands/commands.js'
 import { interactionCreate, ready } from './event_handlers.js'
+import logger from '@adonisjs/core/services/logger'
 
 export const commands = [
   userInfoCommand,
@@ -31,13 +32,21 @@ export class DiscordClient extends Client {
   }
 
   async start() {
+    this.displayAvailableCommands()
+    this.registerListeners()
+
     await this.login(env.get('DISCORD_TOKEN'))
   }
 
-  async registerListeners() {
+  private registerListeners() {
     this.once('ready', ready)
     this.on('interactionCreate', interactionCreate)
   }
+
+  private displayAvailableCommands() {
+    const prompt = this.commands.map((_, commandName) => `/${commandName}`).join('\n')
+    logger.info(`Available Discord commands:\n${prompt}`)
+  }
 }
 
-export const client = new DiscordClient()
+export const client = new DiscordClient(commands)

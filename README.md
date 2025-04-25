@@ -163,5 +163,5 @@ Don't forget to check out [Solvro docs](https://docs.solvro.pl/)
 
 
 <div align="center">
-  <sub>Built with ❤︎ by <a href="https://solvro.pl">Solvro</a>
+  <sub>Built with 💙 by <a href="https://solvro.pl">Solvro</a>
 </div>

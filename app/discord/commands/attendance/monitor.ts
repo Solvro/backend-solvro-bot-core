@@ -2,7 +2,6 @@ import {
   ChannelType,
   CommandInteraction,
   MessageFlags,
-  Routes,
   SlashCommandBuilder,
 } from 'discord.js'
 import { SlashCommand, StaticCommand } from '../commands.js'

@@ -2,7 +2,7 @@ import { DateTime } from 'luxon'
 import { BaseModel, column, hasMany, manyToMany } from '@adonisjs/lucid/orm'
 import Member from './member.js'
 import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
-import MeetingChunk from './meeting_chunk.js'
+import TranscriptionPart from './transcription_parts.js'
 
 export enum RecordingStatus {
   PENDING = 'pending',
@@ -43,6 +43,6 @@ export default class Meeting extends BaseModel {
   @manyToMany(() => Member)
   declare members: ManyToMany<typeof Member>
 
-  @hasMany(() => MeetingChunk)
-  declare chunks: HasMany<typeof MeetingChunk>
+  @hasMany(() => TranscriptionPart)
+  declare chunks: HasMany<typeof TranscriptionPart>
 }

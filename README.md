@@ -39,6 +39,14 @@ Alternatively:
 npm install
 ```
 
+#### Setup environment variables
+
+```bash
+node ace bootstrap:env
+```
+
+and set variables according to the comments.
+
 #### Start Required Services
 
 Ensure Docker Engine is running, then start all services:

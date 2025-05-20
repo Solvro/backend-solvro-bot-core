@@ -7,8 +7,10 @@ import { DateTime, Duration } from 'luxon'
 
 export default class RecordingsController {
   async register({ request, params, response }: HttpContext) {
+    // TODO: proper validator
     const schema = vine.object({ id: vine.number() })
-    const validator = await vine.compile(schema)
+    
+    const validator = vine.compile(schema)
     const { id } = await validator.validate(params)
     const payload = await request.validateUsing(updateMeetingValidator)
 
@@ -19,22 +21,23 @@ export default class RecordingsController {
         return response.status(404).json({ message: 'Recording not found' })
       }
 
-      meeting.transcription = payload.transcription
+      meeting.transcription = payload.text
       meeting.recordingStatus = RecordingStatus.COMPLETED
       meeting.finishedAt = DateTime.now()
       await meeting.useTransaction(trx).save()
 
-      for (const chunk of payload.metadata) {
-        await meeting
-          .useTransaction(trx)
-          .related('chunks')
-          .create({
-            discordUserId: chunk.userId,
-            recordedAt: DateTime.fromMillis(chunk.globalTimestamp),
-            recordingTimestamp: DateTime.fromMillis(chunk.recordingTImestamp),
-            duration: Duration.fromMillis(chunk.duration),
-          })
-      }
+      // TODO: save chunks to db
+      // for (const chunk of payload.metadata) {
+      //   await meeting
+      //     .useTransaction(trx)
+      //     .related('chunks')
+      //     .create({
+      //       discordUserId: chunk.userId,
+      //       recordedAt: DateTime.fromMillis(chunk.globalTimestamp),
+      //       recordingTimestamp: DateTime.fromMillis(chunk.recordingTImestamp),
+      //       duration: Duration.fromMillis(chunk.duration),
+      //     })
+      // }
 
       await trx.commit()
       return response.status(204)

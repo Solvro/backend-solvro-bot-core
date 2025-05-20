@@ -34,6 +34,9 @@ const command: SlashCommand = new StaticCommand(
       return
     }
 
+    meeting.recordingStatus = RecordingStatus.COMPLETED
+    await meeting.save()
+
     interaction.reply({ content: 'Stopped recording' })
   }
 )

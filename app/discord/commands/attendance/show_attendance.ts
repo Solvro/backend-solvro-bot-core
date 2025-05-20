@@ -35,7 +35,7 @@ const command: SlashCommand = new StaticCommand(
     const memberList = uniqueDiscordIds.map((id) => `• <@${id}>`).join('\n')
 
     interaction.reply({
-      content: `**Attending Members for meeting "${meeting.name ?? 'Unnamed Meeting'}":**\n${memberList}`,
+      content: `**Attending Members for meeting "${meeting.name ?? 'Unnamed Meeting'}" (${uniqueDiscordIds.length}):**\n${memberList}`,
       flags: MessageFlags.Ephemeral,
     })
   }

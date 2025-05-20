@@ -8,15 +8,15 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
 
-      table.timestamp('created_at')
-      table.timestamp('updated_at')
-
       table.text('name').nullable()
       table.boolean('is_monitored').defaultTo(false)
       table.text('discord_channel_id').nullable()
       table.text('transcription').nullable()
       table.text('recording_status').nullable().defaultTo(RecordingStatus.PENDING)
       table.timestamp('finished_at').nullable()
+
+      table.timestamp('created_at')
+      table.timestamp('updated_at')
     })
   }
 

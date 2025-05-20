@@ -32,4 +32,6 @@ router.get('/health', [HealthChecksController])
 
 router.patch('/recordings/:id', [RecordingsController, 'register'])
 
-router.post('/office/camera', [OfficeCameraController, 'cameraPoll'])
+router.post('/office/camera/poll', [OfficeCameraController, 'cameraPoll'])
+
+router.post('/office/camera/image', [OfficeCameraController, 'cameraImage'])

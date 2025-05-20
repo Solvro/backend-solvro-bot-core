@@ -4,8 +4,8 @@ import { CommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.j
 
 const command: SlashCommand = new StaticCommand(
   new SlashCommandBuilder()
-    .setName('show_attendence')
-    .setDescription('Show attendence list of last meeting'),
+    .setName('show_attendance')
+    .setDescription('Show attendance list of last meeting'),
   async (interaction: CommandInteraction) => {
     const meeting = await Meeting.query()
       .where('recording_status', RecordingStatus.COMPLETED)

@@ -6,6 +6,7 @@ import recordCommand from '#app/discord/commands/transcriber/record'
 import stopRecordingCommand from '#app/discord/commands/transcriber/stop_recording'
 import monitorAttendanceCommand from '#app/discord/commands/attendance/monitor'
 import stopMonitoringAttendanceCommand from '#app/discord/commands/attendance/stop_monitoring'
+import showAttendanceCommand from '#app/discord/commands/attendance/show_attendence'
 import createMeeting from '#app/discord/commands/meeting/create_meeting'
 import { SlashCommand } from './commands/commands.js'
 import { interactionCreate, monitorVoiceState, ready } from './event_handlers.js'
@@ -19,6 +20,7 @@ export const commands = [
   monitorAttendanceCommand,
   stopMonitoringAttendanceCommand,
   createMeeting,
+  showAttendanceCommand,
 ]
 
 export class DiscordClient extends Client {

@@ -7,10 +7,11 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
 
-      table.text('discord_user_id').notNullable()
-      table.timestamp('recorded_at').notNullable()
+      table.string('discord_user_id').nullable()
+      table.integer('start_time').notNullable()
       table.float('duration').notNullable()
       table.integer('meeting_id').references('id').inTable('meetings').notNullable()
+      table.text('text')
 
       table.timestamp('created_at')
       table.timestamp('updated_at')

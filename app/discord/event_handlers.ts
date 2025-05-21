@@ -45,6 +45,7 @@ export async function monitorVoiceState(
   if (!newState.member || !newState.channelId) return
   if (newState.member.user.bot) return;
 
+
   const meeting = await Meeting.query()
     .where('is_monitored', true)
     .andWhere('discord_channel_id', newState.channelId)

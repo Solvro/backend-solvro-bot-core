@@ -1,6 +1,7 @@
 import { CommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, StaticCommand } from '../commands.js'
 import OfficeCameraStatus from '#models/office_camera_status'
+import { existsSync } from 'fs'
 
 const command: SlashCommand = new StaticCommand(
   new SlashCommandBuilder()
@@ -23,7 +24,7 @@ const command: SlashCommand = new StaticCommand(
     const isOccupied = count > 0
     const embedColor = isOccupied ? 0x57f287 : 0x2f3136
 
-    if (cameraStatus.imagePath == null) {
+    if (cameraStatus.imagePath == null || !existsSync(cameraStatus.imagePath)) {
       const embed = new EmbedBuilder()
         .setTitle('🏢 Office Presence Update')
         .addFields(
@@ -50,7 +51,7 @@ const command: SlashCommand = new StaticCommand(
     await interaction.reply({
       embeds: [embed],
       files: [{ attachment: cameraStatus.imagePath, name: 'camera.jpg' }],
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     })
   }
 )

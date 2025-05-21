@@ -7,7 +7,6 @@ import { DateTime, Duration } from 'luxon'
 
 export default class RecordingsController {
   async register({ request, params, response }: HttpContext) {
-    // TODO: proper validator
     const schema = vine.object({ id: vine.number() })
     
     const validator = vine.compile(schema)
@@ -27,17 +26,17 @@ export default class RecordingsController {
       await meeting.useTransaction(trx).save()
 
       // TODO: save chunks to db
-      // for (const chunk of payload.metadata) {
-      //   await meeting
-      //     .useTransaction(trx)
-      //     .related('chunks')
-      //     .create({
-      //       discordUserId: chunk.userId,
-      //       recordedAt: DateTime.fromMillis(chunk.globalTimestamp),
-      //       recordingTimestamp: DateTime.fromMillis(chunk.recordingTImestamp),
-      //       duration: Duration.fromMillis(chunk.duration),
-      //     })
-      // }
+      for (const segment of payload.segments) {
+        await meeting
+          .useTransaction(trx)
+          .related('chunks')
+          .create({
+            discordUserId: segment.userId,
+            startTime: segment.start,
+            duration: segment.end - segment.start,
+            text: segment.text,
+          })
+      }
 
       await trx.commit()
       return response.status(204)

@@ -1,7 +1,6 @@
 import { CommandInteraction, EmbedBuilder, MessageFlags, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, StaticCommand } from '../commands.js'
 import OfficeCameraStatus from '#models/office_camera_status'
-import fs from 'fs/promises'
 
 const command: SlashCommand = new StaticCommand(
   new SlashCommandBuilder()
@@ -44,9 +43,7 @@ const command: SlashCommand = new StaticCommand(
     const embed = new EmbedBuilder()
       .setTitle('📷 New Camera Image')
       .setDescription(`Taken: <t:${unix}:R>`)
-      .addFields(
-          { name: 'People in Office', value: `**${cameraStatus.count}**`, inline: true },
-        )
+      .addFields({ name: 'People in Office', value: `**${cameraStatus.count}**`, inline: true })
       .setImage('attachment://camera.jpg')
       .setColor(0x57f287)
 

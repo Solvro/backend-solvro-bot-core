@@ -3,9 +3,10 @@ import { SlashCommand, StaticCommand } from '../commands.js'
 import OfficeCameraStatus from '#models/office_camera_status'
 import fs from 'fs/promises'
 
-
 const command: SlashCommand = new StaticCommand(
-  new SlashCommandBuilder().setName('office_status').setDescription('Get number of people in office'),
+  new SlashCommandBuilder()
+    .setName('office_status')
+    .setDescription('Get number of people in office'),
   async (interaction: CommandInteraction) => {
     const cameraStatus = await OfficeCameraStatus.query().orderBy('created_at', 'desc').first()
 
@@ -18,7 +19,7 @@ const command: SlashCommand = new StaticCommand(
     }
 
     const count = cameraStatus.count
-    const unix = cameraStatus.timestamp.toMillis()
+    const unix = Math.floor(new Date(cameraStatus.timestamp.toString()).getTime() / 1000)
 
     const isOccupied = count > 0
     const embedColor = isOccupied ? 0x57f287 : 0x2f3136
@@ -40,15 +41,20 @@ const command: SlashCommand = new StaticCommand(
       return
     }
 
-    try {
-      const buffer = await fs.readFile(cameraStatus.imagePath)
-    } catch (err) {}
-
     const embed = new EmbedBuilder()
       .setTitle('📷 New Camera Image')
       .setDescription(`Taken: <t:${unix}:R>`)
+      .addFields(
+          { name: 'People in Office', value: `**${cameraStatus.count}**`, inline: true },
+        )
       .setImage('attachment://camera.jpg')
-      .setColor(0x2f3136)
+      .setColor(0x57f287)
+
+    await interaction.reply({
+      embeds: [embed],
+      files: [{ attachment: cameraStatus.imagePath, name: 'camera.jpg' }],
+      ephemeral: true,
+    })
   }
 )
 

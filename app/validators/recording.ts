@@ -20,7 +20,7 @@ export const updateMeetingValidator = vine.compile(
         avg_logprob: vine.number(),
         compression_ratio: vine.number(),
         no_speech_prob: vine.number(),
-        userId: vine.string().optional(),
+        userId: vine.string(),
       })
     ),
   })

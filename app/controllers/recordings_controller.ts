@@ -3,7 +3,7 @@ import { updateMeetingValidator } from '#validators/recording'
 import type { HttpContext } from '@adonisjs/core/http'
 import db from '@adonisjs/lucid/services/db'
 import vine from '@vinejs/vine'
-import { DateTime, Duration } from 'luxon'
+import { DateTime } from 'luxon'
 
 export default class RecordingsController {
   async register({ request, params, response }: HttpContext) {

@@ -42,16 +42,23 @@ export async function monitorVoiceState(
   newState: VoiceState
 ): Promise<void> {
   logger.debug(`monitorVoiceState ${JSON.stringify(newState, null, 2)}`)
-  if (!newState.member) return
-  if (newState.member.user.bot) return
-  const meeting = await Meeting.findBy({ isMonitored: true, discordChannelId: newState.channelId })
+  if (!newState.member || !newState.channelId) return
+  if (newState.member.user.bot) return;
+
+  const meeting = await Meeting.query()
+    .where('is_monitored', true)
+    .andWhere('discord_channel_id', newState.channelId)
+    .orderBy('created_at', 'desc') // Get the *latest* matching meeting
+    .first()
   if (!meeting) return
+
   logger.trace(`Monitoring meeting ${meeting.name}`)
   logger.info(`User ${newState.member.user.username} changed voice state`)
 
   const member = await Member.firstOrCreate({
     discordId: newState.member.user.id,
   })
+  
   try {
     await member.related('meetings').attach([meeting.id])
   } catch (error) {

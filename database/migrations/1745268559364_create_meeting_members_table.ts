@@ -7,9 +7,6 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id')
 
-      table.timestamp('created_at')
-      table.timestamp('updated_at')
-
       table
         .integer('meeting_id')
         .notNullable()
@@ -22,6 +19,9 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('members')
         .onDelete('CASCADE')
+
+      table.timestamp('created_at')
+      table.timestamp('updated_at')
     })
   }
 

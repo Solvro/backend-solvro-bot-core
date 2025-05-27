@@ -31,6 +31,8 @@ export default class OfficeCameraController {
       }
     }
 
+    logger.debug("Camera update recieved");
+
     // Save to database
     await OfficeCameraStatus.create({
       count,

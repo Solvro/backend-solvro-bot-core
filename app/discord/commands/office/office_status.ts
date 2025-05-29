@@ -9,6 +9,7 @@ const command: SlashCommand = new StaticCommand(
     .setDescription('Get number of people in office'),
   async (interaction: CommandInteraction) => {
     const cameraStatus = await OfficeCameraStatus.query().orderBy('created_at', 'desc').first()
+    const lastPresenceDetected = await OfficeCameraStatus.query().where('count', '>', 0).orderBy('created_at', 'desc').first();
 
     if (!cameraStatus) {
       interaction.reply({
@@ -32,6 +33,11 @@ const command: SlashCommand = new StaticCommand(
           { name: 'Last Update', value: `<t:${unix}:R>`, inline: true }
         )
         .setColor(embedColor)
+
+      if (lastPresenceDetected) {
+        const presUnix = Math.floor(new Date(lastPresenceDetected.timestamp.toString()).getTime() / 1000);
+        embed.addFields({ name: "Last presence detected", value: `<t:${presUnix}:R>`, inline: true })
+      }
 
       await interaction.reply({
         embeds: [embed],

@@ -35,7 +35,7 @@ const command: SlashCommand = new StaticCommand(
         .setColor(embedColor)
 
       if (lastPresenceDetected) {
-        let presUnix = Math.floor(new Date(lastPresenceDetected.timestamp.toString()).getTime() / 1000);
+        const presUnix = Math.floor(new Date(lastPresenceDetected.timestamp.toString()).getTime() / 1000);
         embed.addFields({ name: "Last presence detected", value: `<t:${presUnix}:R>`, inline: true })
       }
 

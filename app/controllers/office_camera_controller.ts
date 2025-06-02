@@ -10,8 +10,6 @@ export default class OfficeCameraController {
   async update({ request, response }: HttpContext) {
     const { count, timestamp, file: image } = await request.validateUsing(officeCameraPollValidator)
 
-    const unix = Math.floor(new Date(timestamp).getTime() / 1000)
-
     // Handle image (if provided)
     let savedImagePath: string | undefined
     const imageDir = path.join(process.cwd(), 'tmp', 'office-camera')
@@ -31,12 +29,10 @@ export default class OfficeCameraController {
       }
     }
 
-    logger.debug("Camera update recieved");
-
     // Save to database
     await OfficeCameraStatus.create({
       count,
-      timestamp: DateTime.fromMillis(unix * 1000),
+      timestamp: DateTime.fromJSDate(timestamp),
       imagePath: savedImagePath,
     })
 

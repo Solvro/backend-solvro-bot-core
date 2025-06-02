@@ -8,13 +8,18 @@ const command: SlashCommand = new StaticCommand(
     .setName('office_status')
     .setDescription('Get number of people in office'),
   async (interaction: CommandInteraction) => {
+
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral })
+
     const cameraStatus = await OfficeCameraStatus.query().orderBy('created_at', 'desc').first()
-    const lastPresenceDetected = await OfficeCameraStatus.query().where('count', '>', 0).orderBy('created_at', 'desc').first();
+    const lastPresenceDetected = await OfficeCameraStatus.query()
+      .where('count', '>', 0)
+      .orderBy('created_at', 'desc')
+      .first()
 
     if (!cameraStatus) {
-      interaction.reply({
+      interaction.editReply({
         content: 'No office status found, try again later',
-        flags: MessageFlags.Ephemeral,
       })
       return
     }
@@ -35,13 +40,18 @@ const command: SlashCommand = new StaticCommand(
         .setColor(embedColor)
 
       if (lastPresenceDetected) {
-        const presUnix = Math.floor(new Date(lastPresenceDetected.timestamp.toString()).getTime() / 1000);
-        embed.addFields({ name: "Last presence detected", value: `<t:${presUnix}:R>`, inline: true })
+        const presUnix = Math.floor(
+          new Date(lastPresenceDetected.timestamp.toString()).getTime() / 1000
+        )
+        embed.addFields({
+          name: 'Last presence detected',
+          value: `<t:${presUnix}:R>`,
+          inline: true,
+        })
       }
 
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [embed],
-        flags: MessageFlags.Ephemeral,
       })
 
       return
@@ -54,10 +64,9 @@ const command: SlashCommand = new StaticCommand(
       .setImage('attachment://camera.jpg')
       .setColor(0x57f287)
 
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [embed],
       files: [{ attachment: cameraStatus.imagePath, name: 'camera.jpg' }],
-      flags: MessageFlags.Ephemeral,
     })
   }
 )

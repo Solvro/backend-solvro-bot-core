@@ -1,15 +1,10 @@
-import {
-  ChannelType,
-  CommandInteraction,
-  MessageFlags,
-  SlashCommandBuilder,
-} from 'discord.js'
+import { ChannelType, CommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, StaticCommand } from '../commands.js'
 import { client } from '#app/discord/index'
-import { monitorVoiceState } from '#app/discord/event_handlers'
 import Meeting from '#models/meetings'
 import Member from '#models/member'
 import logger from '@adonisjs/core/services/logger'
+import { monitorVoiceState } from '#app/discord/handlers/voiceStateHandler'
 
 const OPTION_CHANNEL = 'channel'
 const command: SlashCommand = new StaticCommand(

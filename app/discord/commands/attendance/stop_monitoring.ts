@@ -1,7 +1,7 @@
 import { CommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, StaticCommand } from '../commands.js'
 import { client } from '#app/discord/index'
-import { monitorVoiceState } from '#app/discord/event_handlers'
+import { monitorVoiceState } from '#app/discord/handlers/voiceStateHandler'
 
 const command: SlashCommand = new StaticCommand(
   new SlashCommandBuilder()

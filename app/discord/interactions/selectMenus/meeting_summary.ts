@@ -1,4 +1,4 @@
-import { StringSelectMenuInteraction, AttachmentBuilder } from 'discord.js'
+import { StringSelectMenuInteraction, AttachmentBuilder, MessageFlags } from 'discord.js'
 import env from '#start/env'
 
 /**
@@ -79,7 +79,7 @@ export default async function handleMeetingSummary(interaction: StringSelectMenu
             for (const chunk of chunks) {
                 await interaction.followUp({
                     content: chunk,
-                    ephemeral: true,
+                    flags: MessageFlags.Ephemeral,
                 })
             }
         } else {

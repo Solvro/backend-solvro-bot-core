@@ -8,23 +8,24 @@ import { DateTime } from 'luxon'
 export default class RecordingsController {
   async register({ request, params, response }: HttpContext) {
     const schema = vine.object({ id: vine.number() })
-    
+
     const validator = vine.compile(schema)
     const { id } = await validator.validate(params)
     const payload = await request.validateUsing(updateMeetingValidator)
 
     const trx = await db.transaction()
+
+    const meeting = await Meeting.find(id)
+    if (!meeting) {
+      return response.status(404).json({ message: 'Recording not found' })
+    }
+
+    meeting.transcription = payload.text
+    meeting.recordingStatus = RecordingStatus.COMPLETED
+    meeting.finishedAt = DateTime.now()
+    await meeting.save()
+
     try {
-      const meeting = await Meeting.find(id)
-      if (!meeting) {
-        return response.status(404).json({ message: 'Recording not found' })
-      }
-
-      meeting.transcription = payload.text
-      meeting.recordingStatus = RecordingStatus.COMPLETED
-      meeting.finishedAt = DateTime.now()
-      await meeting.useTransaction(trx).save()
-
       // TODO: save chunks to db
       for (const segment of payload.segments) {
         await meeting

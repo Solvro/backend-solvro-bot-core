@@ -68,6 +68,7 @@ const command: SlashCommand = new StaticCommand(
 
     interaction.reply({
       content: `Recording audio from channel: *${channel?.name}*`,
+      flags: MessageFlags.Ephemeral,
     })
   }
 )

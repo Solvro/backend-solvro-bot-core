@@ -34,7 +34,7 @@ const command: SlashCommand = new StaticCommand(
       return
     }
 
-    interaction.reply({ content: 'Stopped recording', flags: MessageFlags.Ephemeral, })
+    interaction.reply({ content: 'Stopped recording' })
   }
 )
 export default command

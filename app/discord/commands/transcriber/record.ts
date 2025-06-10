@@ -67,8 +67,7 @@ const command: SlashCommand = new StaticCommand(
     await meeting.save()
 
     interaction.reply({
-      content: `Recording audio from channel: *${channel?.name}*`,
-      flags: MessageFlags.Ephemeral,
+      content: `Recording audio from channel: *${channel?.name}*`
     })
   }
 )

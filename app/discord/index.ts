@@ -17,6 +17,7 @@ import logger from '@adonisjs/core/services/logger'
 import { setupInteractionHandler } from './handlers/interactionHandler.js'
 import { commandsHandler } from './handlers/commandHandler.js'
 import { monitorVoiceState } from './handlers/voiceStateHandler.js'
+import { messagesHandler } from './handlers/messagesHandler.js'
 
 export const commands = [
   userInfoCommand,
@@ -33,7 +34,13 @@ export const commands = [
 export class DiscordClient extends Client {
   commands: Collection<string, SlashCommand>
   constructor(slashCommands?: SlashCommand[]) {
-    super({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] })
+    super({
+      intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.GuildMessages,
+      ],
+    })
     if (slashCommands) {
       this.commands = new Collection(slashCommands.map((command) => [command.name(), command]))
     } else {
@@ -57,6 +64,7 @@ export class DiscordClient extends Client {
   private registerListeners() {
     this.once('ready', ready)
     this.on('interactionCreate', commandsHandler)
+    this.on('messageCreate', messagesHandler)
 
     setupInteractionHandler(this)
   }

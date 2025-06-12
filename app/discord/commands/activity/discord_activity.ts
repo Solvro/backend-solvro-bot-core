@@ -77,15 +77,24 @@ const command: SlashCommand = new StaticCommand(
     const activity = await DiscordActivity.query()
       .where('discord_id', user.id)
       .where('date', '>=', startDate)
-      .sum('message_count as count')
+      .sum('message_count as sum_count')
+      .avg('message_count as avg_count')
+      .max('message_count as max_count')
 
-    const messageCount = activity[0]?.$extras.count || 0
+    const messageCount = activity[0]?.$extras.sum_count || 0
     const displayName = member.nickname || user.username
 
-    const capitalizedPeriod = period.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
+    const capitalizedPeriod = period.replace('_', ' ').toLocaleLowerCase()
+
+    let extraStats = ''
+    if (period !== 'today') {
+      const avgPerDay = new Number(activity[0]?.$extras.avg_count) || 0
+      const maxPerDay = activity[0]?.$extras.max_count || 0
+      extraStats = `\n🗓️ Avg per day: **${avgPerDay.toFixed(1)}**, Max in a day: **${maxPerDay}**`
+    }
 
     await interaction.editReply({
-      content: `📊 **${displayName}** sent **${messageCount} messages** during \`${capitalizedPeriod}\`.`,
+      content: `📊 **${displayName}** sent **${messageCount} messages** during \`${capitalizedPeriod}\`.${extraStats}`,
     })
   }
 )

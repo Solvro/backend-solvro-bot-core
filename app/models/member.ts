@@ -1,17 +1,12 @@
 import { DateTime } from 'luxon'
-import { BaseModel, column, manyToMany } from '@adonisjs/lucid/orm'
+import { BaseModel, column, hasMany, manyToMany } from '@adonisjs/lucid/orm'
 import Meeting from './meetings.js'
-import type { ManyToMany } from '@adonisjs/lucid/types/relations'
+import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
+import DiscordActivity from './discord_activity.js'
 
 export default class Member extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
-
-  @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
-
-  @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
 
   @column()
   declare firstName: string | null
@@ -33,4 +28,13 @@ export default class Member extends BaseModel {
 
   @manyToMany(() => Meeting)
   declare meetings: ManyToMany<typeof Meeting>
+
+  @hasMany(() => DiscordActivity, { localKey: 'discordId', foreignKey: 'discordId' })
+  declare discordActivity: HasMany<typeof DiscordActivity>
+
+  @column.dateTime({ autoCreate: true })
+  declare createdAt: DateTime
+
+  @column.dateTime({ autoCreate: true, autoUpdate: true })
+  declare updatedAt: DateTime
 }

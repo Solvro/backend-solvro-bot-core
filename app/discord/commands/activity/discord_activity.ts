@@ -54,8 +54,8 @@ const command: SlashCommand = new StaticCommand(
         .setRequired(true)
         .setChoices(
           { name: 'Today', value: 'today' },
-          { name: 'Last Week', value: 'last_week' },
-          { name: 'Last Month', value: 'last_month' },
+          { name: 'Past Week', value: 'last_week' },
+          { name: 'Past Month', value: 'last_month' },
           { name: 'This Semester', value: 'this_semester' }
         )
     )

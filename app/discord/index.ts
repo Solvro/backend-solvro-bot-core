@@ -7,6 +7,7 @@ import stopRecordingCommand from '#app/discord/commands/transcriber/stop_recordi
 import meetingSummaryCommand from '#app/discord/commands/transcriber/meeting_summary'
 import monitorAttendanceCommand from '#app/discord/commands/attendance/monitor'
 import discordActivityCommand from '#app/discord/commands/activity/discord_activity'
+import githubActivityCommand from '#app/discord/commands/activity/github_activity'
 import stopMonitoringAttendanceCommand from '#app/discord/commands/attendance/stop_monitoring'
 import officeStatusCommand from '#app/discord/commands/office/office_status'
 import showAttendanceCommand from '#app/discord/commands/attendance/show_attendance'
@@ -31,6 +32,7 @@ export const commands = [
   showAttendanceCommand,
   meetingSummaryCommand,
   discordActivityCommand,
+  githubActivityCommand,
 ]
 
 export class DiscordClient extends Client {

@@ -9,7 +9,7 @@ export default class extends BaseSchema {
 
             table.string('github_id').nullable()
             table.enum('type', ['commit', 'pr', 'issue', 'review', 'other'])
-            table.string('message').nullable();
+            table.text('message').nullable();
             table.string('author_github_id')
             table.string('repo')
             table.timestamp('date', { useTz: true }).notNullable()

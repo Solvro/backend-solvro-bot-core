@@ -3,6 +3,8 @@ import { SlashCommand, StaticCommand } from '../commands.js'
 import DiscordActivity from '#models/discord_activity'
 
 function getStartDateFromPeriod(period: string): Date {
+  if (period == "all") return new Date(0);
+
   const now = new Date()
   const year = now.getFullYear()
   const month = now.getMonth()
@@ -56,7 +58,8 @@ const command: SlashCommand = new StaticCommand(
           { name: 'Today', value: 'today' },
           { name: 'Past Week', value: 'last_week' },
           { name: 'Past Month', value: 'last_month' },
-          { name: 'This Semester', value: 'this_semester' }
+          { name: 'This Semester', value: 'this_semester' },
+          { name: 'All', value: 'all' }
         )
     )
     .addUserOption((option) => option.setName('user').setDescription('User').setRequired(true)),

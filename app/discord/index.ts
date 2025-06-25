@@ -6,6 +6,8 @@ import recordCommand from '#app/discord/commands/transcriber/record'
 import stopRecordingCommand from '#app/discord/commands/transcriber/stop_recording'
 import meetingSummaryCommand from '#app/discord/commands/transcriber/meeting_summary'
 import monitorAttendanceCommand from '#app/discord/commands/attendance/monitor'
+import discordActivityCommand from '#app/discord/commands/activity/discord_activity'
+import githubActivityCommand from '#app/discord/commands/activity/github_activity'
 import stopMonitoringAttendanceCommand from '#app/discord/commands/attendance/stop_monitoring'
 import officeStatusCommand from '#app/discord/commands/office/office_status'
 import showAttendanceCommand from '#app/discord/commands/attendance/show_attendance'
@@ -17,6 +19,7 @@ import logger from '@adonisjs/core/services/logger'
 import { setupInteractionHandler } from './handlers/interactionHandler.js'
 import { commandsHandler } from './handlers/commandHandler.js'
 import { monitorVoiceState } from './handlers/voiceStateHandler.js'
+import { messagesHandler } from './handlers/messagesHandler.js'
 
 export const commands = [
   userInfoCommand,
@@ -28,12 +31,20 @@ export const commands = [
   officeStatusCommand,
   showAttendanceCommand,
   meetingSummaryCommand,
+  discordActivityCommand,
+  githubActivityCommand,
 ]
 
 export class DiscordClient extends Client {
   commands: Collection<string, SlashCommand>
   constructor(slashCommands?: SlashCommand[]) {
-    super({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] })
+    super({
+      intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.GuildMessages,
+      ],
+    })
     if (slashCommands) {
       this.commands = new Collection(slashCommands.map((command) => [command.name(), command]))
     } else {
@@ -57,6 +68,7 @@ export class DiscordClient extends Client {
   private registerListeners() {
     this.once('ready', ready)
     this.on('interactionCreate', commandsHandler)
+    this.on('messageCreate', messagesHandler)
 
     setupInteractionHandler(this)
   }

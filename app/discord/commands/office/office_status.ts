@@ -10,7 +10,6 @@ const command: SlashCommand = new StaticCommand(
   async (interaction: CommandInteraction) => {
 
     await interaction.deferReply({ flags: MessageFlags.Ephemeral })
-
     const cameraStatus = await OfficeCameraStatus.query().orderBy('created_at', 'desc').first()
     const lastPresenceDetected = await OfficeCameraStatus.query()
       .where('count', '>', 0)

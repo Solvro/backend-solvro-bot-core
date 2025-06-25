@@ -21,6 +21,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   DISCORD_CLIENT_ID: Env.schema.string(),
   DISCORD_GUILD_ID: Env.schema.string(),
   TRANSCRIBER_URL: Env.schema.string(),
+  GITHUB_TOKEN: Env.schema.string(),
   /*
   |----------------------------------------------------------
   | Variables for configuring database connection

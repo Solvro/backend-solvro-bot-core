@@ -5,12 +5,14 @@ export default class extends BaseSchema {
 
     async up() {
         this.schema.alterTable(this.tableName, (table) => {
-            table.string('github_id').nullable().after('discord_id');
+            table.string('github_url').nullable();
+            table.string('github_id').nullable();
         })
     }
 
     async down() {
         this.schema.alterTable(this.tableName, (table) => {
+            table.dropColumn('github_url');
             table.dropColumn('github_id');
         })
     }

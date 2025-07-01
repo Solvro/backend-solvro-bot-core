@@ -26,6 +26,12 @@ export default class Member extends BaseModel {
   @column()
   declare discordId: string
 
+  @column()
+  declare githubUrl: string | null
+
+  @column()
+  declare githubId: string | null
+
   @manyToMany(() => Meeting)
   declare meetings: ManyToMany<typeof Meeting>
 

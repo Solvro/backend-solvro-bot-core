@@ -29,9 +29,16 @@ export default class GetGithubActivity extends BaseCommand {
         const fullRepoName = `${owner}/${repo}`
         this.logger.info(`🔍 Syncing GitHub activity for: ${fullRepoName}`)
 
-        const headers = {
-            Authorization: `Bearer ${env.get('GITHUB_TOKEN')}`,
-            Accept: 'application/vnd.github+json',
+        let headers;
+        if (env.get('GITHUB_TOKEN')) {
+            headers = {
+                Authorization: `Bearer ${env.get('GITHUB_TOKEN')}`,
+                Accept: 'application/vnd.github+json',
+            }
+        } else {
+            headers = {
+                Accept: 'application/vnd.github+json',
+            };
         }
 
         const seenCommitIds = new Set<string>()

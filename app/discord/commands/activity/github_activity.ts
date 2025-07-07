@@ -48,7 +48,7 @@ function getStartDateFromPeriod(period: string): Date {
 const command: SlashCommand = new StaticCommand(
     new SlashCommandBuilder()
         .setName('github_activity')
-        .setDescription('Show github activity for a specyfic user and a given time period')
+        .setDescription('Show github activity for a specific user and a given time period')
         .addStringOption((option) =>
             option
                 .setName('time_period')

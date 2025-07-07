@@ -48,7 +48,7 @@ function getStartDateFromPeriod(period: string): Date {
 const command: SlashCommand = new StaticCommand(
   new SlashCommandBuilder()
     .setName('discord_activity')
-    .setDescription('Show discord activity for a specyfic user and a given time period')
+    .setDescription('Show discord activity for a specific user and a given time period')
     .addStringOption((option) =>
       option
         .setName('time_period')
@@ -91,7 +91,7 @@ const command: SlashCommand = new StaticCommand(
 
     let extraStats = ''
     if (period !== 'today') {
-      const avgPerDay = new Number(activity[0]?.$extras.avg_count) || 0
+      const avgPerDay = Number(activity[0]?.$extras.avg_count) || 0
       const maxPerDay = activity[0]?.$extras.max_count || 0
       extraStats = `\n🗓️ Avg per day: **${avgPerDay.toFixed(1)}**, Max in a day: **${maxPerDay}**`
     }

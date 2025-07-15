@@ -7,8 +7,9 @@ import stopRecordingCommand from '#app/discord/commands/transcriber/stop_recordi
 import monitorAttendanceCommand from '#app/discord/commands/attendance/monitor'
 import stopMonitoringAttendanceCommand from '#app/discord/commands/attendance/stop_monitoring'
 import createMeeting from '#app/discord/commands/meeting/create_meeting'
+import archive from '#app/discord/commands/archive_channel/archive'
 import { SlashCommand } from './commands/commands.js'
-import { interactionCreate, monitorVoiceState, ready } from './event_handlers.js'
+import { interactionCreate, monitorVoiceState, ready, guildMemberAdd } from './event_handlers.js'
 import Meeting from '#models/meetings'
 import logger from '@adonisjs/core/services/logger'
 
@@ -19,12 +20,13 @@ export const commands = [
   monitorAttendanceCommand,
   stopMonitoringAttendanceCommand,
   createMeeting,
+  archive,
 ]
 
 export class DiscordClient extends Client {
   commands: Collection<string, SlashCommand>
   constructor(slashCommands?: SlashCommand[]) {
-    super({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] })
+    super({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates, GatewayIntentBits.GuildMembers], })
     if (slashCommands) {
       this.commands = new Collection(slashCommands.map((command) => [command.name(), command]))
     } else {
@@ -48,6 +50,7 @@ export class DiscordClient extends Client {
   private registerListeners() {
     this.once('ready', ready)
     this.on('interactionCreate', interactionCreate)
+    this.on('guildMemberAdd', guildMemberAdd)
   }
 
   private displayAvailableCommands() {

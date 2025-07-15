@@ -1,4 +1,10 @@
-import { CommandInteraction, ChannelType, SlashCommandBuilder, PermissionFlagsBits } from 'discord.js'
+import {
+  CommandInteraction,
+  ChannelType,
+  SlashCommandBuilder,
+  PermissionFlagsBits,
+  TextChannel,
+} from 'discord.js'
 import { StaticCommand } from '../commands.js'
 
 const command = new StaticCommand(
@@ -11,8 +17,18 @@ const command = new StaticCommand(
     const channel = interaction.channel
     const guild = interaction.guild
 
+    if (!guild || !channel || !channel.isTextBased()) return;
+
+    // Make sure it's a GuildChannel and has setParent
+    if (!('setParent' in channel)) {
+      await interaction.reply({ content: 'This command can only be used in guild channels.', ephemeral: true });
+      return;
+    }
+
     const archivedCategory = guild.channels.cache.find(
-      (ch) => ch.type === ChannelType.GuildCategory && ch.name.toLowerCase() === 'archived'
+      (ch) =>
+        ch.type === ChannelType.GuildCategory &&
+        ch.name.toLowerCase() === 'archived'
     )
 
     if (!archivedCategory) {
@@ -21,11 +37,11 @@ const command = new StaticCommand(
     }
 
     try {
-      await channel.setParent(archivedCategory.id)
+      await (channel as TextChannel).setParent(archivedCategory.id)
       await interaction.reply({ content: 'Channel archived successfully.', ephemeral: true })
     } catch (error) {
       console.error(error)
-      await interaction.reply({ content: 'Failed to archive_channel channel.', ephemeral: true })
+      await interaction.reply({ content: 'Failed to archive the channel.', ephemeral: true })
     }
   }
 )

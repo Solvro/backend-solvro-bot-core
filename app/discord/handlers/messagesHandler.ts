@@ -2,12 +2,8 @@ import ChannelActivity from '#models/channel_activity'
 import DiscordActivity from '#models/discord_activity'
 import { Message } from 'discord.js'
 
-// JEDYNY handler, którego importujesz w index.ts!
 export async function messagesHandler(message: Message) {
-  // Pomijaj wiadomości od botów
   if (message.author.bot) return;
-
-  // --- Aktywność kanałowa (ChannelActivity) ---
   const channelId = message.channel.id;
 
   let channelActivity = await ChannelActivity.query()
@@ -24,7 +20,6 @@ export async function messagesHandler(message: Message) {
     });
   }
 
-  // --- Aktywność użytkownika dzienna (DiscordActivity) ---
   const discordId = message.author.id;
   const todayStr = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
 

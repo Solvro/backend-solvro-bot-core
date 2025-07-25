@@ -2,7 +2,6 @@ import { CommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.j
 import { StaticCommand } from '../commands.js'
 import ChannelActivity from '#models/channel_activity'
 
-// ZMIANA: przekazujemy tu TYLKO SlashCommandBuilder (nie SharedSlashCommand!)
 const command = new StaticCommand(
   new SlashCommandBuilder()
     .setName('channel_activity')

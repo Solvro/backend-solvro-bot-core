@@ -22,6 +22,7 @@ import { setupInteractionHandler } from './handlers/interactionHandler.js'
 import { commandsHandler } from './handlers/commandHandler.js'
 import { monitorVoiceState } from './handlers/voiceStateHandler.js'
 import { messagesHandler } from './handlers/messagesHandler.js'
+import channel_activity from "#app/discord/commands/activity/channel_activity";
 
 export const commands = [
   userInfoCommand,
@@ -36,6 +37,7 @@ export const commands = [
   discordActivityCommand,
   githubActivityCommand,
   archive,
+  channel_activity,
 ]
 
 export class DiscordClient extends Client {
@@ -47,6 +49,7 @@ export class DiscordClient extends Client {
         GatewayIntentBits.GuildVoiceStates,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.MessageContent
       ],
     })
     if (slashCommands) {
@@ -72,8 +75,9 @@ export class DiscordClient extends Client {
   private registerListeners() {
     this.once('ready', ready)
     this.on('interactionCreate', commandsHandler)
-    this.on('messageCreate', messagesHandler)
     this.on('guildMemberAdd', guildMemberAdd)
+    this.on('messageCreate', messagesHandler)
+
 
     setupInteractionHandler(this)
   }

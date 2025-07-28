@@ -72,7 +72,7 @@ export default class GetGithubActivity extends BaseCommand {
                         if (!githubId || seenCommitIds.has(githubId)) continue
                         seenCommitIds.add(githubId)
 
-                        const authorId = commit.commit?.author.name || 'unknown'
+                        const authorId = commit.author?.id?.toString() || 'unknown'
                         const message = commit.commit?.message || 'no message'
                         const date = commit.commit?.author?.date;
 
@@ -106,7 +106,7 @@ export default class GetGithubActivity extends BaseCommand {
             this.logger.info(`📥 Found ${prsRes.data.length} pull requests`)
             for (const pr of prsRes.data) {
                 const githubId = pr.node_id
-                const authorId = pr.user?.login || 'unknown'
+                const authorId = pr.user?.id?.toString() || 'unknown'
                 const message = pr.title
                 const date = pr.created_at;
 
@@ -137,7 +137,7 @@ export default class GetGithubActivity extends BaseCommand {
             this.logger.info(`📌 Found ${issues.length} issues`)
             for (const issue of issues) {
                 const githubId = issue.node_id
-                const authorId = issue.user?.login || 'unknown'
+                const authorId = issue.user?.id?.toString() || 'unknown'
                 const message = issue.title;
                 const date = issue.created_at;
 
@@ -174,7 +174,7 @@ export default class GetGithubActivity extends BaseCommand {
 
                     for (const review of reviewsRes.data) {
                         const githubId = review.node_id
-                        const authorId = review.user?.login || 'unknown'
+                        const authorId = review.user?.id?.toString() || 'unknown'
                         const message = `Review state: ${review.state}`
                         const date = review.submitted_at;
 

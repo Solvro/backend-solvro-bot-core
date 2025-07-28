@@ -9,8 +9,6 @@ export default class GithubWebhooksController {
         const payload = request.body()
         const fullRepoName = payload?.repository?.full_name
 
-        console.log(payload)
-
         if (!event || !fullRepoName) {
             return response.badRequest('Missing event header or repository data.')
         }
@@ -19,9 +17,10 @@ export default class GithubWebhooksController {
             switch (event) {
                 case 'push': {
                     const commits = payload.commits || []
+                    const authorId = payload.sender?.id || 'unknown'
+
                     for (const commit of commits) {
                         const githubId = commit.id
-                        const authorId = commit.author?.id || 'unknown'
                         const message = commit.message
                         const date = commit.timestamp
 
@@ -104,7 +103,6 @@ export default class GithubWebhooksController {
 
                 case 'pull_request_review': {
                     const review = payload.review
-                    const pr = payload.pull_request
                     const githubId = review.node_id
                     const authorId = review.user?.id?.toString() || 'unknown'
                     const message = `Review state: ${review.state}`
@@ -129,7 +127,6 @@ export default class GithubWebhooksController {
                 }
 
                 default:
-                    // ignore other evnt types
                     break
             }
 

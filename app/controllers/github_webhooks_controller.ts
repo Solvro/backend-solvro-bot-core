@@ -30,7 +30,7 @@ export default class GithubWebhooksController {
         }
         
         const rawBody = request.raw() ?? "";
-        const secret = env.get("GITHUB_WEBHOOK_SECTET")
+        const secret = env.get("GITHUB_WEBHOOK_SECRET")
         
         if (!isValidHmacSignature(rawBody, signature, secret)) {
             return response.unauthorized('Invalid signature')

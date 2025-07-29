@@ -51,7 +51,6 @@ export class DiscordClient extends Client {
         GatewayIntentBits.GuildVoiceStates,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildMembers,
-        GatewayIntentBits.MessageContent
       ],
     })
     if (slashCommands) {
@@ -65,7 +64,7 @@ export class DiscordClient extends Client {
     this.displayAvailableCommands()
     this.registerListeners()
 
-    const meeting = await Meeting.findBy({ attendanceStatus: AttendanceStatus.MONITORING });``
+    const meeting = await Meeting.findBy({ attendanceStatus: AttendanceStatus.MONITORING }); ``
     if (meeting && this.listeners('voiceStateUpdate').length === 0) {
       this.on('voiceStateUpdate', monitorVoiceState)
       logger.debug('Registered attendance monitoring listener')

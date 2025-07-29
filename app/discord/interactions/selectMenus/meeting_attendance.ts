@@ -9,16 +9,16 @@ type UserInfo = {
     nickname: string
 }
 
-async function getUserNicknamesFromIds(ids: string[], guild: Guild): Promise<UserInfo[]> {
-    return Promise.all(ids.map(async (id) =>  {
-        const member = await guild.members.fetch(id);
+function getUserNicknamesFromIds(ids: string[], guild: Guild): UserInfo[] {
+    return ids.map(id => {
+        const member = guild.members.cache.get(id);
         const user = member?.user;
         return {
             discordId: id,
             globalName: user?.globalName ?? '',
             nickname: member?.displayName ?? '',
         };
-    }));
+    });
 }
 
 function createCsv(data: UserInfo[]): string {

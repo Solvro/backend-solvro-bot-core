@@ -15,7 +15,7 @@ import createMeeting from '#app/discord/commands/meeting/create_meeting'
 import archive from '#app/discord/commands/archive_channel/archive'
 import { SlashCommand } from './commands/commands.js'
 import { ready } from './handlers/clientReadyHandler.js'
-import Meeting from '#models/meetings'
+import Meeting, { AttendanceStatus } from '#models/meetings'
 import logger from '@adonisjs/core/services/logger'
 import { guildMemberAdd } from "#app/discord/handlers/membersHandler";
 import { setupInteractionHandler } from '#app/discord/handlers/interactionHandler'
@@ -60,7 +60,7 @@ export class DiscordClient extends Client {
     this.displayAvailableCommands()
     this.registerListeners()
 
-    const meeting = await Meeting.findBy({ isMonitored: true })
+    const meeting = await Meeting.findBy({ attendanceStatus: AttendanceStatus.MONITORING });``
     if (meeting && this.listeners('voiceStateUpdate').length === 0) {
       this.on('voiceStateUpdate', monitorVoiceState)
       logger.debug('Registered attendance monitoring listener')

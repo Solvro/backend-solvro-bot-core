@@ -2,10 +2,41 @@ import type { HttpContext } from '@adonisjs/core/http'
 import GithubActivity from '#models/github_activity'
 import logger from '@adonisjs/core/services/logger'
 import { DateTime } from 'luxon'
+import crypto from 'crypto'
+import env from '#start/env'
+
+
+function isValidHmacSignature(content: string | Buffer, receivedSignature: string, secret: string, algorithm: string = 'sha256'): boolean {
+    const hmac = crypto.createHmac(algorithm, secret)
+    hmac.update(content)
+    const expectedSignature = hmac.digest('hex')
+
+    const received = receivedSignature.replace(/^sha256=/, '')
+
+    return crypto.timingSafeEqual(
+        Buffer.from(expectedSignature, 'hex'),
+        Buffer.from(received, 'hex')
+    )
+}
 
 export default class GithubWebhooksController {
     async webhook({ request, response }: HttpContext) {
         const event = request.header('X-GitHub-Event')
+        const signature = request.header('X-Hub-Signature-256');
+        
+        // validate request with signature
+        if (!signature) {
+            return response.unauthorized('Missing signature')
+        }
+        
+        const rawBody = request.raw() ?? "";
+        const secret = env.get("GITHUB_WEBHOOK_SECTET")
+        
+        if (!isValidHmacSignature(rawBody, signature, secret)) {
+            return response.unauthorized('Invalid signature')
+        }
+
+        // hhandle event
         const payload = request.body()
         const fullRepoName = payload?.repository?.full_name
 

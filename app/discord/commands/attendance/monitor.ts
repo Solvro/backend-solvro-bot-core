@@ -1,7 +1,7 @@
 import { ChannelType, CommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, StaticCommand } from '../commands.js'
 import { client } from '#app/discord/index'
-import Meeting from '#models/meetings'
+import Meeting, { AttendanceStatus } from '#models/meetings'
 import Member from '#models/member'
 import logger from '@adonisjs/core/services/logger'
 import { monitorVoiceState } from '#app/discord/handlers/voiceStateHandler'
@@ -27,6 +27,8 @@ const command: SlashCommand = new StaticCommand(
       })
       return
     }
+
+    // get meeting by cannel id
     const meeting = await Meeting.query()
       .orderBy('id', 'desc')
       .where('discord_channel_id', voiceChannelId)
@@ -38,6 +40,8 @@ const command: SlashCommand = new StaticCommand(
       })
       return
     }
+
+    // save users currently in vc channel
     const channel = await client.channels.fetch(voiceChannelId)
     if (channel?.isVoiceBased()) {
       channel.members.forEach(async (member) => {
@@ -53,9 +57,10 @@ const command: SlashCommand = new StaticCommand(
       })
     }
 
-    meeting.isMonitored = true
+    meeting.attendanceStatus = AttendanceStatus.MONITORING;
     await meeting.save()
 
+    // register listener
     if (client.listeners('voiceStateUpdate').length === 0) {
       client.on('voiceStateUpdate', monitorVoiceState)
     }

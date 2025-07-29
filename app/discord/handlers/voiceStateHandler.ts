@@ -1,6 +1,6 @@
 import logger from '@adonisjs/core/services/logger'
 import { VoiceState } from 'discord.js'
-import Meeting from '#models/meetings'
+import Meeting, { AttendanceStatus } from '#models/meetings'
 import Member from '#models/member'
 
 export async function monitorVoiceState(
@@ -12,7 +12,7 @@ export async function monitorVoiceState(
   if (newState.member.user.bot) return
 
   const meeting = await Meeting.query()
-    .where('is_monitored', true)
+    .where('attendance_status', AttendanceStatus.MONITORING)
     .andWhere('discord_channel_id', newState.channelId)
     .orderBy('created_at', 'desc') // Get the *latest* matching meeting
     .first()

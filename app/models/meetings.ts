@@ -12,6 +12,12 @@ export enum RecordingStatus {
   ERROR = 'error',
 }
 
+export enum AttendanceStatus {
+  NOT_MONITORED = 'not_monitored',
+  MONITORING = 'monitoring',
+  FINISHED_MONITORING = 'finished_monitoring',
+}
+
 export default class Meeting extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
@@ -29,7 +35,7 @@ export default class Meeting extends BaseModel {
   declare discordChannelId: string | null
 
   @column()
-  declare isMonitored: boolean
+  declare attendanceStatus: AttendanceStatus
 
   @column()
   declare transcription: string | null

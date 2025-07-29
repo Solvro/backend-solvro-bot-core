@@ -10,6 +10,7 @@ import router from '@adonisjs/core/services/router'
 import AutoSwagger from 'adonis-autoswagger'
 import swagger from '#config/swagger'
 import OfficeCameraController from '#controllers/office_camera_controller'
+import GithubWebhooksController from '#controllers/github_webhooks_controller'
 
 const HealthChecksController = () => import('#controllers/health_checks_controller')
 const RecordingsController = () => import('#controllers/recordings_controller')
@@ -33,3 +34,5 @@ router.get('/health', [HealthChecksController])
 router.patch('/recordings/:id', [RecordingsController, 'register'])
 
 router.post('/office/camera', [OfficeCameraController, 'update'])
+
+router.post('/webhook/github', [GithubWebhooksController, 'webhook']);

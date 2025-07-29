@@ -1,23 +1,41 @@
+import ChannelActivity from '#models/channel_activity'
 import DiscordActivity from '#models/discord_activity'
 import { Message } from 'discord.js'
 
 export async function messagesHandler(message: Message) {
-  const discordId = message.author.id
-  const today = new Date()
+  if (message.author.bot) return;
+  const channelId = message.channel.id;
 
-  let activity = await DiscordActivity.query()
-    .where('date', today)
-    .andWhere('discord_id', discordId)
-    .first()
+  let channelActivity = await ChannelActivity.query()
+    .where('channel_id', channelId)
+    .first();
 
-  if (activity) {
-    activity.messageCount++
-    await activity.save()
+  if (channelActivity) {
+    channelActivity.messageCount++;
+    await channelActivity.save();
   } else {
-    activity = await DiscordActivity.create({
-      date: today,
+    await ChannelActivity.create({
+      channelId,
+      messageCount: 1,
+    });
+  }
+
+  const discordId = message.author.id;
+  const todayStr = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+
+  let userActivity = await DiscordActivity.query()
+    .where('date', todayStr)
+    .andWhere('discord_id', discordId)
+    .first();
+
+  if (userActivity) {
+    userActivity.messageCount++;
+    await userActivity.save();
+  } else {
+    await DiscordActivity.create({
+      date: todayStr,
       discordId: discordId,
       messageCount: 1,
-    })
+    });
   }
 }

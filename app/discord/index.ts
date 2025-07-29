@@ -17,11 +17,14 @@ import { SlashCommand } from './commands/commands.js'
 import { ready } from './handlers/clientReadyHandler.js'
 import Meeting, { AttendanceStatus } from '#models/meetings'
 import logger from '@adonisjs/core/services/logger'
-import { guildMemberAdd } from "#app/discord/handlers/membersHandler";
+
+import { guildMemberAdd } from '#app/discord/handlers/membersHandler'
 import { setupInteractionHandler } from '#app/discord/handlers/interactionHandler'
 import { commandsHandler } from '#app/discord/handlers/commandHandler'
 import { monitorVoiceState } from '#app/discord/handlers/voiceStateHandler'
 import { messagesHandler } from '#app/discord/handlers/messagesHandler'
+import channel_activity from '#app/discord/commands/activity/channel_activity'
+
 
 export const commands = [
   userInfoCommand,
@@ -36,6 +39,7 @@ export const commands = [
   discordActivityCommand,
   githubActivityCommand,
   archive,
+  channel_activity,
 ]
 
 export class DiscordClient extends Client {
@@ -47,6 +51,7 @@ export class DiscordClient extends Client {
         GatewayIntentBits.GuildVoiceStates,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.MessageContent
       ],
     })
     if (slashCommands) {
@@ -72,8 +77,9 @@ export class DiscordClient extends Client {
   private registerListeners() {
     this.once('ready', ready)
     this.on('interactionCreate', commandsHandler)
-    this.on('messageCreate', messagesHandler)
     this.on('guildMemberAdd', guildMemberAdd)
+    this.on('messageCreate', messagesHandler)
+
 
     setupInteractionHandler(this)
   }

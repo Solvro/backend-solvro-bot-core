@@ -1,4 +1,4 @@
-import { StringSelectMenuInteraction, MessageFlags, Guild, AttachmentBuilder } from 'discord.js'
+import { StringSelectMenuInteraction, Guild, AttachmentBuilder } from 'discord.js'
 import Meeting, { AttendanceStatus } from '#models/meetings';
 import { client } from '#app/discord/index';
 import env from '#start/env';

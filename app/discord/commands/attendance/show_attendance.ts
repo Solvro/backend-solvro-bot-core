@@ -34,38 +34,6 @@ const command: SlashCommand = new StaticCommand(
       components: [row],
       flags: MessageFlags.Ephemeral,
     })
-
-    // const meeting = await Meeting.query()
-    //   .where('recording_status', RecordingStatus.COMPLETED)
-    //   .where('attendance_status', AttendanceStatus.FINISHED_MONITORING)
-    //   .orderBy('id', 'desc')
-    //   .preload('members')
-    //   .first()
-
-    // if (!meeting) {
-    //   interaction.reply({
-    //     content: 'There are no completed meetings',
-    //     flags: MessageFlags.Ephemeral,
-    //   })
-    //   return
-    // }
-
-    // const uniqueDiscordIds = [...new Set(meeting.members.map((m) => m.discordId))]
-
-    // if (uniqueDiscordIds.length === 0) {
-    //   interaction.reply({
-    //     content: 'No members attended the last meeting.',
-    //     flags: MessageFlags.Ephemeral,
-    //   })
-    //   return
-    // }
-
-    // const memberList = uniqueDiscordIds.map((id) => `• <@${id}>`).join('\n')
-
-    // interaction.reply({
-    //   content: `**Attending Members for meeting "${meeting.name ?? 'Unnamed Meeting'}" (${uniqueDiscordIds.length}):**\n${memberList}`,
-    //   flags: MessageFlags.Ephemeral,
-    // })
   }
 )
 

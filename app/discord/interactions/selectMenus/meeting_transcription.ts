@@ -1,5 +1,7 @@
 import { StringSelectMenuInteraction, AttachmentBuilder } from 'discord.js'
 import Meeting, { RecordingStatus } from '#models/meetings';
+import { client } from '#app/discord/index';
+import env from '#start/env';
 
 function formatTimestamp(seconds: number): string {
     const mins = Math.floor(seconds / 60)
@@ -31,11 +33,15 @@ export default async function handleMeetingTranscription(interaction: StringSele
         return
     }
 
+    const guild = interaction.guild ?? await client.guilds.fetch(env.get('DISCORD_GUILD_ID'))
+    // Cache all users
+    await guild.members.fetch();
+
     const userNames: Record<string, string> = {}
     for (const chunk of chunks)
         if (!userNames[chunk.discordUserId]) {
-            const user = interaction.client.users.cache.get(chunk.discordUserId)
-            userNames[chunk.discordUserId] = user ? user.username : `User#${chunk.discordUserId}`
+            const member = guild.members.cache.get(chunk.discordUserId)
+            userNames[chunk.discordUserId] = member ? member.displayName : `User#${chunk.discordUserId}`
         }
 
     const formattedText = chunks

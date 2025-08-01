@@ -56,7 +56,7 @@ export default async function handleMeetingAttendance(interaction: StringSelectM
         return
     }
 
-    const guild = await client.guilds.fetch(env.get('DISCORD_GUILD_ID'))
+    const guild = interaction.guild ?? await client.guilds.fetch(env.get('DISCORD_GUILD_ID'))
     // Cache all users
     await guild.members.fetch();
 

@@ -57,6 +57,9 @@ export default async function handleMeetingAttendance(interaction: StringSelectM
     }
 
     const guild = await client.guilds.fetch(env.get('DISCORD_GUILD_ID'))
+    // Cache all users
+    await guild.members.fetch();
+
     const userInfo = await getUserNicknamesFromIds(uniqueDiscordIds, guild);
     const memberList = userInfo.map((i) => {
         return `• <@${i.discordId}> ` + (i.nickname ?? "");

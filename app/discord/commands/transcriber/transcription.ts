@@ -1,9 +1,4 @@
-import {
-  SlashCommandBuilder,
-  CommandInteraction,
-  AttachmentBuilder,
-  MessageFlags,
-} from 'discord.js'
+import { SlashCommandBuilder, CommandInteraction, AttachmentBuilder, MessageFlags, Message } from 'discord.js'
 import { SlashCommand, StaticCommand } from '#app/discord/commands/commands'
 import Meeting, { RecordingStatus } from '#models/meetings'
 
@@ -16,14 +11,15 @@ const command: SlashCommand = new StaticCommand(
     ),
 
   async (interaction: CommandInteraction) => {
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral })
+
     const meetingId = interaction.options.get('meeting')?.value as number
 
     const meeting = await Meeting.find(meetingId)
 
     if (!meeting || meeting.recordingStatus !== RecordingStatus.COMPLETED) {
-      await interaction.reply({
+      await interaction.editReply({
         content: 'Meeting not found or not completed.',
-        flags: MessageFlags.Ephemeral,
       })
       return
     }
@@ -31,9 +27,8 @@ const command: SlashCommand = new StaticCommand(
     const chunks = await meeting.related('chunks').query().orderBy('startTime')
 
     if (chunks.length === 0) {
-      await interaction.reply({
+      await interaction.editReply({
         content: 'No transcription chunks found for this meeting.',
-        flags: MessageFlags.Ephemeral,
       })
       return
     }
@@ -41,8 +36,8 @@ const command: SlashCommand = new StaticCommand(
     const userNames: Record<string, string> = {}
     for (const chunk of chunks)
       if (!userNames[chunk.discordUserId]) {
-        const user = await interaction.client.users.fetch(chunk.discordUserId).catch(() => null)
-        userNames[chunk.discordUserId] = user ? user.username : chunk.discordUserId
+        const user = interaction.client.users.cache.get(chunk.discordUserId)
+        userNames[chunk.discordUserId] = user ? user.username : `User#${chunk.discordUserId}`
       }
 
     const formattedText = chunks
@@ -58,10 +53,9 @@ const command: SlashCommand = new StaticCommand(
       name: `transcription_meeting_${meetingId}.txt`,
     })
 
-    await interaction.reply({
+    await interaction.editReply({
       content: `Transcription for meeting "${meeting.name ?? '#' + meeting.id}"`,
       files: [attachment],
-      flags: MessageFlags.Ephemeral,
     })
   }
 )

@@ -65,7 +65,7 @@ export default async function handleMeetingAttendance(interaction: StringSelectM
         return `• <@${i.discordId}> ` + (i.nickname ?? "");
     }).join('\n');
 
-    if (userInfo.length > 10) memberList += `\n and **${userInfo.length - 10} more`;
+    if (userInfo.length > 10) memberList += `\n and **${userInfo.length - 10}** more`;
 
     const csvContent = createCsv(userInfo);
     const buffer = Buffer.from(csvContent, 'utf-8');

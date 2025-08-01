@@ -13,6 +13,8 @@ import officeStatusCommand from '#app/discord/commands/office/office_status'
 import showAttendanceCommand from '#app/discord/commands/attendance/show_attendance'
 import createMeeting from '#app/discord/commands/meeting/create_meeting'
 import archive from '#app/discord/commands/archive_channel/archive'
+import channel_activity from '#app/discord/commands/activity/channel_activity'
+import transcription from '#app/discord/commands/transcriber/transcription'
 import { SlashCommand } from './commands/commands.js'
 import { ready } from './handlers/clientReadyHandler.js'
 import Meeting, { AttendanceStatus } from '#models/meetings'
@@ -23,8 +25,6 @@ import { setupInteractionHandler } from '#app/discord/handlers/interactionHandle
 import { commandsHandler } from '#app/discord/handlers/commandHandler'
 import { monitorVoiceState } from '#app/discord/handlers/voiceStateHandler'
 import { messagesHandler } from '#app/discord/handlers/messagesHandler'
-import channel_activity from '#app/discord/commands/activity/channel_activity'
-
 
 export const commands = [
   userInfoCommand,
@@ -40,6 +40,7 @@ export const commands = [
   githubActivityCommand,
   archive,
   channel_activity,
+  transcription,
 ]
 
 export class DiscordClient extends Client {
@@ -64,7 +65,7 @@ export class DiscordClient extends Client {
     this.displayAvailableCommands()
     this.registerListeners()
 
-    const meeting = await Meeting.findBy({ attendanceStatus: AttendanceStatus.MONITORING }); ``
+    const meeting = await Meeting.findBy({ attendanceStatus: AttendanceStatus.MONITORING })
     if (meeting && this.listeners('voiceStateUpdate').length === 0) {
       this.on('voiceStateUpdate', monitorVoiceState)
       logger.debug('Registered attendance monitoring listener')
@@ -78,7 +79,6 @@ export class DiscordClient extends Client {
     this.on('interactionCreate', commandsHandler)
     this.on('guildMemberAdd', guildMemberAdd)
     this.on('messageCreate', messagesHandler)
-
 
     setupInteractionHandler(this)
   }

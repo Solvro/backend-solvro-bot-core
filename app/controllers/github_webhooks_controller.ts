@@ -36,6 +36,8 @@ export default class GithubWebhooksController {
             return response.unauthorized('Invalid signature')
         }
 
+        logger.debug("Recieved webhook from github - event: " + event);
+
         // hhandle event
         const payload = request.body()
         const fullRepoName = payload?.repository?.full_name

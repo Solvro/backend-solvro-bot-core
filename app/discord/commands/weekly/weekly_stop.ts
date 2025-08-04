@@ -26,7 +26,6 @@ const command: SlashCommand = new StaticCommand(
         // Turn off attendance monitoring
         client.off('voiceStateUpdate', monitorVoiceState)
         meeting.attendanceStatus = AttendanceStatus.FINISHED_MONITORING;
-        await meeting.save();
 
         // Turn off transcription
         meeting.recordingStatus = RecordingStatus.STOPPING
@@ -49,9 +48,8 @@ const command: SlashCommand = new StaticCommand(
         }
 
         await interaction.reply({
-            content: "✅ Weekly session ended successfully:\n- 🎤 Transcription is being saved and will be available shortly\n- 📋 Attendance tracking is complete"
+            content: "✅ Weekly session ended successfully:\n- 🎤 Transcription is being saved and will be available shortly\n- 📋 Attendance tracking is complete\n\nYou can:\n- 📄 View the transcription with `/transcription`\n- 🧠 See the meeting summary with `/meeting_summary`\n- 👥 View attendance with `/show_attendance`"
         });
-
     }
 );
 

@@ -15,6 +15,8 @@ import createMeeting from '#app/discord/commands/meeting/create_meeting'
 import archive from '#app/discord/commands/archive_channel/archive'
 import channel_activity from '#app/discord/commands/activity/channel_activity'
 import transcription from '#app/discord/commands/transcriber/transcription'
+import weeklyStart from '#app/discord/commands/weekly/weekly_start';
+import weeklyStop from '#app/discord/commands/weekly/weekly_stop';
 import { SlashCommand } from './commands/commands.js'
 import { ready } from './handlers/clientReadyHandler.js'
 import Meeting, { AttendanceStatus } from '#models/meetings'
@@ -41,6 +43,8 @@ export const commands = [
   archive,
   channel_activity,
   transcription,
+  weeklyStart,
+  weeklyStop
 ]
 
 export class DiscordClient extends Client {

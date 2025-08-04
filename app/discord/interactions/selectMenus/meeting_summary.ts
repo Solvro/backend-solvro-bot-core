@@ -54,8 +54,18 @@ export default async function handleMeetingSummary(interaction: StringSelectMenu
 
     try {
         const response = await fetch(`${env.get('TRANSCRIBER_URL')}/summary/${meetingId}`)
-        const data: any = await response.json()
 
+        if (response.status == 404) {
+            await interaction.update({
+                content: '❌ Looks like there is no summary for this meeting.',
+                components: []
+            })
+            return;
+        } else if (!response.ok) {
+            throw new Error('Failed to fetch')
+        }
+
+        const data: any = await response.json()
         const summary = data.summary?.trim()
 
         if (!summary) {

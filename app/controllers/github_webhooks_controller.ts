@@ -33,14 +33,16 @@ export default class GithubWebhooksController {
         const secret = env.get("GITHUB_WEBHOOK_SECRET")
         
         if (!isValidHmacSignature(rawBody, signature, secret)) {
+            logger.debug("Github webhook: Invalid signature")
             return response.unauthorized('Invalid signature')
         }
-
-        // hhandle event
+        
+        // handle event
         const payload = request.body()
         const fullRepoName = payload?.repository?.full_name
-
+        
         if (!event || !fullRepoName) {
+            logger.debug("Github webhook: Missing event header or repository data.")
             return response.badRequest('Missing event header or repository data.')
         }
 

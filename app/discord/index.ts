@@ -15,6 +15,7 @@ import createMeeting from '#app/discord/commands/meeting/create_meeting'
 import archive from '#app/discord/commands/archive_channel/archive'
 import channel_activity from '#app/discord/commands/activity/channel_activity'
 import calendarAddEvent from '#app/discord/commands/calendar/add_event'
+import calendarUpcomingEvent from '#app/discord/commands/calendar/upcoming_event'
 import { SlashCommand } from './commands/commands.js'
 import { ready } from './handlers/clientReadyHandler.js'
 import Meeting, { AttendanceStatus } from '#models/meetings'
@@ -41,6 +42,7 @@ export const commands = [
   archive,
   channel_activity,
   calendarAddEvent,
+  calendarUpcomingEvent,
 ]
 
 export class DiscordClient extends Client {

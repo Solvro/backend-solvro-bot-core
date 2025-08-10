@@ -1,5 +1,6 @@
 import { CommandInteraction, SlashCommandBuilder, MessageFlags } from 'discord.js'
 import { StaticCommand } from '../commands.js'
+import env from '#start/env'
 
 const command: StaticCommand = new StaticCommand(
   new SlashCommandBuilder()
@@ -11,7 +12,7 @@ const command: StaticCommand = new StaticCommand(
     try {
       const { default: googleCalendarService } = await import('#services/google_calendar_service')
 
-      const event = await googleCalendarService.getUpcomingEvent()
+      const event = await googleCalendarService.getUpcomingEvent(env.get('GOOGLE_CALENDAR_ID'))
 
       if (!event) {
         await interaction.editReply({

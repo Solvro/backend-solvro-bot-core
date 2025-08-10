@@ -2,6 +2,7 @@ import { CommandInteraction, SlashCommandBuilder, MessageFlags } from 'discord.j
 import { StaticCommand } from '../commands.js'
 import { CalendarEvent } from '#services/google_calendar_service'
 import logger from '@adonisjs/core/services/logger'
+import env from '#start/env'
 
 const command: StaticCommand = new StaticCommand(
   new SlashCommandBuilder()
@@ -91,7 +92,10 @@ const command: StaticCommand = new StaticCommand(
         attendees,
       }
 
-      const createdEvent = await googleCalendarService.createEvent(event)
+      const createdEvent = await googleCalendarService.createEvent(
+        event,
+        env.get('GOOGLE_CALENDAR_ID')
+      )
 
       const attendeesText =
         attendees.length > 0 ? `\n👥 ${attendees.map((a) => a.email).join(', ')}` : ''

@@ -33,14 +33,16 @@ export default class GithubWebhooksController {
         const secret = env.get("GITHUB_WEBHOOK_SECRET")
         
         if (!isValidHmacSignature(rawBody, signature, secret)) {
+            logger.debug("Github webhook: Invalid signature")
             return response.unauthorized('Invalid signature')
         }
-
-        // hhandle event
+        
+        // handle event
         const payload = request.body()
         const fullRepoName = payload?.repository?.full_name
-
+        
         if (!event || !fullRepoName) {
+            logger.debug("Github webhook: Missing event header or repository data.")
             return response.badRequest('Missing event header or repository data.')
         }
 
@@ -49,6 +51,8 @@ export default class GithubWebhooksController {
                 case 'push': {
                     const commits = payload.commits || []
                     const authorId = payload.sender?.id || 'unknown'
+
+                    logger.debug("Github webhook event: " + event + ", user " + authorId + " pushed " + commits.length + " commits");
 
                     for (const commit of commits) {
                         const githubId = commit.id
@@ -84,6 +88,8 @@ export default class GithubWebhooksController {
                         const message = issue.title
                         const date = issue.created_at
 
+                        logger.debug("Github webhook event: " + event + ", user " + authorId + " created/edited " + issue.title + " issue");
+
                         const exists = await GithubActivity.query()
                             .where('githubId', githubId)
                             .where('type', 'issue')
@@ -113,6 +119,8 @@ export default class GithubWebhooksController {
                         const message = pr.title
                         const date = pr.created_at
 
+                        logger.debug("Github webhook event: " + event + ", user " + authorId + " created/reopened/edited " + pr.title + " pull request");
+
                         const exists = await GithubActivity.query()
                             .where('githubId', githubId)
                             .where('type', 'pr')
@@ -139,6 +147,8 @@ export default class GithubWebhooksController {
                     const message = `Review state: ${review.state}`
                     const date = review.submitted_at
 
+                    logger.debug("Github webhook event: " + event + ", user " + authorId + " reviewed a pull request");
+
                     const exists = await GithubActivity.query()
                         .where('githubId', githubId)
                         .where('type', 'review')
@@ -158,6 +168,7 @@ export default class GithubWebhooksController {
                 }
 
                 default:
+                    logger.info("Unsupported github webhook event recieved: " + event);
                     break
             }
 

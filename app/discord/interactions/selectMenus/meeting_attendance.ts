@@ -56,11 +56,16 @@ export default async function handleMeetingAttendance(interaction: StringSelectM
         return
     }
 
-    const guild = await client.guilds.fetch(env.get('DISCORD_GUILD_ID'))
+    const guild = interaction.guild ?? await client.guilds.fetch(env.get('DISCORD_GUILD_ID'))
+    // Cache all users
+    await guild.members.fetch();
+
     const userInfo = await getUserNicknamesFromIds(uniqueDiscordIds, guild);
-    const memberList = userInfo.map((i) => {
+    let memberList = userInfo.slice(0, 11).map((i) => {
         return `• <@${i.discordId}> ` + (i.nickname ?? "");
     }).join('\n');
+
+    if (userInfo.length > 10) memberList += `\n and **${userInfo.length - 10}** more`;
 
     const csvContent = createCsv(userInfo);
     const buffer = Buffer.from(csvContent, 'utf-8');

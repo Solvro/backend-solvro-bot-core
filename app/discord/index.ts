@@ -16,6 +16,10 @@ import archive from '#app/discord/commands/archive_channel/archive'
 import channel_activity from '#app/discord/commands/activity/channel_activity'
 import calendarAddEvent from '#app/discord/commands/calendar/add_event'
 import calendarUpcomingEvent from '#app/discord/commands/calendar/upcoming_event'
+import transcription from '#app/discord/commands/transcriber/transcription'
+import weeklyStart from '#app/discord/commands/weekly/weekly_start';
+import weeklyStop from '#app/discord/commands/weekly/weekly_stop';
+
 import { SlashCommand } from './commands/commands.js'
 import { ready } from './handlers/clientReadyHandler.js'
 import Meeting, { AttendanceStatus } from '#models/meetings'
@@ -43,6 +47,9 @@ export const commands = [
   channel_activity,
   calendarAddEvent,
   calendarUpcomingEvent,
+  transcription,
+  weeklyStart,
+  weeklyStop
 ]
 
 export class DiscordClient extends Client {
@@ -68,7 +75,6 @@ export class DiscordClient extends Client {
     this.registerListeners()
 
     const meeting = await Meeting.findBy({ attendanceStatus: AttendanceStatus.MONITORING })
-    ;``
     if (meeting && this.listeners('voiceStateUpdate').length === 0) {
       this.on('voiceStateUpdate', monitorVoiceState)
       logger.debug('Registered attendance monitoring listener')

@@ -11,7 +11,7 @@ const command: StaticCommand = new StaticCommand(
       option.setName('title').setDescription('Event title').setRequired(true)
     )
     .addStringOption((option) =>
-      option.setName('date').setDescription('Event date (YYYY-MM-DD)').setRequired(true)
+      option.setName('date').setDescription('Event date (DD.MM.YYYY)').setRequired(true)
     )
     .addStringOption((option) =>
       option
@@ -34,7 +34,7 @@ const command: StaticCommand = new StaticCommand(
     .addStringOption((option) =>
       option
         .setName('attendees')
-        .setDescription('Attendees (comma-separated emails)')
+        .setDescription('Attendees (comma-separated index numbers or emails)')
         .setRequired(false)
     ),
   async (interaction: CommandInteraction) => {
@@ -49,10 +49,10 @@ const command: StaticCommand = new StaticCommand(
       const location = (interaction.options.get('location')?.value as string) || ''
       const attendeesInput = (interaction.options.get('attendees')?.value as string) || ''
 
-      const dateRegex = /^\d{4}-\d{2}-\d{2}$/
+      const dateRegex = /^\d{2}\.\d{2}\.\d{4}$/
       if (!dateRegex.test(date)) {
         await interaction.editReply({
-          content: '❌ Invalid date format. Please use YYYY-MM-DD (e.g., 2025-01-15)',
+          content: '❌ Invalid date format. Please use DD.MM.YYYY (e.g., 15.01.2025)',
         })
         return
       }
@@ -65,9 +65,16 @@ const command: StaticCommand = new StaticCommand(
         return
       }
 
-      const attendees = attendeesInput
-        ? attendeesInput.split(',').map((email) => ({ email: email.trim() }))
-        : undefined
+      const attendees: Array<{ email: string }> = attendeesInput
+        ? attendeesInput
+            .split(',')
+            .map((attendee) => attendee.trim())
+            .map((attendee) => ({
+              email: attendee.includes('@') ? attendee : `${attendee}@student.pwr.edu.pl`,
+            }))
+        : []
+
+      const { default: googleCalendarService } = await import('#services/google_calendar_service')
 
       const event: CalendarEvent = {
         summary: title,
@@ -84,11 +91,10 @@ const command: StaticCommand = new StaticCommand(
         attendees,
       }
 
-      const { default: googleCalendarService } = await import('#services/google_calendar_service')
       const createdEvent = await googleCalendarService.createEvent(event)
 
       const attendeesText =
-        attendees && attendees.length > 0 ? `\n👥 ${attendees.map((a) => a.email).join(', ')}` : ''
+        attendees.length > 0 ? `\n👥 ${attendees.map((a) => a.email).join(', ')}` : ''
 
       await interaction.editReply({
         content: `✅ **Event created successfully!**\n\n📅 **${title}**\n🕒 ${date} ${startTime} - ${endTime}\n📝 ${description}\n📍 ${location}${attendeesText}\n\n🔗 [View in Calendar](${createdEvent.htmlLink})`,
@@ -98,8 +104,7 @@ const command: StaticCommand = new StaticCommand(
 
       if (error.message?.includes('invalid_grant') || error.message?.includes('unauthorized')) {
         await interaction.editReply({
-          content:
-            '❌ Google Calendar authentication failed. Please contact an administrator to re-authorize the bot.',
+          content: '❌ Google Calendar authentication failed. Please re-authorize the bot.',
         })
       } else {
         await interaction.editReply({

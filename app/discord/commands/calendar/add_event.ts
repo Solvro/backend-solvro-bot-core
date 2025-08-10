@@ -81,11 +81,11 @@ const command: StaticCommand = new StaticCommand(
         description,
         location,
         start: {
-          dateTime: `${date}T${startTime}:00`,
+          dateTime: googleCalendarService.formatToRFC3339WithWarsawTime(date, startTime),
           timeZone: 'Europe/Warsaw',
         },
         end: {
-          dateTime: `${date}T${endTime}:00`,
+          dateTime: googleCalendarService.formatToRFC3339WithWarsawTime(date, endTime),
           timeZone: 'Europe/Warsaw',
         },
         attendees,

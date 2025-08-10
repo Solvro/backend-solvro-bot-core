@@ -17,6 +17,8 @@ export interface CalendarEvent {
   attendees?: Array<{ email: string }>
 }
 
+// TODO: jak bedzie baza czlonkow - updatowac dostepy do googla przy dodawaniu/usuwaniu osob
+
 export class GoogleCalendarService {
   private calendar
   private auth
@@ -68,6 +70,19 @@ export class GoogleCalendarService {
       logger.error('Error getting upcoming event:', error)
       throw new Error(`Failed to get upcoming event: ${error.message}`)
     }
+  }
+
+  formatToRFC3339WithWarsawTime(date: string, time: string): string {
+    const [day, month, year] = date.split('.')
+    const isWinterTime = this.isWinterTime(new Date(`${year}-${month}-${day}`))
+    const offset = isWinterTime ? '+01:00' : '+02:00'
+
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}T${time}:00${offset}`
+  }
+
+  private isWinterTime(date: Date): boolean {
+    const month = date.getMonth() + 1
+    return month < 3 || month > 10
   }
 }
 

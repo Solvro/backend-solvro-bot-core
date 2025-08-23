@@ -1,12 +1,15 @@
 import { officeCameraPollValidator } from '#validators/office_camera'
-import OfficeCameraStatus from '#models/office_camera_status'
 import { HttpContext } from '@adonisjs/core/http'
 import logger from '@adonisjs/core/services/logger'
 import fs from 'fs/promises'
 import path from 'path'
-import { DateTime } from 'luxon'
+import { OfficeCameraService } from '#services/office_camera_service'
+import { inject } from '@adonisjs/core'
 
+@inject()
 export default class OfficeCameraController {
+  constructor(protected officeCameraService: OfficeCameraService) { }
+
   async update({ request, response }: HttpContext) {
     const { count, timestamp, file: image } = await request.validateUsing(officeCameraPollValidator)
 
@@ -27,14 +30,9 @@ export default class OfficeCameraController {
       } catch (err) {
         logger.error('Failed to save image:', err)
       }
-    }
 
-    // Save to database
-    await OfficeCameraStatus.create({
-      count,
-      timestamp: DateTime.fromJSDate(timestamp),
-      imagePath: savedImagePath,
-    })
+      this.officeCameraService.updateStatusMessages(fullImagePath, count, timestamp);
+    }
 
     response.status(201)
   }

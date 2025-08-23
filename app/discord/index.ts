@@ -9,7 +9,7 @@ import monitorAttendanceCommand from '#app/discord/commands/attendance/monitor'
 import discordActivityCommand from '#app/discord/commands/activity/discord_activity'
 import githubActivityCommand from '#app/discord/commands/activity/github_activity'
 import stopMonitoringAttendanceCommand from '#app/discord/commands/attendance/stop_monitoring'
-import officeStatusCommand from '#app/discord/commands/office/office_status'
+import officeWidgetCommand from '#app/discord/commands/office/office_widget'
 import showAttendanceCommand from '#app/discord/commands/attendance/show_attendance'
 import createMeeting from '#app/discord/commands/meeting/create_meeting'
 import archive from '#app/discord/commands/archive_channel/archive'
@@ -38,7 +38,7 @@ export const commands = [
   monitorAttendanceCommand,
   stopMonitoringAttendanceCommand,
   createMeeting,
-  officeStatusCommand,
+  officeWidgetCommand,
   showAttendanceCommand,
   meetingSummaryCommand,
   discordActivityCommand,
@@ -95,6 +95,10 @@ export class DiscordClient extends Client {
   private displayAvailableCommands() {
     const prompt = this.commands.map((_, commandName) => `/${commandName}`).join('\n')
     logger.info(`Available Discord commands:\n${prompt}`)
+  }
+
+  public async getGuild() {
+    return await client.guilds.fetch(env.get('DISCORD_GUILD_ID'))
   }
 }
 

@@ -1,4 +1,4 @@
-import { ChannelType, CommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
+import { ChannelType, ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, StaticCommand } from '../commands.js'
 import Meeting from '#models/meetings'
 
@@ -16,7 +16,7 @@ const command: SlashCommand = new StaticCommand(
         .setRequired(true)
         .addChannelTypes(ChannelType.GuildVoice)
     ),
-  async (interaction: CommandInteraction) => {
+  async (interaction: ChatInputCommandInteraction) => {
     const optCh = interaction.options.get('channel', true)
     if (!optCh.channel) {
       interaction.reply({

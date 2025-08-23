@@ -1,4 +1,4 @@
-import { CommandInteraction, SlashCommandBuilder, MessageFlags } from 'discord.js'
+import { SlashCommandBuilder, MessageFlags, ChatInputCommandInteraction } from 'discord.js'
 import { StaticCommand } from '../commands.js'
 import { CalendarEvent } from '#services/google_calendar_service'
 import logger from '@adonisjs/core/services/logger'
@@ -38,7 +38,7 @@ const command: StaticCommand = new StaticCommand(
         .setDescription('Attendees (comma-separated index numbers or emails)')
         .setRequired(false)
     ),
-  async (interaction: CommandInteraction) => {
+  async (interaction: ChatInputCommandInteraction) => {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral })
 
     try {

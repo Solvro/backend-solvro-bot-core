@@ -1,4 +1,4 @@
-import { ChannelType, CommandInteraction, SlashCommandBuilder } from 'discord.js'
+import { ChannelType, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, StaticCommand } from '../commands.js'
 import Meeting, { AttendanceStatus, RecordingStatus } from '#models/meetings'
 import { client } from '#app/discord/index';
@@ -21,7 +21,7 @@ const command: SlashCommand = new StaticCommand(
                 .setRequired(true)
                 .addChannelTypes(ChannelType.GuildVoice)
         ),
-    async (interaction: CommandInteraction) => {
+    async (interaction: ChatInputCommandInteraction) => {
         await interaction.deferReply({})
 
         const optCh = interaction.options.get('channel', true)

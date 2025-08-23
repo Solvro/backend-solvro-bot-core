@@ -1,4 +1,4 @@
-import { ChannelType, CommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
+import { ChannelType, ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, StaticCommand } from '../commands.js'
 import { client } from '#app/discord/index'
 import Meeting, { AttendanceStatus } from '#models/meetings'
@@ -18,7 +18,7 @@ const command: SlashCommand = new StaticCommand(
         .setRequired(false)
         .addChannelTypes(ChannelType.GuildVoice)
     ),
-  async (interaction: CommandInteraction) => {
+  async (interaction: ChatInputCommandInteraction) => {
     const voiceChannelId = await getVoiceChannelId(interaction)
     if (!voiceChannelId) {
       interaction.reply({
@@ -72,7 +72,7 @@ const command: SlashCommand = new StaticCommand(
   }
 )
 
-async function getVoiceChannelId(interaction: CommandInteraction): Promise<string | null> {
+async function getVoiceChannelId(interaction: ChatInputCommandInteraction): Promise<string | null> {
   const optChannel = interaction.options.get(OPTION_CHANNEL, false)?.channel
   if (optChannel) {
     return optChannel.id

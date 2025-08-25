@@ -22,17 +22,20 @@ export default class OfficeCameraController {
     if (image) {
       try {
         await fs.mkdir(imageDir, { recursive: true })
-
         // Replace old image with the new one
         await image.move(imageDir, { name: imageName, overwrite: true })
         savedImagePath = fullImagePath
+
+        this.officeCameraService.updateStatusMessages(count, timestamp, fullImagePath);
+
         logger.debug('Image saved to: ' + fullImagePath)
       } catch (err) {
         logger.error('Failed to save image:', err)
       }
-
-      this.officeCameraService.updateStatusMessages(fullImagePath, count, timestamp);
+    } else {
+      this.officeCameraService.updateStatusMessages(count, timestamp);
     }
+
 
     response.status(201)
   }

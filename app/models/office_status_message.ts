@@ -11,6 +11,15 @@ export default class OfficeStatusMessage extends BaseModel {
   @column()
   declare messageId: string
 
+  @column()
+  declare count: number | null
+
+  @column()
+  declare lastPresence: DateTime | null
+
+  @column()
+  declare imagePath: string | null
+
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime
 

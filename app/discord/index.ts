@@ -82,6 +82,10 @@ export class DiscordClient extends Client {
       logger.debug('Registered attendance monitoring listener')
     }
 
+    await this.loginBot();
+  }
+
+  async loginBot() {
     await this.login(env.get('DISCORD_TOKEN'))
   }
 

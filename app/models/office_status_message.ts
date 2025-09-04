@@ -1,18 +1,24 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 
-export default class OfficeCameraStatus extends BaseModel {
+export default class OfficeStatusMessage extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
   @column()
-  declare count: number
+  declare channelId: string
 
   @column()
-  declare timestamp: DateTime
+  declare messageId: string
 
   @column()
-  declare imagePath: string
+  declare count: number | null
+
+  @column()
+  declare lastPresence: DateTime | null
+
+  @column()
+  declare imagePath: string | null
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

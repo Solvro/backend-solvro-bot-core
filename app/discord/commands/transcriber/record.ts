@@ -2,7 +2,7 @@ import { SlashCommand, StaticCommand } from '#app/discord/commands/commands'
 import { client } from '#app/discord/index'
 import Meeting, { RecordingStatus } from '#models/meetings'
 import env from '#start/env'
-import { ChannelType, CommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
+import { ChannelType, ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
 
 const COMMAND_NAME = 'record'
 const OPTION_CHANNEL = 'channel'
@@ -21,7 +21,7 @@ const command: SlashCommand = new StaticCommand(
     .addStringOption((option) =>
       option.setName(OPTION_MEETING_NAME).setDescription('Meeting name').setRequired(true)
     ),
-  async (interaction: CommandInteraction) => {
+  async (interaction: ChatInputCommandInteraction) => {
     const optCh = interaction.options.get(OPTION_CHANNEL, true)
     if (!optCh.channel) {
       interaction.reply({

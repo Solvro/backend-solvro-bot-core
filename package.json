@@ -60,8 +60,9 @@
     "adonis-autoswagger": "^3.72.0",
     "axios": "^1.10.0",
     "discord.js": "^14.18.0",
+    "googleapis": "^155.0.0",
     "luxon": "^3.6.1",
-    "pg": "^8.14.1",
+    "pg": "^8.16.3",
     "pino-pretty": "^13.0.0",
     "reflect-metadata": "^0.2.2"
   },

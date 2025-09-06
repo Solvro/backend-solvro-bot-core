@@ -1,10 +1,12 @@
 import env from '#start/env'
 import logger from '@adonisjs/core/services/logger'
-import {Client, GuildMember,} from 'discord.js'
+import { Client, GuildMember, } from 'discord.js'
 
 
 export async function guildMemberAdd(member: GuildMember) {
   const roleId = env.get('ROLE_ID')
+
+  if (!roleId) return;
 
   try {
     const role = member.guild.roles.cache.get(roleId)

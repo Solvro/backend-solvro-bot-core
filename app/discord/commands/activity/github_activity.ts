@@ -1,4 +1,4 @@
-import { CommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
+import { ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, StaticCommand } from '../commands.js'
 import GithubActivity from '#models/github_activity'
 
@@ -68,7 +68,7 @@ const command: SlashCommand = new StaticCommand(
                 .setDescription('Github User ID')
                 .setRequired(true)
         ),
-    async (interaction: CommandInteraction) => {
+    async (interaction: ChatInputCommandInteraction) => {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral })
 
         const period = interaction.options.get('time_period')?.value as string

@@ -21,10 +21,10 @@ export async function messagesHandler(message: Message) {
   }
 
   const discordId = message.author.id;
-  const todayStr = new Date().toISOString().slice(0, 10); // "YYYY-MM-DD"
+  const today = new Date()
 
   let userActivity = await DiscordActivity.query()
-    .where('date', todayStr)
+    .where('date', today)
     .andWhere('discord_id', discordId)
     .first();
 
@@ -33,7 +33,7 @@ export async function messagesHandler(message: Message) {
     await userActivity.save();
   } else {
     await DiscordActivity.create({
-      date: todayStr,
+      date: today,
       discordId: discordId,
       messageCount: 1,
     });

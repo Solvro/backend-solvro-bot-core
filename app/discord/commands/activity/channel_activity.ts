@@ -1,4 +1,4 @@
-import { CommandInteraction, SlashCommandBuilder } from 'discord.js'
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
 import { StaticCommand } from '../commands.js'
 import ChannelActivity from '#models/channel_activity'
 
@@ -34,7 +34,7 @@ const command = new StaticCommand(
         )
         .setRequired(false)
     ),
-  async (interaction: CommandInteraction) => {
+  async (interaction: ChatInputCommandInteraction) => {
     await interaction.deferReply({ ephemeral: true })
 
     // UWAGA: getString zwraca string | null, nie obiekt z .value

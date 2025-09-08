@@ -126,6 +126,7 @@ export default class SyncMembers extends BaseCommand {
                         githubUrl,
                         githubUsername,
                         status,
+                        currentSection,
                     }
                 )
 
@@ -142,6 +143,7 @@ export default class SyncMembers extends BaseCommand {
                     githubUrl,
                     githubUsername,
                     status,
+                    currentSection,
                 })
                 await member.useTransaction(trx).save()
             }

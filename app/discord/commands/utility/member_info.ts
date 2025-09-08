@@ -39,7 +39,9 @@ const command: SlashCommand = new StaticCommand(
             })
             .setDescription(
                 `${statusEmoji[member.status]} **Status:** ${member.status.toUpperCase()}` +
-                `\n📂 **Section:** ${member.currentSection ?? 'N/A'}`
+                `\n📂 **Section:** ${member.currentSection ?? 'N/A'}` +
+                `\n🏢 **Projects:** ${member.currentProjects ?? 'N/A'}` +
+                `\n🎯 **Role:** ${member.currentRole ?? 'N/A'}`
             )
             .addFields(
                 ...(member.indexNumber

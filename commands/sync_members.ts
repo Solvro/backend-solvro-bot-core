@@ -1,4 +1,3 @@
-import { client } from '#app/discord/index'
 import Member, { MemberStatus } from '#models/member'
 import env from '#start/env'
 import { BaseCommand } from '@adonisjs/core/ace'
@@ -80,7 +79,7 @@ export default class SyncMembers extends BaseCommand {
                     discordUsername,
                     githubUrl,
                     currentSection,
-                    currentProject,
+                    currentProjects,
                     currentRole,
                     otherProjects,
                     otherExperiences,
@@ -127,6 +126,10 @@ export default class SyncMembers extends BaseCommand {
                         githubUsername,
                         status,
                         currentSection,
+                        currentRole,
+                        otherProjects,
+                        otherExperiences,
+                        currentProjects,
                     }
                 )
 
@@ -144,6 +147,10 @@ export default class SyncMembers extends BaseCommand {
                     githubUsername,
                     status,
                     currentSection,
+                    currentRole,
+                    otherProjects,
+                    otherExperiences,
+                    currentProjects,
                 })
                 await member.useTransaction(trx).save()
             }

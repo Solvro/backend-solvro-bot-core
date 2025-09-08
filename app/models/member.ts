@@ -48,6 +48,18 @@ export default class Member extends BaseModel {
   declare currentSection: string | null
 
   @column()
+  declare currentRole: string | null
+
+  @column()
+  declare currentProjects: string | null
+
+  @column()
+  declare otherProjects: string | null
+
+  @column()
+  declare otherExperiences: string | null
+
+  @column()
   declare status: MemberStatus
 
   @column()

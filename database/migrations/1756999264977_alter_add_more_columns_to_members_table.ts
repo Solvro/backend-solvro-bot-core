@@ -11,6 +11,10 @@ export default class extends BaseSchema {
       table.string('study_year').nullable()
       table.string('messenger_url').nullable()
       table.string('current_section').nullable()
+      table.string('current_role').nullable()
+      table.string('current_projects').nullable()
+      table.string('other_projects').nullable()
+      table.string('other_experiences').nullable()
       table.string('github_username').nullable()
 
       table.enu('status', ['new', 'active', 'inactive']).defaultTo('new')
@@ -27,6 +31,10 @@ export default class extends BaseSchema {
       table.dropColumn('status')
       table.dropColumn('github_username')
       table.dropColumn('current_section')
+      table.dropColumn('current_role')
+      table.dropColumn('other_projects')
+      table.dropColumn('other_experiences')
+      table.dropColumn('current_projects')
     })
   }
 }

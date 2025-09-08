@@ -14,7 +14,6 @@ export default class OfficeCameraController {
     const { count, timestamp, file: image } = await request.validateUsing(officeCameraPollValidator)
 
     // Handle image (if provided)
-    let savedImagePath: string | undefined
     const imageDir = path.join(process.cwd(), 'tmp', 'office-camera')
     const imageName = 'latest.jpg'
     const fullImagePath = path.join(imageDir, imageName)
@@ -24,7 +23,6 @@ export default class OfficeCameraController {
         await fs.mkdir(imageDir, { recursive: true })
         // Replace old image with the new one
         await image.move(imageDir, { name: imageName, overwrite: true })
-        savedImagePath = fullImagePath
 
         this.officeCameraService.updateStatusMessages(count, timestamp, fullImagePath);
 

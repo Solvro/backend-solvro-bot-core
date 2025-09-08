@@ -93,20 +93,8 @@ const command: SlashCommand = new StaticCommand(
             })
             .setTimestamp(member.updatedAt.toJSDate())
 
-        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
-            new ButtonBuilder()
-                .setCustomId(`member_stats_${member.id}`)
-                .setLabel('📊 Show Discord Stats')
-                .setStyle(ButtonStyle.Primary),
-            new ButtonBuilder()
-                .setCustomId(`member_projects_${member.id}`)
-                .setLabel('📂 Show Github Stats')
-                .setStyle(ButtonStyle.Primary)
-        )
-
         await interaction.editReply({
             embeds: [embed],
-            components: [row],
         })
     }
 );

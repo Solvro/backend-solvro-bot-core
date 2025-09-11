@@ -158,6 +158,8 @@ export default class SyncMembers extends BaseCommand {
             trx.commit();
         }
 
+        discord.client.destroy();
+
         this.logger.success('✅ Members synced from Google Sheets')
     }
 }

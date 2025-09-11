@@ -1,5 +1,6 @@
 import { Client, Interaction } from 'discord.js';
 import selectMenuHandlers from '../interactions/selectMenus/index.js';
+import { buttonHandlers } from '../interactions/buttons/index.js';
 
 
 export function setupInteractionHandler(client: Client) {
@@ -9,11 +10,14 @@ export function setupInteractionHandler(client: Client) {
             if (handler) return handler(interaction)
         }
 
-        // if (interaction.isButton()) {
-        //     const handler = buttonHandlers[interaction.customId]
-        //     if (handler) return handler(interaction)
-        // }
+        if (interaction.isButton()) {
+            // Find handler by matching prefix
+            const handler = Object.entries(buttonHandlers).find(([prefix]) =>
+                interaction.customId.startsWith(prefix)
+            )?.[1]
 
-        // More interractions types
+            if (handler) await handler(interaction)
+        }
+
     })
 }

@@ -2,6 +2,7 @@ import env from '#start/env'
 import { Client, Collection, GatewayIntentBits } from 'discord.js'
 
 import userInfoCommand from '#app/discord/commands/utility/user'
+import memberInfoCommand from '#app/discord/commands/utility/member_info'
 import recordCommand from '#app/discord/commands/transcriber/record'
 import stopRecordingCommand from '#app/discord/commands/transcriber/stop_recording'
 import meetingSummaryCommand from '#app/discord/commands/transcriber/meeting_summary'
@@ -34,6 +35,7 @@ import { messagesHandler } from '#app/discord/handlers/messagesHandler'
 
 export const commands = [
   userInfoCommand,
+  memberInfoCommand,
   recordCommand,
   stopRecordingCommand,
   monitorAttendanceCommand,
@@ -51,7 +53,7 @@ export const commands = [
   calendarUpcomingEvent,
   transcription,
   weeklyStart,
-  weeklyStop
+  weeklyStop,
 ]
 
 export class DiscordClient extends Client {
@@ -82,6 +84,10 @@ export class DiscordClient extends Client {
       logger.debug('Registered attendance monitoring listener')
     }
 
+    await this.loginBot();
+  }
+
+  async loginBot() {
     await this.login(env.get('DISCORD_TOKEN'))
   }
 

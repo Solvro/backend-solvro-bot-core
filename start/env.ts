@@ -28,6 +28,9 @@ export default await Env.create(new URL('../', import.meta.url), {
   GOOGLE_REDIRECT_URI: Env.schema.string.optional(),
   GOOGLE_REFRESH_TOKEN: Env.schema.string.optional(),
   GOOGLE_CALENDAR_ID: Env.schema.string.optional(),
+
+  GOOGLE_MEMBERS_SHEET_ID: Env.schema.string.optional(),
+  GOOGLE_CREDENTIALS_PATH: Env.schema.string.optional(),
   /*
   |----------------------------------------------------------
   | Variables for configuring database connection

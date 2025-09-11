@@ -38,7 +38,7 @@ export default class SyncMembers extends BaseCommand {
 
         const auth = new google.auth.GoogleAuth({
             scopes: ['https://www.googleapis.com/auth/spreadsheets.readonly'],
-            keyFile: 'credentials/credentials.json', // service account JSON
+            keyFile: env.get('GOOGLE_CREDENTIALS_PATH'),
         })
 
         const sheets = google.sheets({ version: 'v4', auth })

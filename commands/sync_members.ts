@@ -53,7 +53,7 @@ export default class SyncMembers extends BaseCommand {
             this.logger.info(`📥 Fetching members from tab: ${tab}`)
 
             const response = await sheets.spreadsheets.values.get({
-                spreadsheetId: env.get('GOOGLE_SHEET_ID'),
+                spreadsheetId: env.get('GOOGLE_MEMBERS_SHEET_ID'),
                 range: `${tab}!A2:Z`,
             })
 

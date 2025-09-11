@@ -71,7 +71,7 @@ export default class SyncMembers extends BaseCommand {
                     indexNumber,
                     email,
                     joinDate,
-                    knowledge,
+                    _knowledge,
                     faculty,
                     fieldOfStudy,
                     studyYear,

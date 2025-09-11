@@ -31,6 +31,8 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   GOOGLE_MEMBERS_SHEET_ID: Env.schema.string.optional(),
   GOOGLE_CREDENTIALS_PATH: Env.schema.string.optional(),
+
+  OFFICE_CAMERA_IMAGE_PATH: Env.schema.string(),
   /*
   |----------------------------------------------------------
   | Variables for configuring database connection

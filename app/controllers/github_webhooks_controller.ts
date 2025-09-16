@@ -38,8 +38,14 @@ export default class GithubWebhooksController {
         }
         
         // handle event
-        const payload = request.body()
-        const fullRepoName = payload?.repository?.full_name
+        let payload: any;
+        try {
+            payload = typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody;
+        } catch (e) {
+            logger.debug("Github webhook: Failed to parse JSON body.");
+            return response.badRequest('Invalid JSON body.');
+        }
+        const fullRepoName = payload?.repository?.full_name;
         
         if (!event || !fullRepoName) {
             logger.debug("Github webhook: Missing event header or repository data.")

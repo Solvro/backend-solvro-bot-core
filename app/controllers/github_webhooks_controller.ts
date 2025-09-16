@@ -4,6 +4,7 @@ import logger from '@adonisjs/core/services/logger'
 import { DateTime } from 'luxon'
 import crypto from 'crypto'
 import env from '#start/env'
+import { githubWebhookValidator } from '#validators/github_webhook'
 
 
 function isValidHmacSignature(content: string | Buffer, receivedSignature: string, secret: string, algorithm: string = 'sha256'): boolean {
@@ -19,18 +20,6 @@ function isValidHmacSignature(content: string | Buffer, receivedSignature: strin
     )
 }
 
-async function getRawBody(request: HttpContext['request']): Promise<string> {
-    return new Promise((resolve) => {
-        let data = ''
-        request.request.on('data', (chunk) => {
-            data += chunk
-        })
-        request.request.on('end', () => {
-            resolve(data)
-        })
-    })
-}
-
 export default class GithubWebhooksController {
     async webhook({ request, response }: HttpContext) {
         const event = request.header('X-GitHub-Event')
@@ -41,7 +30,7 @@ export default class GithubWebhooksController {
             return response.unauthorized('Missing signature')
         }
 
-        const rawBody = request.raw() || await getRawBody(request)
+        const rawBody = request.raw()
         if (!rawBody) {
             return response.badRequest('Missing request body')
         }
@@ -53,8 +42,8 @@ export default class GithubWebhooksController {
         }
 
         // handle event
-        const payload = request.hasBody() ? request.body() : {}
-        const fullRepoName = payload?.repository?.full_name
+        const payload = await request.validateUsing(githubWebhookValidator);
+        const fullRepoName = payload.repository.full_name
 
 
         if (!event || !fullRepoName) {
@@ -95,10 +84,10 @@ export default class GithubWebhooksController {
                 }
 
                 case 'issues': {
-                    const issue = payload.issue
-                    const action = payload.action
+                    const issue = payload.issue || null
+                    const action = payload.action || ''
 
-                    if (['opened', 'edited'].includes(action)) {
+                    if (['opened', 'edited'].includes(action) && issue) {
                         const githubId = issue.node_id
                         const authorId = issue.user?.id?.toString() || 'unknown'
                         const message = issue.title
@@ -126,10 +115,10 @@ export default class GithubWebhooksController {
                 }
 
                 case 'pull_request': {
-                    const pr = payload.pull_request
-                    const action = payload.action
+                    const pr = payload.pull_request || null
+                    const action = payload.action || ''
 
-                    if (['opened', 'reopened', 'edited'].includes(action)) {
+                    if (['opened', 'reopened', 'edited'].includes(action) && pr) {
                         const githubId = pr.node_id
                         const authorId = pr.user?.id?.toString() || 'unknown'
                         const message = pr.title
@@ -157,7 +146,9 @@ export default class GithubWebhooksController {
                 }
 
                 case 'pull_request_review': {
-                    const review = payload.review
+                    const review = payload.review || null
+                    if (!review) break;
+                    
                     const githubId = review.node_id
                     const authorId = review.user?.id?.toString() || 'unknown'
                     const message = `Review state: ${review.state}`

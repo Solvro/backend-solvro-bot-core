@@ -41,9 +41,12 @@ export default class GithubWebhooksController {
             return response.unauthorized('Missing signature')
         }
 
-        const rawBody = await getRawBody(request)
-        const secret = env.get("GITHUB_WEBHOOK_SECRET")
+        const rawBody = request.raw() || await getRawBody(request)
+        if (!rawBody) {
+            return response.badRequest('Missing request body')
+        }
 
+        const secret = env.get("GITHUB_WEBHOOK_SECRET")
         if (!isValidHmacSignature(rawBody, signature, secret)) {
             logger.debug("Github webhook: Invalid signature")
             return response.unauthorized('Invalid signature')

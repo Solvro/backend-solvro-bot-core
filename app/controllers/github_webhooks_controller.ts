@@ -53,8 +53,9 @@ export default class GithubWebhooksController {
         }
 
         // handle event
-        const payload = JSON.parse(rawBody)
+        const payload = request.hasBody() ? request.body() : {}
         const fullRepoName = payload?.repository?.full_name
+
 
         if (!event || !fullRepoName) {
             logger.debug("Github webhook: Missing event header or repository data.")

@@ -12,6 +12,7 @@ import githubActivityCommand from '#app/discord/commands/activity/github_activit
 import stopMonitoringAttendanceCommand from '#app/discord/commands/attendance/stop_monitoring'
 import officeWidgetCommand from '#app/discord/commands/office/office_widget'
 import officeWidgetRemoveCommand from '#app/discord/commands/office/office_widget_remove'
+import officeCameraDowntimeAlertCommand from '#app/discord/commands/office/office_down_alert'
 import showAttendanceCommand from '#app/discord/commands/attendance/show_attendance'
 import createMeeting from '#app/discord/commands/meeting/create_meeting'
 import archive from '#app/discord/commands/archive_channel/archive'
@@ -43,6 +44,7 @@ export const commands = [
   createMeeting,
   officeWidgetCommand,
   officeWidgetRemoveCommand,
+  officeCameraDowntimeAlertCommand,
   showAttendanceCommand,
   meetingSummaryCommand,
   discordActivityCommand,

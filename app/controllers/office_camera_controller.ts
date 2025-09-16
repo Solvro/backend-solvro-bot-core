@@ -5,6 +5,7 @@ import fs from 'fs/promises'
 import path from 'path'
 import { OfficeCameraService } from '#services/office_camera_service'
 import { inject } from '@adonisjs/core'
+import env from '#start/env'
 
 @inject()
 export default class OfficeCameraController {
@@ -14,7 +15,7 @@ export default class OfficeCameraController {
     const { count, timestamp, file: image } = await request.validateUsing(officeCameraPollValidator)
 
     // Handle image (if provided)
-    const imageDir = path.join(process.cwd(), 'tmp', 'office-camera')
+    const imageDir = env.get("OFFICE_CAMERA_IMAGE_PATH")
     const imageName = 'latest.jpg'
     const fullImagePath = path.join(imageDir, imageName)
 

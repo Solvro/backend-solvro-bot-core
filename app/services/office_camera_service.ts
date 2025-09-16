@@ -53,6 +53,7 @@ export class OfficeCameraService {
 
                 msg.messageId = message.id;
                 msg.count = peopleCount;
+                msg.lastUpdate = DateTime.fromJSDate(lastUpdate);
                 if (peopleCount > 0) msg.lastPresence = DateTime.fromJSDate(lastUpdate);
                 if (image) msg.imagePath = image;
 

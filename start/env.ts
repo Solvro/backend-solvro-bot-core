@@ -33,6 +33,7 @@ export default await Env.create(new URL('../', import.meta.url), {
   GOOGLE_CREDENTIALS_PATH: Env.schema.string.optional(),
 
   OFFICE_CAMERA_IMAGE_PATH: Env.schema.string(),
+  OFFICE_CAMERA_DOWN_TIME_THRESHOLD_MINUTES: Env.schema.number(),
   /*
   |----------------------------------------------------------
   | Variables for configuring database connection

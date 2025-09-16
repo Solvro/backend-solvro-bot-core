@@ -19,34 +19,40 @@ function isValidHmacSignature(content: string | Buffer, receivedSignature: strin
     )
 }
 
+async function getRawBody(request: HttpContext['request']): Promise<string> {
+    return new Promise((resolve) => {
+        let data = ''
+        request.request.on('data', (chunk) => {
+            data += chunk
+        })
+        request.request.on('end', () => {
+            resolve(data)
+        })
+    })
+}
+
 export default class GithubWebhooksController {
     async webhook({ request, response }: HttpContext) {
         const event = request.header('X-GitHub-Event')
         const signature = request.header('X-Hub-Signature-256');
-        
+
         // validate request with signature
         if (!signature) {
             return response.unauthorized('Missing signature')
         }
-        
-        const rawBody = request.raw() ?? "";
+
+        const rawBody = await getRawBody(request)
         const secret = env.get("GITHUB_WEBHOOK_SECRET")
-        
+
         if (!isValidHmacSignature(rawBody, signature, secret)) {
             logger.debug("Github webhook: Invalid signature")
             return response.unauthorized('Invalid signature')
         }
-        
+
         // handle event
-        let payload: any;
-        try {
-            payload = typeof rawBody === 'string' ? JSON.parse(rawBody) : rawBody;
-        } catch (e) {
-            logger.debug("Github webhook: Failed to parse JSON body.");
-            return response.badRequest('Invalid JSON body.');
-        }
-        const fullRepoName = payload?.repository?.full_name;
-        
+        const payload = JSON.parse(rawBody)
+        const fullRepoName = payload?.repository?.full_name
+
         if (!event || !fullRepoName) {
             logger.debug("Github webhook: Missing event header or repository data.")
             return response.badRequest('Missing event header or repository data.')

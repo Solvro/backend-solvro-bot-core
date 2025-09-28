@@ -41,13 +41,24 @@ export default class GithubWebhooksController {
             return response.unauthorized('Invalid signature')
         }
 
+        // Add debugging BEFORE validation
+        const rawPayload = request.body()
+        logger.debug("Raw payload before validation:", JSON.stringify(rawPayload))
+        logger.debug("Repository in raw payload:", rawPayload?.repository?.full_name)
+
         // handle event
         const payload = await request.validateUsing(githubWebhookValidator);
-        const fullRepoName = payload.repository.full_name
 
+        // Add debugging AFTER validation
+        logger.debug("Payload after validation:", JSON.stringify(payload))
+        logger.debug("Repository after validation:", payload?.repository?.full_name)
+
+        const fullRepoName = payload.repository.full_name
 
         if (!event || !fullRepoName) {
             logger.debug("Github webhook: Missing event header or repository data.")
+            logger.debug("Event:", event)
+            logger.debug("Full repo name:", fullRepoName)
             return response.badRequest('Missing event header or repository data.')
         }
 
@@ -148,7 +159,7 @@ export default class GithubWebhooksController {
                 case 'pull_request_review': {
                     const review = payload.review || null
                     if (!review) break;
-                    
+
                     const githubId = review.node_id
                     const authorId = review.user?.id?.toString() || 'unknown'
                     const message = `Review state: ${review.state}`

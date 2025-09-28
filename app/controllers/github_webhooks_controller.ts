@@ -27,11 +27,13 @@ export default class GithubWebhooksController {
 
         // validate request with signature
         if (!signature) {
+            logger.debug("Github webhook: Missing signature")
             return response.unauthorized('Missing signature')
         }
 
         const rawBody = request.raw()
         if (!rawBody) {
+            logger.debug("Github webhook: Missing request body")
             return response.badRequest('Missing request body')
         }
 

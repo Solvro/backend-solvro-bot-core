@@ -48,7 +48,7 @@ const command: SlashCommand = new StaticCommand(
         }
 
         await interaction.reply({
-            content: "✅ Weekly session ended successfully:\n- 🎤 Transcription is being saved and will be available shortly\n- 📋 Attendance tracking is complete\n\nYou can:\n- 📄 View the transcription with `/transcription`\n- 🧠 See the meeting summary with `/meeting_summary`\n- 👥 View attendance with `/show_attendance`"
+            content: "✅ Weekly session ended successfully:\n- 🎤 Transcription is being processed and will be available shortly\n- 📋 Attendance tracking is complete\n- 💾 Files will be automatically uploaded to Google Drive when the summary is ready\n\nYou can:\n- 📄 View the transcription with `/transcription`\n- 🧠 See the meeting summary with `/meeting_summary`\n- 👥 View attendance with `/show_attendance`\n- 📊 Check upload status with `/upload_status`"
         });
     }
 );

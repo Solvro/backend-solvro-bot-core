@@ -12,7 +12,7 @@ export class GoogleDriveService {
 
     constructor() {
         this.auth = new google.auth.GoogleAuth({
-            scopes: ['https://www.googleapis.com/auth/drive.file'],
+            scopes: ['https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive.readonly'],
             keyFile: env.get('GOOGLE_CREDENTIALS_PATH'),
         })
 
@@ -79,6 +79,8 @@ export class GoogleDriveService {
             fields: 'files(id, name)',
             spaces: 'drive',
             supportsAllDrives: true,
+            includeItemsFromAllDrives: true,
+            corpora: 'allDrives',
         })
 
         if (response.data.files && response.data.files.length > 0) {
@@ -235,6 +237,8 @@ export class GoogleDriveService {
                 q: `'${meeting.googleDriveFolderId}' in parents and trashed=false`,
                 fields: 'files(name)',
                 supportsAllDrives: true,
+                includeItemsFromAllDrives: true,
+                corpora: 'allDrives',
             })
 
             return response.data.files?.map(file => file.name || '') || []
@@ -258,7 +262,12 @@ export class GoogleDriveService {
             }
 
             // Test authentication by making a simple API call
-            await this.drive.files.list({ pageSize: 1 })
+            await this.drive.files.list({ 
+                pageSize: 1,
+                supportsAllDrives: true,
+                includeItemsFromAllDrives: true,
+                corpora: 'allDrives'
+            })
             return true
         } catch (error) {
             logger.error('Google Drive service authentication failed', error)

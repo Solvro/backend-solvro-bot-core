@@ -13,12 +13,19 @@ const command: SlashCommand = new StaticCommand(
                 .setName('meeting_id')
                 .setDescription('Meeting ID to retry upload for')
                 .setRequired(true)
+        )
+        .addBooleanOption((option) =>
+            option
+                .setName('force')
+                .setDescription('Force upload even if files have already been uploaded')
+                .setRequired(false)
         ),
 
     async (interaction: ChatInputCommandInteraction) => {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral })
 
         const meetingId = interaction.options.getInteger('meeting_id', true)
+        const force = interaction.options.getBoolean('force') ?? false
 
         try {
             const meeting = await Meeting.find(meetingId)
@@ -30,9 +37,9 @@ const command: SlashCommand = new StaticCommand(
                 return
             }
 
-            if (meeting.filesUploadedToDrive) {
+            if (meeting.filesUploadedToDrive && !force) {
                 await interaction.editReply({
-                    content: `❌ Meeting ${meetingId} files have already been uploaded to Google Drive.`
+                    content: `❌ Meeting ${meetingId} files have already been uploaded to Google Drive. Use --force to override.`
                 })
                 return
             }

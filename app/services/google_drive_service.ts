@@ -172,6 +172,45 @@ export class GoogleDriveService {
     }
 
     /**
+     * Upload or update a file in Google Drive meeting folder
+     */
+    private async uploadOrUpdateFile(
+        name: string,
+        content: string,
+        mimeType: string,
+        folderId: string
+    ): Promise<string> {
+        // Check if file exists
+        const query = `name='${name}' and '${folderId}' in parents and trashed=false`
+        const response = await this.drive.files.list({
+            q: query,
+            fields: 'files(id, name)',
+            supportsAllDrives: true,
+            includeItemsFromAllDrives: true,
+            corpora: 'allDrives',
+        })
+
+        const file = response.data.files?.[0]
+        if (file && file.id) {
+            // Update existing file
+            await this.drive.files.update({
+                fileId: file.id,
+                media: {
+                    mimeType,
+                    body: Readable.from([content]),
+                },
+                supportsAllDrives: true,
+            })
+            logger.info(`Updated file in Google Drive: ${name} (ID: ${file.id})`)
+            return file.id
+        } else {
+            // Create new file
+            logger.info(`Uploading new file to Google Drive: ${name}`)
+            return await this.uploadFile(name, content, mimeType, folderId)
+        }
+    }
+    
+    /**
      * Upload all meeting files to Google Drive
      */
     async uploadAllMeetingFiles(meeting: Meeting, summary: string): Promise<void> {
@@ -184,7 +223,7 @@ export class GoogleDriveService {
             // Upload transcription
             const transcriptionContent = await this.generateTranscriptionFile(meeting)
             if (transcriptionContent) {
-                await this.uploadFile(
+                await this.uploadOrUpdateFile(
                     `transcription_meeting_${meeting.id}.txt`,
                     transcriptionContent,
                     'text/plain',
@@ -193,7 +232,7 @@ export class GoogleDriveService {
             }
 
             // Upload summary
-            await this.uploadFile(
+            await this.uploadOrUpdateFile(
                 `summary_meeting_${meeting.id}.md`,
                 summary,
                 'text/markdown',
@@ -203,7 +242,7 @@ export class GoogleDriveService {
             // Upload attendance
             const attendanceContent = await this.generateAttendanceFile(meeting)
             if (attendanceContent) {
-                await this.uploadFile(
+                await this.uploadOrUpdateFile(
                     `attendance_meeting_${meeting.id}.csv`,
                     attendanceContent,
                     'text/csv',

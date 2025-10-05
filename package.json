@@ -48,7 +48,6 @@
     "eslint": "^9.20.1",
     "hot-hook": "^0.4.0",
     "prettier": "^3.5.0",
-    "ts-node-maintained": "^10.9.5",
     "typescript": "~5.7"
   },
   "dependencies": {
@@ -64,7 +63,8 @@
     "luxon": "^3.6.1",
     "pg": "^8.16.3",
     "pino-pretty": "^13.0.0",
-    "reflect-metadata": "^0.2.2"
+    "reflect-metadata": "^0.2.2",
+    "ts-node-maintained": "^10.9.5"
   },
   "hotHook": {
     "boundaries": [

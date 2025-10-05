@@ -31,6 +31,7 @@ export default class GithubWebhooksController {
             return response.unauthorized('Missing signature')
         }
 
+        // Get the raw body first for signature validation
         const rawBody = request.raw()
         if (!rawBody) {
             logger.debug("Github webhook: Missing request body")
@@ -43,10 +44,21 @@ export default class GithubWebhooksController {
             return response.unauthorized('Invalid signature')
         }
 
+        // Parse the raw body as JSON for debugging and validation
+        let parsedBody
+        try {
+            parsedBody = JSON.parse(rawBody.toString())
+        } catch (error) {
+            logger.error("Github webhook: Failed to parse JSON body", error)
+            return response.badRequest('Invalid JSON body')
+        }
+
         // Add debugging BEFORE validation
-        const rawPayload = request.body()
-        logger.debug("Raw payload before validation:", JSON.stringify(rawPayload))
-        logger.debug("Repository in raw payload:", rawPayload?.repository?.full_name)
+        logger.debug("Raw payload before validation:", JSON.stringify(parsedBody))
+        logger.debug("Repository in raw payload:", parsedBody?.repository?.full_name)
+
+        // Manually set the parsed body for validation since raw() might have consumed the stream
+        request.updateBody(parsedBody)
 
         // handle event
         const payload = await request.validateUsing(githubWebhookValidator);

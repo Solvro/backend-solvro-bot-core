@@ -32,6 +32,9 @@ export default await Env.create(new URL('../', import.meta.url), {
   GOOGLE_MEMBERS_SHEET_ID: Env.schema.string.optional(),
   GOOGLE_CREDENTIALS_PATH: Env.schema.string.optional(),
 
+  // Google Drive configuration for meeting files
+  GOOGLE_DRIVE_FOLDER_ID: Env.schema.string.optional(),
+
   OFFICE_CAMERA_IMAGE_PATH: Env.schema.string(),
   OFFICE_CAMERA_DOWN_TIME_THRESHOLD_MINUTES: Env.schema.number(),
   /*

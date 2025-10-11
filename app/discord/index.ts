@@ -22,6 +22,8 @@ import calendarUpcomingEvent from '#app/discord/commands/calendar/upcoming_event
 import transcription from '#app/discord/commands/transcriber/transcription'
 import weeklyStart from '#app/discord/commands/weekly/weekly_start';
 import weeklyStop from '#app/discord/commands/weekly/weekly_stop';
+import uploadStatus from '#app/discord/commands/admin/upload_status';
+import retryUpload from '#app/discord/commands/admin/retry_upload';
 
 import { SlashCommand } from './commands/commands.js'
 import { ready } from './handlers/clientReadyHandler.js'
@@ -56,6 +58,8 @@ export const commands = [
   transcription,
   weeklyStart,
   weeklyStop,
+  uploadStatus,
+  retryUpload,
 ]
 
 export class DiscordClient extends Client {
@@ -86,7 +90,7 @@ export class DiscordClient extends Client {
       logger.debug('Registered attendance monitoring listener')
     }
 
-    await this.loginBot();
+    await this.loginBot()
   }
 
   async loginBot() {

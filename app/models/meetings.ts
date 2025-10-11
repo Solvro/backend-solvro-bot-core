@@ -46,6 +46,16 @@ export default class Meeting extends BaseModel {
   @column.dateTime()
   declare finishedAt: DateTime | null
 
+  // Google Drive upload tracking
+  @column()
+  declare googleDriveFolderId: string | null
+
+  @column()
+  declare filesUploadedToDrive: boolean
+
+  @column.dateTime()
+  declare driveUploadCompletedAt: DateTime | null
+
   @manyToMany(() => Member)
   declare members: ManyToMany<typeof Member>
 

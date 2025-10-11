@@ -32,6 +32,7 @@ router.get('/docs', async () => {
 router.get('/health', [HealthChecksController])
 
 router.patch('/recordings/:id', [RecordingsController, 'register'])
+router.post('/recordings/:id/summary', [RecordingsController, 'summary'])
 
 router.post('/office/camera', [OfficeCameraController, 'update'])
 

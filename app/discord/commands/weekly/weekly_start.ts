@@ -43,6 +43,18 @@ const command: SlashCommand = new StaticCommand(
             return
         }
 
+        // Check if there's an ongoing meeting
+        const ongoingMeeting = await Meeting.query()
+            .where('recording_status', RecordingStatus.RECORDING)
+            .first()
+
+        if (ongoingMeeting) {
+            interaction.editReply({
+                content: '❌ There is already an ongoing weekly meeting. Please stop it before starting a new one.',
+            })
+            return
+        }
+
         const newMeeting = await Meeting.create({
             name: String(optMeetingName.value),
             discordChannelId: channel.id,

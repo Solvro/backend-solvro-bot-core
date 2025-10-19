@@ -18,7 +18,7 @@ const command: SlashCommand = new StaticCommand(
                 .setRequired(true)
                 .addChoices(
                     { name: 'CSV', value: 'csv' },
-                    { name: 'Excel', value: 'excel' }
+                    // { name: 'Excel', value: 'excel' }
                 )
         )
         .addStringOption((option) =>

@@ -3,7 +3,7 @@ import { SlashCommand, StaticCommand } from '../commands.js'
 import GithubActivity from '#models/github_activity'
 import Member from '#models/member';
 
-function getStartDateFromPeriod(period: string): Date {
+function getStartDateFromPeriod(period: 'today' | 'last_week' | 'last_month' | 'this_semester' | 'all'): Date {
     if (period == "all") return new Date(0);
 
     const now = new Date()
@@ -38,7 +38,6 @@ function getStartDateFromPeriod(period: string): Date {
             }
             start.setHours(0, 0, 0, 0)
             break
-
         default:
             throw new Error(`Unsupported period: ${period}`)
     }
@@ -68,7 +67,7 @@ const command: SlashCommand = new StaticCommand(
     async (interaction: ChatInputCommandInteraction) => {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral })
 
-        const period = interaction.options.get('time_period')?.value as string
+        const period = interaction.options.getString('time_period', true) as 'today' | 'last_week' | 'last_month' | 'this_semester' | 'all'
         const userDiscordId = interaction.options.getUser('user')?.id;
 
         if (!period || !userDiscordId) {

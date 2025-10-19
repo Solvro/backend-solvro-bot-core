@@ -3,6 +3,7 @@ import { BaseModel, column, hasMany, manyToMany } from '@adonisjs/lucid/orm'
 import Meeting from './meetings.js'
 import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 import DiscordActivity from './discord_activity.js'
+import GithubActivity from './github_activity.js'
 
 export enum MemberStatus {
   NEW = 'new',
@@ -79,6 +80,9 @@ export default class Member extends BaseModel {
 
   @hasMany(() => DiscordActivity, { localKey: 'discordId', foreignKey: 'discordId' })
   declare discordActivity: HasMany<typeof DiscordActivity>
+
+  @hasMany(() => GithubActivity, { localKey: 'githubId', foreignKey: 'authorGithubId' })
+  declare githubActivity: HasMany<typeof GithubActivity>
 
   @column.dateTime({ autoCreate: true })
   declare createdAt: DateTime

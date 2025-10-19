@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
 import { SlashCommand, StaticCommand } from '../commands.js'
 import GithubActivity from '#models/github_activity'
+import Member from '#models/member';
 
 function getStartDateFromPeriod(period: string): Date {
     if (period == "all") return new Date(0);
@@ -61,37 +62,39 @@ const command: SlashCommand = new StaticCommand(
                     { name: 'This Semester', value: 'this_semester' },
                     { name: 'All', value: 'all' }
                 )
-        )
-        .addStringOption((option) =>
-            option
-                .setName('user')
-                .setDescription('Github User ID')
-                .setRequired(true)
+        ).addUserOption((option) => 
+            option.setName('user').setDescription('User').setRequired(true)
         ),
     async (interaction: ChatInputCommandInteraction) => {
         await interaction.deferReply({ flags: MessageFlags.Ephemeral })
 
         const period = interaction.options.get('time_period')?.value as string
-        const user = interaction.options.get('user')?.value as string;
-        // const member = interaction.guild?.members.cache.get(user?.id || '')
+        const userDiscordId = interaction.options.getUser('user')?.id;
 
-        if (!period || !user) {
+        if (!period || !userDiscordId) {
             await interaction.editReply({ content: 'Invalid command input' })
             return
+        }
+
+        const user = await Member.query()
+            .where('discord_id', userDiscordId)
+            .first();
+
+        if (!user || !user.githubId) {
+            await interaction.editReply({ content: 'User not found in the database or has no GitHub ID.' });
+            return;
         }
 
         const startDate = getStartDateFromPeriod(period)
 
         const activity = await GithubActivity.query()
             .select('type')
-            .where('author_github_id', user)
+            .where('author_github_id', user.githubId)
             .where('date', '>=', startDate)
             .count('github_id as count')
             .groupBy('type')
 
-        // console.log(activity);
-
-        let summary = `📊 **${user}** GitHub activity during \`${period}\`:\n`
+        let summary = `📊 **${user.firstName} ${user.lastName}** GitHub activity during \`${period}\`:\n`
 
         if (activity.length === 0) {
             summary += 'No GitHub activity found.'

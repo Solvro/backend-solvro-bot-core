@@ -9,6 +9,7 @@ import meetingSummaryCommand from '#app/discord/commands/transcriber/meeting_sum
 import monitorAttendanceCommand from '#app/discord/commands/attendance/monitor'
 import discordActivityCommand from '#app/discord/commands/activity/discord_activity'
 import githubActivityCommand from '#app/discord/commands/activity/github_activity'
+import activityReportCommand from '#app/discord/commands/activity/activity_report'
 import stopMonitoringAttendanceCommand from '#app/discord/commands/attendance/stop_monitoring'
 import officeWidgetCommand from '#app/discord/commands/office/office_widget'
 import officeWidgetRemoveCommand from '#app/discord/commands/office/office_widget_remove'
@@ -51,6 +52,7 @@ export const commands = [
   meetingSummaryCommand,
   discordActivityCommand,
   githubActivityCommand,
+  activityReportCommand,
   archive,
   channel_activity,
   calendarAddEvent,

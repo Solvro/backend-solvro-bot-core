@@ -3,9 +3,6 @@ import {
     ActionRowBuilder,
     SlashCommandBuilder,
     StringSelectMenuBuilder,
-    ButtonBuilder,
-    ButtonStyle,
-    EmbedBuilder,
     MessageFlags,
 } from 'discord.js'
 import { SlashCommand, StaticCommand } from '../commands.js'
@@ -13,7 +10,17 @@ import { SlashCommand, StaticCommand } from '../commands.js'
 const command: SlashCommand = new StaticCommand(
     new SlashCommandBuilder()
         .setName('activity_report')
-        .setDescription('Configure and generate an activity report with flexible options')
+        .setDescription('Generate an activity report with selected statistics')
+        .addStringOption((option) =>
+            option
+                .setName('file_type')
+                .setDescription('Export file format')
+                .setRequired(true)
+                .addChoices(
+                    { name: 'CSV', value: 'csv' },
+                    { name: 'Excel', value: 'excel' }
+                )
+        )
         .addStringOption((option) =>
             option
                 .setName('start_date')
@@ -28,6 +35,7 @@ const command: SlashCommand = new StaticCommand(
         ),
     async (interaction: ChatInputCommandInteraction) => {
         try {
+            const fileType = interaction.options.getString('file_type', true)
             const startDateInput = interaction.options.getString('start_date')
             const endDateInput = interaction.options.getString('end_date')
 
@@ -67,39 +75,17 @@ const command: SlashCommand = new StaticCommand(
                 }
             }
 
-            // Create an embed to display the current configuration
-            const embed = new EmbedBuilder()
-                .setColor(0x0099ff)
-                .setTitle('📊 Activity Report Configuration')
-                .setDescription('Configure your activity report using the options below.')
-                .addFields(
-                    { 
-                        name: '📅 Start Date', 
-                        value: startDateInput ? `\`${startDateInput}\`` : '`Not set (all time)`', 
-                        inline: true 
-                    },
-                    { 
-                        name: '📅 End Date', 
-                        value: endDateInput ? `\`${endDateInput}\`` : '`Not set (today)`', 
-                        inline: true 
-                    },
-                    { name: '📈 Stats to Include', value: '`None selected`', inline: false },
-                    { name: '📄 Export Format', value: '`Not selected`', inline: true }
-                )
-                .setFooter({ text: 'Select options below, then click Generate Report' })
-                .setTimestamp()
-
-            // Row 1: Stats selection (multi-select menu)
+            // Stats selection (multi-select menu)
             const statsRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
                 new StringSelectMenuBuilder()
                     .setCustomId('activity_report_stats_select')
-                    .setPlaceholder('Select stats to include')
-                    .setMinValues(0)
+                    .setPlaceholder('Select statistics to include in the report')
+                    .setMinValues(1)
                     .setMaxValues(4)
                     .addOptions([
                         {
                             label: 'Discord Activity',
-                            description: 'Message counts and activity',
+                            description: 'Message counts on Discord',
                             value: 'discord',
                             emoji: '💬',
                         },
@@ -117,65 +103,31 @@ const command: SlashCommand = new StaticCommand(
                         },
                         {
                             label: 'Word Count',
-                            description: 'Transcription word counts',
+                            description: 'Total words said in meetings',
                             value: 'words',
                             emoji: '📝',
                         },
                     ])
             )
 
-            // Row 2: File type selection
-            const fileTypeRow = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
-                new StringSelectMenuBuilder()
-                    .setCustomId('activity_report_file_type_select')
-                    .setPlaceholder('Select export format')
-                    .addOptions([
-                        {
-                            label: 'CSV',
-                            description: 'Comma-separated values (Excel compatible)',
-                            value: 'csv',
-                            emoji: '📄',
-                        },
-                        {
-                            label: 'Excel',
-                            description: 'Microsoft Excel format (.xlsx)',
-                            value: 'excel',
-                            emoji: '📊',
-                        },
-                    ])
-            )
-
-            // Row 3: Submit button
-            const actionRow = new ActionRowBuilder<ButtonBuilder>().addComponents(
-                new ButtonBuilder()
-                    .setCustomId('activity_report_submit')
-                    .setLabel('Generate Report')
-                    .setStyle(ButtonStyle.Success)
-                    .setEmoji('✨'),
-                new ButtonBuilder()
-                    .setCustomId('activity_report_cancel')
-                    .setLabel('Cancel')
-                    .setStyle(ButtonStyle.Danger)
-                    .setEmoji('❌')
-            )
-
             const reply = await interaction.reply({
-                embeds: [embed],
-                components: [statsRow, fileTypeRow, actionRow],
+                content: `📊 **Activity Report Generator**\n\n**Format:** ${fileType.toUpperCase()}\n**Date Range:** ${startDateInput || 'All time'} → ${endDateInput || 'Today'}\n\nPlease select the statistics you want to include:`,
+                components: [statsRow],
                 flags: MessageFlags.Ephemeral,
                 fetchReply: true,
             })
 
-            // Store the dates in the config after the message is created
+            // Store the configuration
             const { getConfig } = await import('../../interactions/shared/activity_report_config.js')
             const config = getConfig(interaction.user.id, reply.id)
             config.startDate = startDateInput || undefined
             config.endDate = endDateInput || undefined
+            config.fileType = fileType
         } catch (err) {
             console.error('Error showing activity report:', err)
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
-                    content: '❌ Failed to open activity report configuration.',
+                    content: '❌ Failed to start activity report generation.',
                     flags: MessageFlags.Ephemeral,
                 })
             }

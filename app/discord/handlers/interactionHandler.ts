@@ -2,7 +2,6 @@ import { Client, Interaction } from 'discord.js';
 import selectMenuHandlers from '../interactions/selectMenus/index.js';
 import { buttonHandlers } from '../interactions/buttons/index.js';
 
-
 export function setupInteractionHandler(client: Client) {
     client.on('interactionCreate', async (interaction: Interaction) => {
         if (interaction.isStringSelectMenu()) {
@@ -18,6 +17,5 @@ export function setupInteractionHandler(client: Client) {
 
             if (handler) await handler(interaction)
         }
-
     })
 }

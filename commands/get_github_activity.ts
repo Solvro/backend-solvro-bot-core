@@ -1,4 +1,4 @@
-import { args, BaseCommand } from '@adonisjs/core/ace'
+import { args, BaseCommand, flags } from '@adonisjs/core/ace'
 import axios from 'axios'
 import GithubActivity from '#models/github_activity'
 import { CommandOptions } from '@adonisjs/core/types/ace'
@@ -7,51 +7,162 @@ import { DateTime } from 'luxon'
 
 export default class GetGithubActivity extends BaseCommand {
     public static commandName = 'github:activity'
-    public static description = 'Sync commits, PRs, and issues for a given GitHub repo URL'
+    public static description = 'Sync commits, PRs, and issues for a given GitHub repo or organization URL'
 
-    @args.string()
+    @args.string({ description: 'GitHub repo or organization URL' })
     declare url: string
+
+    @flags.boolean({ description: 'Exit immediately on rate limit instead of waiting' })
+    declare exitOnRatelimit: boolean
+
+    @flags.string({ description: 'Filter activity from this date onward (ISO format: YYYY-MM-DD)' })
+    declare from?: string
 
     static options: CommandOptions = {
         startApp: true,
     };
 
     public async run() {
-        const repoUrl = this.url;
+        const url = this.url
+        const fromDate = this.from ? DateTime.fromISO(this.from) : null
 
-        const match = repoUrl.match(/github\.com\/([^/]+)\/([^/]+)/)
-        if (!match) {
-            this.logger.error('❌ Invalid GitHub repo URL format.')
+        if (fromDate && !fromDate.isValid) {
+            this.logger.error('❌ Invalid date format. Use YYYY-MM-DD format.')
             return
         }
 
-        const [_, owner, repo] = match
-        const fullRepoName = `${owner}/${repo}`
-        this.logger.info(`🔍 Syncing GitHub activity for: ${fullRepoName}`)
+        if (fromDate) {
+            this.logger.info(`📅 Filtering activity from: ${fromDate.toISODate()}`)
+        }
 
-        let headers;
+        // Check if URL is an organization or a repo
+        const orgMatch = url.match(/github\.com\/([^/]+)\/?$/)
+        const repoMatch = url.match(/github\.com\/([^/]+)\/([^/]+)/)
+
+        if (orgMatch && !repoMatch) {
+            // Organization URL
+            const [_, org] = orgMatch
+            await this.syncOrganization(org, fromDate)
+        } else if (repoMatch) {
+            // Repository URL
+            const [_, owner, repo] = repoMatch
+            await this.syncRepository(owner, repo, fromDate)
+        } else {
+            this.logger.error('❌ Invalid GitHub URL format. Provide either an organization or repository URL.')
+        }
+    }
+
+    private async handleRateLimit(resetTimestamp: number) {
+        const resetTime = DateTime.fromSeconds(resetTimestamp)
+        const waitSeconds = resetTime.diff(DateTime.now(), 'seconds').seconds
+
+        if (this.exitOnRatelimit) {
+            this.logger.error(`❌ Rate limit exceeded. Resets at ${resetTime.toLocaleString(DateTime.DATETIME_FULL)}`)
+            this.logger.error('Exiting due to --exit-on-ratelimit flag.')
+            process.exit(1)
+        }
+
+        this.logger.warning(`⏳ Rate limit exceeded. Waiting ${Math.ceil(waitSeconds)} seconds until ${resetTime.toLocaleString(DateTime.TIME_SIMPLE)}...`)
+        await new Promise(resolve => setTimeout(resolve, (waitSeconds + 5) * 1000))
+        this.logger.info('✅ Rate limit reset. Continuing...')
+    }
+
+    private async makeGithubRequest(url: string, headers: any): Promise<any> {
+        try {
+            const response = await axios.get(url, { headers })
+            return response.data
+        } catch (error: any) {
+            if (error.response?.status === 403 && error.response?.headers['x-ratelimit-remaining'] === '0') {
+                const resetTimestamp = parseInt(error.response.headers['x-ratelimit-reset'])
+                await this.handleRateLimit(resetTimestamp)
+                // Retry the request after waiting
+                const response = await axios.get(url, { headers })
+                return response.data
+            }
+            throw error
+        }
+    }
+
+    private async syncOrganization(org: string, fromDate: DateTime | null) {
+        this.logger.info(`🏢 Syncing GitHub activity for organization: ${org}`)
+
+        const headers = this.getHeaders()
+        
+        try {
+            // Fetch all repositories in the organization
+            let page = 1
+            let allRepos: any[] = []
+            
+            while (true) {
+                const reposUrl = `https://api.github.com/orgs/${org}/repos?per_page=100&page=${page}&sort=updated&direction=desc`
+                const repos = await this.makeGithubRequest(reposUrl, headers)
+                
+                if (!repos.length) break
+
+                // Filter by date if specified
+                const filteredRepos = fromDate 
+                    ? repos.filter((repo: any) => DateTime.fromISO(repo.updated_at) >= fromDate || DateTime.fromISO(repo.pushed_at) >= fromDate)
+                    : repos
+
+                allRepos.push(...filteredRepos)
+                
+                // If we're filtering by date and got repos older than the date, we can stop
+                if (fromDate && filteredRepos.length < repos.length) {
+                    break
+                }
+
+                page++
+            }
+
+            this.logger.info(`📦 Found ${allRepos.length} repositories in ${org}`)
+
+            for (const repo of allRepos) {
+                const repoName = repo.name
+                this.logger.info(`\n${'='.repeat(60)}`)
+                this.logger.info(`📁 Processing: ${org}/${repoName}`)
+                this.logger.info(`${'='.repeat(60)}`)
+                
+                await this.syncRepository(org, repoName, fromDate)
+            }
+
+            this.logger.success(`\n✅ Completed syncing organization: ${org}`)
+        } catch (error: any) {
+            this.logger.error(`❌ Error syncing organization ${org}`)
+            this.logger.error(error?.response?.data || error.message)
+        }
+    }
+
+    private getHeaders() {
         if (env.get('GITHUB_TOKEN')) {
-            headers = {
+            return {
                 Authorization: `Bearer ${env.get('GITHUB_TOKEN')}`,
                 Accept: 'application/vnd.github+json',
             }
-        } else {
-            headers = {
-                Accept: 'application/vnd.github+json',
-            };
         }
+        return {
+            Accept: 'application/vnd.github+json',
+        }
+    }
+
+    private async syncRepository(owner: string, repo: string, fromDate: DateTime | null) {
+        const fullRepoName = `${owner}/${repo}`
+        this.logger.info(`🔍 Syncing GitHub activity for: ${fullRepoName}`)
+
+        const headers = this.getHeaders()
 
         const seenCommitIds = new Set<string>()
         let totalCommits = 0
         let newCommits = 0
         let newPRs = 0
         let newIssues = 0
+        let newReviews = 0
 
-        // 🔹 Fetch all branches
         try {
-            // Get all branches
-            const branchesRes = await axios.get(`https://api.github.com/repos/${owner}/${repo}/branches`, { headers })
-            const branches = branchesRes.data
+            // 🔹 Fetch all branches
+            const branches = await this.makeGithubRequest(
+                `https://api.github.com/repos/${owner}/${repo}/branches`,
+                headers
+            )
             this.logger.info(`🌿 Found ${branches.length} branches`)
 
             for (const branch of branches) {
@@ -61,9 +172,12 @@ export default class GetGithubActivity extends BaseCommand {
                 let page = 1
 
                 while (true) {
-                    const commitsUrl = `https://api.github.com/repos/${owner}/${repo}/commits?sha=${encoded}&per_page=100&page=${page}`
-                    const res = await axios.get(commitsUrl, { headers })
-                    const commits = res.data
+                    let commitsUrl = `https://api.github.com/repos/${owner}/${repo}/commits?sha=${encoded}&per_page=100&page=${page}`
+                    if (fromDate) {
+                        commitsUrl += `&since=${fromDate.toISO()}`
+                    }
+                    
+                    const commits = await this.makeGithubRequest(commitsUrl, headers)
                     if (!commits.length) break
 
                     for (const commit of commits) {
@@ -74,7 +188,7 @@ export default class GetGithubActivity extends BaseCommand {
 
                         const authorId = commit.author?.id?.toString() || 'unknown'
                         const message = commit.commit?.message || 'no message'
-                        const date = commit.commit?.author?.date;
+                        const date = commit.commit?.author?.date
 
                         const exists = await GithubActivity.query()
                             .where('githubId', githubId)
@@ -102,13 +216,19 @@ export default class GetGithubActivity extends BaseCommand {
             }
 
             // Pull Requests
-            const prsRes = await axios.get(`https://api.github.com/repos/${owner}/${repo}/pulls?state=all&per_page=100`, { headers })
-            this.logger.info(`📥 Found ${prsRes.data.length} pull requests`)
-            for (const pr of prsRes.data) {
+            let prUrl = `https://api.github.com/repos/${owner}/${repo}/pulls?state=all&per_page=100&sort=updated&direction=desc`
+            const prs = await this.makeGithubRequest(prUrl, headers)
+            
+            const filteredPRs = fromDate 
+                ? prs.filter((pr: any) => DateTime.fromISO(pr.updated_at) >= fromDate)
+                : prs
+
+            this.logger.info(`📥 Found ${filteredPRs.length} pull requests`)
+            for (const pr of filteredPRs) {
                 const githubId = pr.node_id
                 const authorId = pr.user?.id?.toString() || 'unknown'
                 const message = pr.title
-                const date = pr.created_at;
+                const date = pr.created_at
 
                 const exists = await GithubActivity.query()
                     .where('githubId', githubId)
@@ -132,14 +252,19 @@ export default class GetGithubActivity extends BaseCommand {
             }
 
             // Issues
-            const issuesRes = await axios.get(`https://api.github.com/repos/${owner}/${repo}/issues?state=all&per_page=100`, { headers })
-            const issues = issuesRes.data.filter((i: any) => !i.pull_request)
+            let issuesUrl = `https://api.github.com/repos/${owner}/${repo}/issues?state=all&per_page=100&sort=updated&direction=desc`
+            const allIssues = await this.makeGithubRequest(issuesUrl, headers)
+            
+            const issues = allIssues
+                .filter((i: any) => !i.pull_request)
+                .filter((i: any) => !fromDate || DateTime.fromISO(i.updated_at) >= fromDate)
+
             this.logger.info(`📌 Found ${issues.length} issues`)
             for (const issue of issues) {
                 const githubId = issue.node_id
                 const authorId = issue.user?.id?.toString() || 'unknown'
-                const message = issue.title;
-                const date = issue.created_at;
+                const message = issue.title
+                const date = issue.created_at
 
                 const exists = await GithubActivity.query()
                     .where('githubId', githubId)
@@ -163,20 +288,24 @@ export default class GetGithubActivity extends BaseCommand {
             }
 
             // 🔎 Reviews for each PR
-            let newReviews = 0
-            for (const pr of prsRes.data) {
+            for (const pr of filteredPRs) {
                 const prNumber = pr.number
                 try {
-                    const reviewsRes = await axios.get(
+                    const reviews = await this.makeGithubRequest(
                         `https://api.github.com/repos/${owner}/${repo}/pulls/${prNumber}/reviews`,
-                        { headers }
+                        headers
                     )
 
-                    for (const review of reviewsRes.data) {
+                    for (const review of reviews) {
                         const githubId = review.node_id
                         const authorId = review.user?.id?.toString() || 'unknown'
                         const message = `Review state: ${review.state}`
-                        const date = review.submitted_at;
+                        const date = review.submitted_at
+
+                        // Skip if date filter is set and review is older
+                        if (fromDate && DateTime.fromISO(date) < fromDate) {
+                            continue
+                        }
 
                         const exists = await GithubActivity.query()
                             .where('githubId', githubId)
@@ -198,14 +327,14 @@ export default class GetGithubActivity extends BaseCommand {
                             this.logger.debug(`⏩ Review already exists: ${githubId}`)
                         }
                     }
-                } catch (reviewError) {
+                } catch (reviewError: any) {
                     this.logger.warning(`⚠️ Skipped reviews for PR #${prNumber}: ${reviewError.message}`)
                 }
             }
 
-            this.logger.success(`✅ Done: ${newCommits} new commits, ${newPRs} PRs, ${newIssues} issues saved.`)
+            this.logger.success(`✅ Done: ${newCommits} new commits, ${newPRs} PRs, ${newIssues} issues, ${newReviews} reviews saved.`)
             this.logger.info(`🔎 Processed ${totalCommits} commits total across branches.`)
-        } catch (error) {
+        } catch (error: any) {
             this.logger.error(`❌ Error syncing ${fullRepoName}`)
             this.logger.error(error?.response?.data || error.message)
         }

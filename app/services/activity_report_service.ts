@@ -3,8 +3,10 @@ import DiscordActivity from '#models/discord_activity'
 import GithubActivity from '#models/github_activity'
 import TranscriptionPart from '#models/transcription_parts'
 import Meeting, { AttendanceStatus } from '#models/meetings'
-import { AttachmentBuilder } from 'discord.js'
+import { AttachmentBuilder, Guild } from 'discord.js'
 import logger from '@adonisjs/core/services/logger'
+import { client } from '#app/discord/index'
+import env from '#start/env'
 
 interface ReportConfig {
   fileType: 'csv' | 'excel'
@@ -33,6 +35,23 @@ interface MemberStats {
   attendancePercentage?: number
   wordCount?: number
 }
+
+type UserInfo = {
+    discordId: string;
+    globalName: string;
+    nickname: string
+}
+
+function getUserNicknameFromId(id: string, guild: Guild): UserInfo | undefined {
+    const member = guild.members.cache.get(id);
+    const user = member?.user;
+    return {
+        discordId: id,
+        globalName: user?.globalName ?? '',
+        nickname: member?.displayName ?? '',
+    };
+}
+
 
 export class ActivityReportService {
   /**
@@ -63,9 +82,13 @@ export class ActivityReportService {
     // Collect stats for each member
     const memberStats: MemberStats[] = []
 
+    const guild = await client.guilds.fetch(env.get('DISCORD_GUILD_ID'))
+
     for (const member of members) {
+      const userInfo = getUserNicknameFromId(member.discordId, guild);
+
       const stats: MemberStats = {
-        firstName: member.firstName || 'N/A',
+        firstName: member.firstName || userInfo?.nickname || userInfo?.globalName || 'N/A',
         lastName: member.lastName || 'N/A',
         indexNumber: member.indexNumber || 'N/A',
         section: member.currentSection || 'N/A',

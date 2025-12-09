@@ -18,13 +18,15 @@ import showAttendanceCommand from '#app/discord/commands/attendance/show_attenda
 import createMeeting from '#app/discord/commands/meeting/create_meeting'
 import archive from '#app/discord/commands/archive_channel/archive'
 import channel_activity from '#app/discord/commands/activity/channel_activity'
-import calendarAddEvent from '#app/discord/commands/calendar/add_event'
-import calendarUpcomingEvent from '#app/discord/commands/calendar/upcoming_event'
+import calendarNew from '#app/discord/commands/calendar/new'
 import transcription from '#app/discord/commands/transcriber/transcription'
-import weeklyStart from '#app/discord/commands/weekly/weekly_start';
-import weeklyStop from '#app/discord/commands/weekly/weekly_stop';
-import uploadStatus from '#app/discord/commands/admin/upload_status';
-import retryUpload from '#app/discord/commands/admin/retry_upload';
+import weeklyStart from '#app/discord/commands/weekly/weekly_start'
+import weeklyStop from '#app/discord/commands/weekly/weekly_stop'
+import uploadStatus from '#app/discord/commands/admin/upload_status'
+import retryUpload from '#app/discord/commands/admin/retry_upload'
+import officeAvailability from '#app/discord/commands/calendar/office_availability'
+import conferenceRoomAvailability from '#app/discord/commands/calendar/conference_room_availability'
+import calendarLink from '#app/discord/commands/calendar/link'
 
 import { SlashCommand } from './commands/commands.js'
 import { ready } from './handlers/clientReadyHandler.js'
@@ -36,6 +38,7 @@ import { setupInteractionHandler } from '#app/discord/handlers/interactionHandle
 import { commandsHandler } from '#app/discord/handlers/commandHandler'
 import { monitorVoiceState } from '#app/discord/handlers/voiceStateHandler'
 import { messagesHandler } from '#app/discord/handlers/messagesHandler'
+import { calendar } from 'googleapis/build/src/apis/calendar/index.js'
 
 export const commands = [
   userInfoCommand,
@@ -55,13 +58,15 @@ export const commands = [
   activityReportCommand,
   archive,
   channel_activity,
-  calendarAddEvent,
-  calendarUpcomingEvent,
+  calendarNew,
   transcription,
   weeklyStart,
   weeklyStop,
   uploadStatus,
   retryUpload,
+  officeAvailability,
+  conferenceRoomAvailability,
+  calendarLink,
 ]
 
 export class DiscordClient extends Client {

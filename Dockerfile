@@ -21,14 +21,14 @@ RUN apk add --no-cache \
 # All deps stage
 FROM base AS deps
 WORKDIR /app
-ADD package.json pnpm-lock.yaml ./
+ADD package.json pnpm-lock.yaml .npmrc* ./
 RUN pnpm install --frozen-lockfile
 
 # Production only deps stage
 FROM base AS production-deps
 WORKDIR /app
-ADD package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile --prod
+ADD package.json pnpm-lock.yaml .npmrc* ./
+RUN pnpm install --frozen-lockfile --prod --ignore-scripts=false
 
 # Build stage
 FROM base AS build

@@ -4,13 +4,13 @@ import {
   ChatInputCommandInteraction,
   AttachmentBuilder,
 } from 'discord.js'
-import { StaticCommand } from '../commands.js'
+import { StaticCommand } from '../../commands.js'
 import env from '#start/env'
 
 const command: StaticCommand = new StaticCommand(
   new SlashCommandBuilder()
-    .setName('conference_room_availability')
-    .setDescription('Show conference room availability calendar for a selected week')
+    .setName('printer_availability')
+    .setDescription('Show printer availability calendar for a selected week')
     .addIntegerOption((option) =>
       option
         .setName('week')
@@ -82,35 +82,27 @@ const command: StaticCommand = new StaticCommand(
         endDate
       )
 
-      const conferenceRoomEvents = events.filter(
-        (event) =>
-          event.location?.toLowerCase().includes('konferencyjna') ||
-          event.location?.toLowerCase().includes('conference')
+      const printerEvents = events.filter((event) =>
+        event.location?.toLowerCase().includes('drukarka')
       )
 
-      const imageBuffer = googleCalendarService.generateCalendarImage(
-        startDate,
-        conferenceRoomEvents,
-        {
-          workStartHour: startHour,
-          workEndHour: endHour,
-          intervalMinutes: interval,
-        }
-      )
+      const imageBuffer = googleCalendarService.generateCalendarImage(startDate, printerEvents, {
+        workStartHour: startHour,
+        workEndHour: endHour,
+        intervalMinutes: interval,
+      })
 
       const weekLabel =
         weekOffset === 0 ? 'This Week' : weekOffset === 1 ? 'Next Week' : `Week +${weekOffset}`
 
-      const attachment = new AttachmentBuilder(imageBuffer, {
-        name: 'conference-room-availability.png',
-      })
+      const attachment = new AttachmentBuilder(imageBuffer, { name: 'printer-availability.png' })
 
       await interaction.editReply({
-        content: `📅 **Conference Room Availability - ${weekLabel}**\n⏰ Hours: ${startHour}:00 - ${endHour}:00 (${interval}min intervals)`,
+        content: `📅 **Printer Availability - ${weekLabel}**\n⏰ Hours: ${startHour}:00 - ${endHour}:00 (${interval}min intervals)`,
         files: [attachment],
       })
     } catch (error: any) {
-      console.error('Error checking conference room availability:', error)
+      console.error('Error checking printer availability:', error)
 
       if (error.message?.includes('invalid_grant') || error.message?.includes('unauthorized')) {
         await interaction.editReply({
@@ -119,7 +111,7 @@ const command: StaticCommand = new StaticCommand(
         })
       } else {
         await interaction.editReply({
-          content: `❌ Failed to check conference room availability: ${error.message}`,
+          content: `❌ Failed to check printer availability: ${error.message}`,
         })
       }
     }

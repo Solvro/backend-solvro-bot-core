@@ -34,7 +34,6 @@ const command: StaticCommand = new StaticCommand(
         .addChoices(
           { name: 'Discord', value: 'discord' },
           { name: 'Office', value: 'office' },
-          { name: 'Conference room', value: 'conference_room' },
           { name: 'Other', value: 'other' }
         )
     )
@@ -95,9 +94,6 @@ const command: StaticCommand = new StaticCommand(
         case 'office':
           locationText = 'Biuro'
           break
-        case 'conference_room':
-          locationText = 'Sala konferencyjna'
-          break
         case 'other':
           locationText = ''
           break
@@ -125,7 +121,7 @@ const command: StaticCommand = new StaticCommand(
         endDate = `${nextDay}.${nextMonth}.${nextYear}`
       }
 
-      if (location === 'office' || location === 'conference_room') {
+      if (location === 'office') {
         const eventStartDateTime = googleCalendarService.formatToRFC3339WithWarsawTime(
           date,
           startTime
@@ -165,9 +161,8 @@ const command: StaticCommand = new StaticCommand(
         })
 
         if (hasConflict) {
-          const locationName = location === 'office' ? 'Office' : 'Conference room'
           await interaction.editReply({
-            content: `❌ **${locationName} is already booked during this time!**\n\nPlease choose a different time slot or check availability with \`/office_availability\` or \`/conference_room_availability\`.`,
+            content: `❌ **Office is already booked during this time!**\n\nPlease choose a different time slot or check availability with \`/office_availability\`.`,
           })
           return
         }

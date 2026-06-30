@@ -5,7 +5,6 @@ on:
     branches: ["*"]
   push:
     branches: ["main"]
-
 jobs:
   migration-check:
     runs-on: ubuntu-latest
@@ -56,6 +55,8 @@ jobs:
 
       - name: Run AdonisJS migrations
         run: node ace migration:run
+        env:
+          GITHUB_WEBHOOK_SECRET: "placeholder-value-for-CI"
 
       - name: Rollback and rerun AdonisJS migrations
         run: node ace migration:refresh

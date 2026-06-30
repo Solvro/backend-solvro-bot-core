@@ -55,8 +55,9 @@ Ensure Docker Engine is running, then start all services:
 docker compose up -d
 ```
 
-> [!NOTE] 
+> [!NOTE]
 > To shut down all services, run:
+>
 > ```bash
 > docker compose down
 > ```
@@ -69,8 +70,9 @@ Run all pending database migrations:
 node ace migration:run
 ```
 
-> [!NOTE] 
+> [!NOTE]
 > Check migrations status using:
+>
 > ```bash
 > node ace migration:status
 > ```
@@ -148,9 +150,9 @@ Deploy registered commands to the Discord REST API:
 ```bash
 node ace discord:deploy
 ```
+
 > [!IMPORTANT]
-> Use this command to deploy changes to the Discord API whenever you modify the command signatures (*SlashCommandBuilder*) in the *app/discord/commands* directory.
->
+> Use this command to deploy changes to the Discord API whenever you modify the command signatures (_SlashCommandBuilder_) in the _app/discord/commands_ directory.
 
 ---
 
@@ -168,7 +170,6 @@ node ace discord:deploy
 [tutorials](https://adocasts.com)
 
 Don't forget to check out [Solvro docs](https://docs.solvro.pl/)
-
 
 <div align="center">
   <sub>Built with 💙 by <a href="https://solvro.pl">Solvro</a>

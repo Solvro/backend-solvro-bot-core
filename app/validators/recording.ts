@@ -1,4 +1,4 @@
-import vine from '@vinejs/vine'
+import vine from "@vinejs/vine";
 
 // TODO: change this
 export const updateMeetingValidator = vine.compile(
@@ -21,7 +21,7 @@ export const updateMeetingValidator = vine.compile(
         compression_ratio: vine.number(),
         no_speech_prob: vine.number(),
         userId: vine.string(),
-      })
+      }),
     ),
-  })
-)
+  }),
+);

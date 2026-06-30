@@ -1,28 +1,29 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { DateTime } from "luxon";
+
+import { BaseModel, column } from "@adonisjs/lucid/orm";
 
 export default class TranscriptionPart extends BaseModel {
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column()
-  declare discordUserId: string
+  declare discordUserId: string;
 
   @column()
-  declare startTime: number
+  declare startTime: number;
 
   @column()
-  declare meetingId: number
+  declare meetingId: number;
 
   @column()
-  declare text: string
+  declare text: string;
 
   @column()
-  declare duration: number
+  declare duration: number;
 
   @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  declare createdAt: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  declare updatedAt: DateTime;
 }

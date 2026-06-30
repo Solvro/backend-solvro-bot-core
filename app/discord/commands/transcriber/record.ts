@@ -1,75 +1,81 @@
-import { SlashCommand, StaticCommand } from '#app/discord/commands/commands'
-import { client } from '#app/discord/index'
-import Meeting, { RecordingStatus } from '#models/meetings'
-import env from '#start/env'
-import { ChannelType, ChatInputCommandInteraction, MessageFlags, SlashCommandBuilder } from 'discord.js'
+import { ChannelType, MessageFlags, SlashCommandBuilder } from "discord.js";
+import type { ChatInputCommandInteraction } from "discord.js";
 
-const COMMAND_NAME = 'record'
-const OPTION_CHANNEL = 'channel'
-const OPTION_MEETING_NAME = 'meeting_name'
+import { StaticCommand } from "#app/discord/commands/commands";
+import type { SlashCommand } from "#app/discord/commands/commands";
+import { client } from "#app/discord/index";
+import Meeting, { RecordingStatus } from "#models/meetings";
+import env from "#start/env";
+
+const COMMAND_NAME = "record";
+const OPTION_CHANNEL = "channel";
+const OPTION_MEETING_NAME = "meeting_name";
 const command: SlashCommand = new StaticCommand(
   new SlashCommandBuilder()
     .setName(COMMAND_NAME)
-    .setDescription('Record audio from a voice channel')
+    .setDescription("Record audio from a voice channel")
     .addChannelOption((option) =>
       option
         .setName(OPTION_CHANNEL)
-        .setDescription('The ID of the voice channel to join')
+        .setDescription("The ID of the voice channel to join")
         .setRequired(true)
-        .addChannelTypes(ChannelType.GuildVoice)
+        .addChannelTypes(ChannelType.GuildVoice),
     )
     .addStringOption((option) =>
-      option.setName(OPTION_MEETING_NAME).setDescription('Meeting name').setRequired(true)
+      option
+        .setName(OPTION_MEETING_NAME)
+        .setDescription("Meeting name")
+        .setRequired(true),
     ),
   async (interaction: ChatInputCommandInteraction) => {
-    const optCh = interaction.options.get(OPTION_CHANNEL, true)
-    if (!optCh.channel) {
-      interaction.reply({
-        content: 'Invalid channel option',
+    const optCh = interaction.options.get(OPTION_CHANNEL, true);
+    if (optCh.channel === null || optCh.channel === undefined) {
+      await interaction.reply({
+        content: "Invalid channel option",
         flags: MessageFlags.Ephemeral,
-      })
-      return
+      });
+      return;
     }
-    const optMeetingName = interaction.options.get(OPTION_MEETING_NAME, true)
-    const channelId = optCh.channel.id
-    const guild = await client.guilds.fetch(env.get('DISCORD_GUILD_ID'))
-    const channel = await guild.channels.fetch(channelId)
+    const optMeetingName = interaction.options.get(OPTION_MEETING_NAME, true);
+    const channelId = optCh.channel.id;
+    const guild = await client.guilds.fetch(env.get("DISCORD_GUILD_ID"));
+    const channel = await guild.channels.fetch(channelId);
 
     const meeting = await Meeting.create({
       name: String(optMeetingName.value),
       discordChannelId: channelId,
       recordingStatus: RecordingStatus.PENDING,
-    })
+    });
 
-    const response = await fetch(`${env.get('TRANSCRIBER_URL')}/start`, {
-      method: 'POST',
+    const response = await fetch(`${env.get("TRANSCRIBER_URL")}/start`, {
+      method: "POST",
       body: JSON.stringify({
         channelId: String(channelId),
         meetingId: String(meeting.id),
-        meetingName: optMeetingName?.value ?? 'default',
+        meetingName: optMeetingName.value ?? "default",
       }),
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-    })
+    });
 
     if (!response.ok) {
-      meeting.recordingStatus = RecordingStatus.ERROR
-      await meeting.save()
-      interaction.reply({
-        content: 'Failed to start recording',
+      meeting.recordingStatus = RecordingStatus.ERROR;
+      await meeting.save();
+      await interaction.reply({
+        content: "Failed to start recording",
         flags: MessageFlags.Ephemeral,
-      })
-      return
+      });
+      return;
     }
 
-    meeting.recordingStatus = RecordingStatus.RECORDING
-    await meeting.save()
+    meeting.recordingStatus = RecordingStatus.RECORDING;
+    await meeting.save();
 
-    interaction.reply({
-      content: `Recording audio from channel: *${channel?.name}*`
-    })
-  }
-)
+    await interaction.reply({
+      content: `Recording audio from channel: *${channel?.name}*`,
+    });
+  },
+);
 
-export default command
+export default command;

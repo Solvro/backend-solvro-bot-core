@@ -1,6 +1,6 @@
 allowBuilds:
-  '@swc/core': false
-  canvas: false
+  "@swc/core": true
+  canvas: true
 onlyBuiltDependencies:
-  - '@swc/core'
+  - "@swc/core"
   - canvas

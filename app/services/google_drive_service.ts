@@ -1,318 +1,362 @@
-import { google } from 'googleapis'
-import env from '#start/env'
-import logger from '@adonisjs/core/services/logger'
-import { Readable } from 'stream'
-import Meeting from '#models/meetings'
-import { client } from '#app/discord/index'
-import { DateTime } from 'luxon'
+import { google } from "googleapis";
+import { DateTime } from "luxon";
+import { Readable } from "node:stream";
+
+import logger from "@adonisjs/core/services/logger";
+
+import { client } from "#app/discord/index";
+import type Meeting from "#models/meetings";
+import env from "#start/env";
 
 export class GoogleDriveService {
-    private drive
-    private auth
+  private drive;
+  private auth;
 
-    constructor() {
-        this.auth = new google.auth.GoogleAuth({
-            scopes: ['https://www.googleapis.com/auth/drive.file', 'https://www.googleapis.com/auth/drive.readonly'],
-            keyFile: env.get('GOOGLE_CREDENTIALS_PATH'),
-        })
+  constructor() {
+    this.auth = new google.auth.GoogleAuth({
+      scopes: [
+        "https://www.googleapis.com/auth/drive.file",
+        "https://www.googleapis.com/auth/drive.readonly",
+      ],
+      keyFile: env.get("GOOGLE_CREDENTIALS_PATH"),
+    });
 
-        this.drive = google.drive({ version: 'v3', auth: this.auth })
+    this.drive = google.drive({ version: "v3", auth: this.auth });
+  }
+
+  /**
+   * Upload a single file to Google Drive
+   */
+  private async uploadFile(
+    name: string,
+    content: string,
+    mimeType: string,
+    folderId: string,
+  ): Promise<string> {
+    try {
+      const fileMetadata = {
+        name,
+        parents: [folderId],
+      };
+
+      const media = {
+        mimeType,
+        body: Readable.from([content]),
+      };
+
+      const response = await this.drive.files.create({
+        requestBody: fileMetadata,
+        media,
+        fields: "id",
+        supportsAllDrives: true,
+      });
+
+      const fileId = response.data.id;
+      if (fileId === undefined || fileId === null) {
+        throw new Error("Failed to get file ID from response");
+      }
+
+      logger.info(`Uploaded file to Google Drive: ${name} (ID: ${fileId})`);
+      return fileId;
+    } catch (error) {
+      logger.error(`Failed to upload file to Google Drive: ${name}`, error);
+      throw error;
+    }
+  }
+
+  private getFolderNameForMeeting(
+    meetingName: string,
+    meetingId: number,
+  ): string {
+    const sanitizedMeetingName = meetingName.replace(/[<>:"/\\|?*]/g, "_");
+    return `${sanitizedMeetingName}_${meetingId}`;
+  }
+
+  /**
+   * Get or create meeting folder
+   */
+  private async getOrCreateMeetingFolder(
+    meetingName: string,
+    meetingId: number,
+  ): Promise<string> {
+    const mainFolderId = env.get("GOOGLE_DRIVE_FOLDER_ID");
+    if (mainFolderId === undefined) {
+      throw new Error(
+        "GOOGLE_DRIVE_FOLDER_ID environment variable is required",
+      );
     }
 
-    /**
-     * Upload a single file to Google Drive
-     */
-    private async uploadFile(name: string, content: string, mimeType: string, folderId: string): Promise<string> {
-        try {
-            const fileMetadata = {
-                name,
-                parents: [folderId],
-            }
+    // Create unique folder name
+    const folderName = this.getFolderNameForMeeting(meetingName, meetingId);
 
-            const media = {
-                mimeType,
-                body: Readable.from([content]),
-            }
+    // Check if folder already exists
+    const query = `name='${folderName}' and mimeType='application/vnd.google-apps.folder' and '${mainFolderId}' in parents and trashed=false`;
 
-            const response = await this.drive.files.create({
-                requestBody: fileMetadata,
-                media: media,
-                fields: 'id',
-                supportsAllDrives: true,
-            })
+    const response = await this.drive.files.list({
+      q: query,
+      fields: "files(id, name)",
+      spaces: "drive",
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
+      corpora: "allDrives",
+    });
 
-            const fileId = response.data.id
-            if (!fileId) {
-                throw new Error('Failed to get file ID from response')
-            }
-
-            logger.info(`Uploaded file to Google Drive: ${name} (ID: ${fileId})`)
-            return fileId
-        } catch (error) {
-            logger.error(`Failed to upload file to Google Drive: ${name}`, error)
-            throw error
-        }
+    if (response.data.files !== undefined && response.data.files.length > 0) {
+      const folderId = response.data.files[0].id;
+      if (folderId === undefined || folderId === null) {
+        throw new Error("Failed to get folder ID");
+      }
+      logger.info(
+        `Using existing Google Drive folder: ${folderName} (ID: ${folderId})`,
+      );
+      return folderId;
     }
 
-    private getFolderNameForMeeting(meetingName: string, meetingId: number): string {
-        const sanitizedMeetingName = meetingName.replace(/[<>:"/\\|?*]/g, '_')
-        return `${sanitizedMeetingName}_${meetingId}`
+    // Create new folder
+    logger.info(`No existing folder found, creating new folder: ${folderName}`);
+    const folderResponse = await this.drive.files.create({
+      requestBody: {
+        name: folderName,
+        mimeType: "application/vnd.google-apps.folder",
+        parents: [mainFolderId],
+      },
+      fields: "id",
+      supportsAllDrives: true,
+    });
+
+    const folderId = folderResponse.data.id;
+    if (folderId === undefined || folderId === null) {
+      throw new Error("Failed to get folder ID");
+    }
+    logger.info(`Created Google Drive folder: ${folderName} (ID: ${folderId})`);
+    return folderId;
+  }
+
+  /**
+   * Generate transcription file content
+   */
+  private async generateTranscriptionFile(
+    meeting: Meeting,
+  ): Promise<string | null> {
+    const chunks = await meeting.related("chunks").query().orderBy("startTime");
+
+    if (chunks.length === 0) {
+      return null;
     }
 
-    /**
-     * Get or create meeting folder
-     */
-    private async getOrCreateMeetingFolder(meetingName: string, meetingId: number): Promise<string> {
-        const mainFolderId = env.get('GOOGLE_DRIVE_FOLDER_ID')
-        if (!mainFolderId) {
-            throw new Error('GOOGLE_DRIVE_FOLDER_ID environment variable is required')
-        }
+    const guild = await client.guilds.fetch(env.get("DISCORD_GUILD_ID"));
+    await guild.members.fetch();
 
-        // Create unique folder name
-        const folderName = this.getFolderNameForMeeting(meetingName, meetingId)
-
-        // Check if folder already exists
-        const query = `name='${folderName}' and mimeType='application/vnd.google-apps.folder' and '${mainFolderId}' in parents and trashed=false`
-
-        const response = await this.drive.files.list({
-            q: query,
-            fields: 'files(id, name)',
-            spaces: 'drive',
-            supportsAllDrives: true,
-            includeItemsFromAllDrives: true,
-            corpora: 'allDrives',
-        })
-
-        if (response.data.files && response.data.files.length > 0) {
-            const folderId = response.data.files[0].id!
-            logger.info(`Using existing Google Drive folder: ${folderName} (ID: ${folderId})`)
-            return folderId
-        }
-
-        // Create new folder
-        logger.info(`No existing folder found, creating new folder: ${folderName}`)
-        const folderResponse = await this.drive.files.create({
-            requestBody: {
-                name: folderName,
-                mimeType: 'application/vnd.google-apps.folder',
-                parents: [mainFolderId],
-            },
-            fields: 'id',
-            supportsAllDrives: true,
-        })
-
-        const folderId = folderResponse.data.id!
-        logger.info(`Created Google Drive folder: ${folderName} (ID: ${folderId})`)
-        return folderId
+    const userNames: Record<string, string> = {};
+    for (const chunk of chunks) {
+      if (!userNames[chunk.discordUserId]) {
+        const member = guild.members.cache.get(chunk.discordUserId);
+        userNames[chunk.discordUserId] =
+          member !== undefined
+            ? member.displayName
+            : `User#${chunk.discordUserId}`;
+      }
     }
 
-    /**
-     * Generate transcription file content
-     */
-    private async generateTranscriptionFile(meeting: Meeting): Promise<string | null> {
-        const chunks = await meeting.related('chunks').query().orderBy('startTime')
+    const formattedText = chunks
+      .map((chunk) => {
+        const minutes = Math.floor(chunk.startTime / 60);
+        const seconds = Math.floor(chunk.startTime % 60);
+        const timestamp = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+        const userName = userNames[chunk.discordUserId];
+        return `[${timestamp}] ${userName}: ${chunk.text}`;
+      })
+      .join("\n");
 
-        if (chunks.length === 0) {
-            return null
-        }
+    return formattedText;
+  }
 
-        const guild = await client.guilds.fetch(env.get('DISCORD_GUILD_ID'))
-        await guild.members.fetch()
+  /**
+   * Generate attendance file content
+   */
+  private async generateAttendanceFile(
+    meeting: Meeting,
+  ): Promise<string | null> {
+    await meeting.load("members");
+    const uniqueDiscordIds = [
+      ...new Set(meeting.members.map((m) => m.discordId)),
+    ];
 
-        const userNames: Record<string, string> = {}
-        for (const chunk of chunks) {
-            if (!userNames[chunk.discordUserId]) {
-                const member = guild.members.cache.get(chunk.discordUserId)
-                userNames[chunk.discordUserId] = member ? member.displayName : `User#${chunk.discordUserId}`
-            }
-        }
-
-        const formattedText = chunks
-            .map((chunk) => {
-                const minutes = Math.floor(chunk.startTime / 60)
-                const seconds = Math.floor(chunk.startTime % 60)
-                const timestamp = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-                const userName = userNames[chunk.discordUserId]
-                return `[${timestamp}] ${userName}: ${chunk.text}`
-            })
-            .join('\n')
-
-        return formattedText
+    if (uniqueDiscordIds.length === 0) {
+      return null;
     }
 
-    /**
-     * Generate attendance file content
-     */
-    private async generateAttendanceFile(meeting: Meeting): Promise<string | null> {
-        await meeting.load('members')
-        const uniqueDiscordIds = [...new Set(meeting.members.map((m) => m.discordId))]
+    const guild = await client.guilds.fetch(env.get("DISCORD_GUILD_ID"));
+    await guild.members.fetch();
 
-        if (uniqueDiscordIds.length === 0) {
-            return null
-        }
+    const userInfo = uniqueDiscordIds.map((id) => {
+      const member = guild.members.cache.get(id);
+      const user = member?.user;
+      return {
+        discordId: id,
+        globalName: user?.globalName ?? "",
+        nickname: member?.displayName ?? "",
+      };
+    });
 
-        const guild = await client.guilds.fetch(env.get('DISCORD_GUILD_ID'))
-        await guild.members.fetch()
+    const header = "discordId,globalName,serverNickname";
+    const rows = userInfo.map((row) =>
+      [row.discordId, row.globalName, row.nickname]
+        .map((v) => `"${v}"`)
+        .join(","),
+    );
+    return [header, ...rows].join("\n");
+  }
 
-        const userInfo = uniqueDiscordIds.map(id => {
-            const member = guild.members.cache.get(id)
-            const user = member?.user
-            return {
-                discordId: id,
-                globalName: user?.globalName ?? '',
-                nickname: member?.displayName ?? '',
-            }
-        })
+  /**
+   * Upload or update a file in Google Drive meeting folder
+   */
+  private async uploadOrUpdateFile(
+    name: string,
+    content: string,
+    mimeType: string,
+    folderId: string,
+  ): Promise<string> {
+    // Check if file exists
+    const query = `name='${name}' and '${folderId}' in parents and trashed=false`;
+    const response = await this.drive.files.list({
+      q: query,
+      fields: "files(id, name)",
+      supportsAllDrives: true,
+      includeItemsFromAllDrives: true,
+      corpora: "allDrives",
+    });
 
-        const header = 'discordId,globalName,serverNickname'
-        const rows = userInfo.map(row =>
-            [row.discordId, row.globalName, row.nickname].map(v => `"${v}"`).join(',')
-        )
-        return [header, ...rows].join('\n')
+    const file = response.data.files?.[0];
+    if (file?.id !== undefined && file.id !== null) {
+      // Update existing file
+      await this.drive.files.update({
+        fileId: file.id,
+        media: {
+          mimeType,
+          body: Readable.from([content]),
+        },
+        supportsAllDrives: true,
+      });
+      logger.info(`Updated file in Google Drive: ${name} (ID: ${file.id})`);
+      return file.id;
+    } else {
+      // Create new file
+      logger.info(`Uploading new file to Google Drive: ${name}`);
+      return await this.uploadFile(name, content, mimeType, folderId);
+    }
+  }
+
+  /**
+   * Upload all meeting files to Google Drive
+   */
+  async uploadAllMeetingFiles(
+    meeting: Meeting,
+    summary: string,
+  ): Promise<void> {
+    try {
+      const folderId = await this.getOrCreateMeetingFolder(
+        meeting.name ?? `Meeting ${meeting.id}`,
+        meeting.id,
+      );
+
+      // Upload transcription
+      const transcriptionContent =
+        await this.generateTranscriptionFile(meeting);
+      if (transcriptionContent !== null) {
+        await this.uploadOrUpdateFile(
+          `transcription_meeting_${meeting.id}.txt`,
+          transcriptionContent,
+          "text/plain",
+          folderId,
+        );
+      }
+
+      // Upload summary
+      await this.uploadOrUpdateFile(
+        `summary_meeting_${meeting.id}.md`,
+        summary,
+        "text/markdown",
+        folderId,
+      );
+
+      // Upload attendance
+      const attendanceContent = await this.generateAttendanceFile(meeting);
+      if (attendanceContent !== null) {
+        await this.uploadOrUpdateFile(
+          `attendance_meeting_${meeting.id}.csv`,
+          attendanceContent,
+          "text/csv",
+          folderId,
+        );
+      }
+
+      // Update meeting record
+      meeting.googleDriveFolderId = folderId;
+      meeting.filesUploadedToDrive = true;
+      meeting.driveUploadCompletedAt = DateTime.now();
+      await meeting.save();
+
+      logger.info(`Successfully uploaded all files for meeting ${meeting.id}`);
+    } catch (error) {
+      logger.error(`Failed to upload files for meeting ${meeting.id}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Check what files exist in a meeting folder
+   */
+  async getUploadedFiles(meeting: Meeting): Promise<string[]> {
+    if (meeting.googleDriveFolderId === null) {
+      return [];
     }
 
-    /**
-     * Upload or update a file in Google Drive meeting folder
-     */
-    private async uploadOrUpdateFile(
-        name: string,
-        content: string,
-        mimeType: string,
-        folderId: string
-    ): Promise<string> {
-        // Check if file exists
-        const query = `name='${name}' and '${folderId}' in parents and trashed=false`
-        const response = await this.drive.files.list({
-            q: query,
-            fields: 'files(id, name)',
-            supportsAllDrives: true,
-            includeItemsFromAllDrives: true,
-            corpora: 'allDrives',
-        })
+    try {
+      const response = await this.drive.files.list({
+        q: `'${meeting.googleDriveFolderId}' in parents and trashed=false`,
+        fields: "files(name)",
+        supportsAllDrives: true,
+        includeItemsFromAllDrives: true,
+        corpora: "allDrives",
+      });
 
-        const file = response.data.files?.[0]
-        if (file && file.id) {
-            // Update existing file
-            await this.drive.files.update({
-                fileId: file.id,
-                media: {
-                    mimeType,
-                    body: Readable.from([content]),
-                },
-                supportsAllDrives: true,
-            })
-            logger.info(`Updated file in Google Drive: ${name} (ID: ${file.id})`)
-            return file.id
-        } else {
-            // Create new file
-            logger.info(`Uploading new file to Google Drive: ${name}`)
-            return await this.uploadFile(name, content, mimeType, folderId)
-        }
+      return response.data.files?.map((file) => file.name ?? "") ?? [];
+    } catch (error) {
+      logger.error(
+        `Failed to get uploaded files for meeting ${meeting.id}:`,
+        error,
+      );
+      return [];
     }
-    
-    /**
-     * Upload all meeting files to Google Drive
-     */
-    async uploadAllMeetingFiles(meeting: Meeting, summary: string): Promise<void> {
-        try {
-            const folderId = await this.getOrCreateMeetingFolder(
-                meeting.name || `Meeting ${meeting.id}`,
-                meeting.id
-            )
+  }
 
-            // Upload transcription
-            const transcriptionContent = await this.generateTranscriptionFile(meeting)
-            if (transcriptionContent) {
-                await this.uploadOrUpdateFile(
-                    `transcription_meeting_${meeting.id}.txt`,
-                    transcriptionContent,
-                    'text/plain',
-                    folderId
-                )
-            }
+  /**
+   * Check if the service is properly configured
+   */
+  async isConfigured(): Promise<boolean> {
+    try {
+      const credentialsPath = env.get("GOOGLE_CREDENTIALS_PATH");
+      const folderId = env.get("GOOGLE_DRIVE_FOLDER_ID");
 
-            // Upload summary
-            await this.uploadOrUpdateFile(
-                `summary_meeting_${meeting.id}.md`,
-                summary,
-                'text/markdown',
-                folderId
-            )
+      if (credentialsPath === undefined || folderId === undefined) {
+        logger.warn("Google Drive service is not fully configured");
+        return false;
+      }
 
-            // Upload attendance
-            const attendanceContent = await this.generateAttendanceFile(meeting)
-            if (attendanceContent) {
-                await this.uploadOrUpdateFile(
-                    `attendance_meeting_${meeting.id}.csv`,
-                    attendanceContent,
-                    'text/csv',
-                    folderId
-                )
-            }
-
-            // Update meeting record
-            meeting.googleDriveFolderId = folderId
-            meeting.filesUploadedToDrive = true
-            meeting.driveUploadCompletedAt = DateTime.now()
-            await meeting.save()
-
-            logger.info(`Successfully uploaded all files for meeting ${meeting.id}`)
-        } catch (error) {
-            logger.error(`Failed to upload files for meeting ${meeting.id}:`, error)
-            throw error
-        }
+      // Test authentication by making a simple API call
+      await this.drive.files.list({
+        pageSize: 1,
+        supportsAllDrives: true,
+        includeItemsFromAllDrives: true,
+        corpora: "allDrives",
+      });
+      return true;
+    } catch (error) {
+      logger.error("Google Drive service authentication failed", error);
+      return false;
     }
-
-    /**
-     * Check what files exist in a meeting folder
-     */
-    async getUploadedFiles(meeting: Meeting): Promise<string[]> {
-        if (!meeting.googleDriveFolderId) {
-            return []
-        }
-
-        try {
-            const response = await this.drive.files.list({
-                q: `'${meeting.googleDriveFolderId}' in parents and trashed=false`,
-                fields: 'files(name)',
-                supportsAllDrives: true,
-                includeItemsFromAllDrives: true,
-                corpora: 'allDrives',
-            })
-
-            return response.data.files?.map(file => file.name || '') || []
-        } catch (error) {
-            logger.error(`Failed to get uploaded files for meeting ${meeting.id}:`, error)
-            return []
-        }
-    }
-
-    /**
-     * Check if the service is properly configured
-     */
-    async isConfigured(): Promise<boolean> {
-        try {
-            const credentialsPath = env.get('GOOGLE_CREDENTIALS_PATH')
-            const folderId = env.get('GOOGLE_DRIVE_FOLDER_ID')
-
-            if (!credentialsPath || !folderId) {
-                logger.warn('Google Drive service is not fully configured')
-                return false
-            }
-
-            // Test authentication by making a simple API call
-            await this.drive.files.list({ 
-                pageSize: 1,
-                supportsAllDrives: true,
-                includeItemsFromAllDrives: true,
-                corpora: 'allDrives'
-            })
-            return true
-        } catch (error) {
-            logger.error('Google Drive service authentication failed', error)
-            return false
-        }
-    }
+  }
 }
 
-export default GoogleDriveService
+export default GoogleDriveService;

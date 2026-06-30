@@ -52,6 +52,8 @@ jobs:
       - name: Run tests
         run: pnpm test
         if: always()
+        env:
+          GITHUB_WEBHOOK_SECRET: "placeholder-value-for-CI"
 
       - name: Build
         run: pnpm run build

@@ -60,3 +60,5 @@ jobs:
 
       - name: Rollback and rerun AdonisJS migrations
         run: node ace migration:refresh
+        env:
+          GITHUB_WEBHOOK_SECRET: "placeholder-value-for-CI"

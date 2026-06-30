@@ -32,20 +32,20 @@ export default class GithubWebhooksController {
 
     // validate request with signature
     if (signature === undefined) {
-      logger.debug("Github webhook: Missing signature");
+      logger.debug("GitHub webhook: Missing signature");
       return response.unauthorized("Missing signature");
     }
 
     // Get the raw body first for signature validation
     const rawBody = request.raw();
     if (rawBody === null) {
-      logger.debug("Github webhook: Missing request body");
+      logger.debug("GitHub webhook: Missing request body");
       return response.badRequest("Missing request body");
     }
 
     const secret = env.get("GITHUB_WEBHOOK_SECRET");
     if (!isValidHmacSignature(rawBody, signature, secret)) {
-      logger.debug("Github webhook: Invalid signature");
+      logger.debug("GitHub webhook: Invalid signature");
       return response.unauthorized("Invalid signature");
     }
 
@@ -54,7 +54,10 @@ export default class GithubWebhooksController {
     try {
       parsedBody = JSON.parse(rawBody.toString()) as Record<string, unknown>;
     } catch (error) {
-      logger.error({ err: error }, "Github webhook: Failed to parse JSON body");
+      logger.error(
+        { err: error, body: rawBody.toString() },
+        "GitHub webhook: Failed to parse JSON body",
+      );
       return response.badRequest("Invalid JSON body");
     }
 
@@ -75,7 +78,7 @@ export default class GithubWebhooksController {
     const fullRepoName = payload.repository.full_name;
 
     if (event === undefined || fullRepoName.length === 0) {
-      logger.debug("Github webhook: Missing event header or repository data.");
+      logger.debug("GitHub webhook: Missing event header or repository data.");
       logger.debug("Event:", event);
       logger.debug("Full repo name:", fullRepoName);
       return response.badRequest("Missing event header or repository data.");
@@ -88,7 +91,7 @@ export default class GithubWebhooksController {
           const authorId = payload.sender.id;
 
           logger.debug(
-            `Github webhook event: ${event}, user ${authorId} pushed ${
+            `GitHub webhook event: ${event}, user ${authorId} pushed ${
               commits.length
             } commits`,
           );
@@ -128,7 +131,7 @@ export default class GithubWebhooksController {
             const date = issue.created_at;
 
             logger.debug(
-              `Github webhook event: ${event}, user ${
+              `GitHub webhook event: ${event}, user ${
                 authorId
               } created/edited ${issue.title} issue`,
             );
@@ -166,7 +169,7 @@ export default class GithubWebhooksController {
             const date = pr.created_at;
 
             logger.debug(
-              `Github webhook event: ${event}, user ${
+              `GitHub webhook event: ${event}, user ${
                 authorId
               } created/reopened/edited ${pr.title} pull request`,
             );
@@ -202,7 +205,7 @@ export default class GithubWebhooksController {
           const date = review.submitted_at;
 
           logger.debug(
-            `Github webhook event: ${event}, user ${
+            `GitHub webhook event: ${event}, user ${
               authorId
             } reviewed a pull request`,
           );
@@ -232,7 +235,7 @@ export default class GithubWebhooksController {
 
       return response.ok("Webhook processed.");
     } catch (error) {
-      logger.error({ err: error }, "Github webhook: Error processing webhook");
+      logger.error({ err: error }, "GitHub webhook: Error processing webhook");
       return response.internalServerError("Error processing GitHub webhook.");
     }
   }

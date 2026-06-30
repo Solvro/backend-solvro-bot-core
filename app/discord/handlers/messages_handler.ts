@@ -13,7 +13,7 @@ export async function messagesHandler(message: Message) {
     .where("channel_id", channelId)
     .first();
 
-  if (channelActivity) {
+  if (channelActivity !== null) {
     channelActivity.messageCount++;
     await channelActivity.save();
   } else {
@@ -31,7 +31,7 @@ export async function messagesHandler(message: Message) {
     .andWhere("discord_id", discordId)
     .first();
 
-  if (userActivity) {
+  if (userActivity !== null) {
     userActivity.messageCount++;
     await userActivity.save();
   } else {

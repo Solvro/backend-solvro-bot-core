@@ -14,7 +14,7 @@ const command: StaticCommand = new StaticCommand(
 
     const calendarId = env.get("GOOGLE_CALENDAR_ID");
 
-    if (!calendarId) {
+    if (calendarId === undefined) {
       await interaction.editReply({
         content: "❌ Calendar ID is not configured.",
       });

@@ -52,7 +52,7 @@ export class GoogleDriveService {
       });
 
       const fileId = response.data.id;
-      if (!fileId) {
+      if (fileId === undefined || fileId === null) {
         throw new Error("Failed to get file ID from response");
       }
 
@@ -80,7 +80,7 @@ export class GoogleDriveService {
     meetingId: number,
   ): Promise<string> {
     const mainFolderId = env.get("GOOGLE_DRIVE_FOLDER_ID");
-    if (!mainFolderId) {
+    if (mainFolderId === undefined) {
       throw new Error(
         "GOOGLE_DRIVE_FOLDER_ID environment variable is required",
       );
@@ -101,8 +101,11 @@ export class GoogleDriveService {
       corpora: "allDrives",
     });
 
-    if (response.data.files && response.data.files.length > 0) {
-      const folderId = response.data.files[0].id!;
+    if (response.data.files !== undefined && response.data.files.length > 0) {
+      const folderId = response.data.files[0].id;
+      if (folderId === undefined || folderId === null) {
+        throw new Error("Failed to get folder ID");
+      }
       logger.info(
         `Using existing Google Drive folder: ${folderName} (ID: ${folderId})`,
       );
@@ -121,7 +124,10 @@ export class GoogleDriveService {
       supportsAllDrives: true,
     });
 
-    const folderId = folderResponse.data.id!;
+    const folderId = folderResponse.data.id;
+    if (folderId === undefined || folderId === null) {
+      throw new Error("Failed to get folder ID");
+    }
     logger.info(`Created Google Drive folder: ${folderName} (ID: ${folderId})`);
     return folderId;
   }
@@ -145,9 +151,10 @@ export class GoogleDriveService {
     for (const chunk of chunks) {
       if (!userNames[chunk.discordUserId]) {
         const member = guild.members.cache.get(chunk.discordUserId);
-        userNames[chunk.discordUserId] = member
-          ? member.displayName
-          : `User#${chunk.discordUserId}`;
+        userNames[chunk.discordUserId] =
+          member !== undefined
+            ? member.displayName
+            : `User#${chunk.discordUserId}`;
       }
     }
 
@@ -221,7 +228,7 @@ export class GoogleDriveService {
     });
 
     const file = response.data.files?.[0];
-    if (file?.id) {
+    if (file?.id !== undefined && file.id !== null) {
       // Update existing file
       await this.drive.files.update({
         fileId: file.id,
@@ -249,14 +256,14 @@ export class GoogleDriveService {
   ): Promise<void> {
     try {
       const folderId = await this.getOrCreateMeetingFolder(
-        meeting.name || `Meeting ${meeting.id}`,
+        meeting.name ?? `Meeting ${meeting.id}`,
         meeting.id,
       );
 
       // Upload transcription
       const transcriptionContent =
         await this.generateTranscriptionFile(meeting);
-      if (transcriptionContent) {
+      if (transcriptionContent !== null) {
         await this.uploadOrUpdateFile(
           `transcription_meeting_${meeting.id}.txt`,
           transcriptionContent,
@@ -275,7 +282,7 @@ export class GoogleDriveService {
 
       // Upload attendance
       const attendanceContent = await this.generateAttendanceFile(meeting);
-      if (attendanceContent) {
+      if (attendanceContent !== null) {
         await this.uploadOrUpdateFile(
           `attendance_meeting_${meeting.id}.csv`,
           attendanceContent,
@@ -301,7 +308,7 @@ export class GoogleDriveService {
    * Check what files exist in a meeting folder
    */
   async getUploadedFiles(meeting: Meeting): Promise<string[]> {
-    if (!meeting.googleDriveFolderId) {
+    if (meeting.googleDriveFolderId === null) {
       return [];
     }
 
@@ -314,7 +321,7 @@ export class GoogleDriveService {
         corpora: "allDrives",
       });
 
-      return response.data.files?.map((file) => file.name || "") || [];
+      return response.data.files?.map((file) => file.name ?? "") ?? [];
     } catch (error) {
       logger.error(
         `Failed to get uploaded files for meeting ${meeting.id}:`,
@@ -332,7 +339,7 @@ export class GoogleDriveService {
       const credentialsPath = env.get("GOOGLE_CREDENTIALS_PATH");
       const folderId = env.get("GOOGLE_DRIVE_FOLDER_ID");
 
-      if (!credentialsPath || !folderId) {
+      if (credentialsPath === undefined || folderId === undefined) {
         logger.warn("Google Drive service is not fully configured");
         return false;
       }

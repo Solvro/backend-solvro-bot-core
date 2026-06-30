@@ -25,7 +25,8 @@ export default class extends BaseSchema {
       await db
         .from(this.tableName)
         .where((query) => {
-          query.where("is_monitored", false).orWhereNull("is_monitored");
+          void query.where("is_monitored", false);
+          void query.orWhereNull("is_monitored");
         })
         .update("attendance_status", "not_monitored");
     });

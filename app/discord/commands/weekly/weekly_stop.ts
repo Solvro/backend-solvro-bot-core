@@ -3,7 +3,7 @@ import type { CommandInteraction } from "discord.js";
 
 import logger from "@adonisjs/core/services/logger";
 
-import { monitorVoiceState } from "#app/discord/handlers/voiceStateHandler";
+import { monitorVoiceState } from "#app/discord/handlers/voice_state_handler";
 import { client } from "#app/discord/index";
 import Meeting, { AttendanceStatus, RecordingStatus } from "#models/meetings";
 import env from "#start/env";
@@ -20,8 +20,8 @@ const command: SlashCommand = new StaticCommand(
       .where("recording_status", RecordingStatus.RECORDING)
       .first();
 
-    if (!meeting) {
-      interaction.reply({
+    if (meeting === null) {
+      await interaction.reply({
         content: "❌ No weekly in progress",
         flags: MessageFlags.Ephemeral,
       });
@@ -30,7 +30,7 @@ const command: SlashCommand = new StaticCommand(
 
     // Turn off attendance monitoring
     client.off("voiceStateUpdate", monitorVoiceState);
-    meeting.attendanceStatus = AttendanceStatus.FINISHED_MONITORING;
+    meeting.attendanceStatus = AttendanceStatus.FinishedMonitoring;
 
     // Turn off transcription
     meeting.recordingStatus = RecordingStatus.STOPPING;
@@ -41,7 +41,7 @@ const command: SlashCommand = new StaticCommand(
     });
 
     if (!response.ok) {
-      interaction.reply({
+      await interaction.reply({
         content: "❌ Failed to stop recording",
         flags: MessageFlags.Ephemeral,
       });

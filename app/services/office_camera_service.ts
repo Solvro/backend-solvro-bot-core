@@ -2,6 +2,8 @@ import { EmbedBuilder } from "discord.js";
 import type { Message, TextChannel } from "discord.js";
 import { DateTime } from "luxon";
 
+import logger from "@adonisjs/core/services/logger";
+
 import { client } from "#app/discord/index";
 import OfficeStatusMessage from "#models/office_status_message";
 
@@ -23,7 +25,7 @@ export class OfficeCameraService {
     lastUpdate: Date,
   ) {
     const presence =
-      lastPresence == null
+      lastPresence === null
         ? "-"
         : `<t:${Math.floor(lastPresence.getTime() / 1000)}:R>`;
 
@@ -86,7 +88,7 @@ export class OfficeCameraService {
   ) {
     const messages = await OfficeStatusMessage.all();
 
-    if (messages.length == 0) {
+    if (messages.length === 0) {
       return;
     }
 
@@ -95,7 +97,7 @@ export class OfficeCameraService {
     for (const msg of messages) {
       try {
         const channel = await guild.channels.fetch(msg.channelId);
-        if (!channel?.isTextBased()) {
+        if (channel?.isTextBased() !== true) {
           continue;
         }
 
@@ -110,7 +112,7 @@ export class OfficeCameraService {
         if (peopleCount > 0) {
           msg.lastPresence = DateTime.fromJSDate(lastUpdate);
         }
-        if (image) {
+        if (image !== null) {
           msg.imagePath = image;
         }
 
@@ -118,11 +120,11 @@ export class OfficeCameraService {
 
         const imagePath = image ?? msg.imagePath;
 
-        if (imagePath) {
+        if (imagePath !== null) {
           await this.sendEmbedWithImage(
             message,
             peopleCount,
-            msg.lastPresence
+            msg.lastPresence !== null
               ? new Date(msg.lastPresence.toString())
               : lastUpdate,
             imagePath,
@@ -132,12 +134,14 @@ export class OfficeCameraService {
           await this.sendEmbedWithoutImage(
             message,
             peopleCount,
-            msg.lastPresence ? new Date(msg.lastPresence.toString()) : null,
+            msg.lastPresence !== null
+              ? new Date(msg.lastPresence.toString())
+              : null,
             lastUpdate,
           );
         }
       } catch (err) {
-        console.error(`Failed to update message ${msg.messageId}`, err);
+        logger.error(`Failed to update message ${msg.messageId}`, err);
       }
     }
   }
@@ -146,7 +150,7 @@ export class OfficeCameraService {
     const guild = await client.getGuild();
     const channel = await guild.channels.fetch(channelId);
 
-    if (!channel?.isTextBased()) {
+    if (channel?.isTextBased() !== true) {
       throw new Error("Channel does not exist or is not text based");
     }
 
@@ -168,15 +172,11 @@ export class OfficeCameraService {
     const guild = await client.getGuild();
     const channel = await guild.channels.fetch(channelId);
 
-    if (!channel || !channel.isTextBased() || !widget) {
+    if (channel === null || !channel.isTextBased() || widget === null) {
       return;
     }
 
-    const message = await channel.messages.fetch(widget?.messageId);
-
-    if (!message) {
-      return;
-    }
+    const message = await channel.messages.fetch(widget.messageId);
 
     await message.delete();
     await widget.delete();

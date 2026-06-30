@@ -69,7 +69,7 @@ const command = new StaticCommand(
       channels.map(async (c, idx) => {
         try {
           const channel = await interaction.guild?.channels.fetch(c.channelId);
-          return `${idx + 1}. ${channel ? `<#${c.channelId}>` : `ID: ${c.channelId}`} — ${c.messageCount} wiadomości`;
+          return `${idx + 1}. ${channel !== null ? `<#${c.channelId}>` : `ID: ${c.channelId}`} — ${c.messageCount} wiadomości`;
         } catch {
           return `${idx + 1}. ID: ${c.channelId} — ${c.messageCount} wiadomości`;
         }

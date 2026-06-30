@@ -12,7 +12,7 @@ const command: StaticCommand = new StaticCommand(
     const guild = interaction.guild;
 
     await interaction.editReply({
-      content: `User: ${user.username} (${user.id})\nMember: ${member}\nGuild: ${guild?.name}`,
+      content: `User: ${user.username} (${user.id})\nMember: ${member !== null ? member.user.username : "N/A"}\nGuild: ${guild?.name}`,
     });
   },
 );

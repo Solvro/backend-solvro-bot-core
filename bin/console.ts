@@ -31,7 +31,7 @@ const IMPORTER = (filePath: string) => {
   return import(filePath);
 };
 
-new Ignitor(APP_ROOT, { importer: IMPORTER })
+void new Ignitor(APP_ROOT, { importer: IMPORTER })
   .tap((app) => {
     app.booting(async () => {
       await import("#start/env");
@@ -43,5 +43,5 @@ new Ignitor(APP_ROOT, { importer: IMPORTER })
   .handle(process.argv.splice(2))
   .catch((error) => {
     process.exitCode = 1;
-    prettyPrintError(error);
+    void prettyPrintError(error);
   });

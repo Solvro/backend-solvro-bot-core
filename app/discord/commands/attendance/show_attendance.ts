@@ -17,11 +17,11 @@ const command: SlashCommand = new StaticCommand(
   async (interaction: CommandInteraction) => {
     const monitoredMeetings = await Meeting.query().where(
       "attendance_status",
-      AttendanceStatus.FINISHED_MONITORING,
+      AttendanceStatus.FinishedMonitoring,
     );
 
     if (monitoredMeetings.length === 0) {
-      interaction.reply({
+      await interaction.reply({
         content: "No meetins with attendance monitoring found",
         flags: MessageFlags.Ephemeral,
       });

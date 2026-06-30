@@ -1,4 +1,8 @@
-import type { Client, Interaction } from "discord.js";
+import type {
+  Client,
+  Interaction,
+  StringSelectMenuInteraction,
+} from "discord.js";
 
 import { buttonHandlers } from "../interactions/buttons/index.js";
 import selectMenuHandlers from "../interactions/selectMenus/index.js";
@@ -6,8 +10,14 @@ import selectMenuHandlers from "../interactions/selectMenus/index.js";
 export function setupInteractionHandler(client: Client) {
   client.on("interactionCreate", async (interaction: Interaction) => {
     if (interaction.isStringSelectMenu()) {
-      const handler = selectMenuHandlers[interaction.customId];
-      if (handler) {
+      const handler = (
+        selectMenuHandlers as Record<
+          string,
+          | ((interaction: StringSelectMenuInteraction) => Promise<void>)
+          | undefined
+        >
+      )[interaction.customId];
+      if (handler !== undefined) {
         return handler(interaction);
       }
     }
@@ -18,7 +28,7 @@ export function setupInteractionHandler(client: Client) {
         interaction.customId.startsWith(prefix),
       )?.[1];
 
-      if (handler) {
+      if (handler !== undefined) {
         await handler(interaction);
       }
     }

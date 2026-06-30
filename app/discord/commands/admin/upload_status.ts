@@ -22,11 +22,11 @@ const command: SlashCommand = new StaticCommand(
 
     const meetingId = interaction.options.getInteger("meeting_id");
 
-    if (meetingId) {
+    if (meetingId !== null) {
       // Show status for specific meeting
       const meeting = await Meeting.find(meetingId);
 
-      if (!meeting) {
+      if (meeting === null) {
         await interaction.editReply({
           content: `❌ Meeting ${meetingId} not found.`,
         });
@@ -52,7 +52,7 @@ const command: SlashCommand = new StaticCommand(
         .addFields([
           {
             name: "Meeting Name",
-            value: meeting.name || `Meeting ${meetingId}`,
+            value: meeting.name ?? `Meeting ${meetingId}`,
             inline: true,
           },
           {
@@ -62,14 +62,15 @@ const command: SlashCommand = new StaticCommand(
           },
           {
             name: "Google Drive Folder",
-            value: meeting.googleDriveFolderId
-              ? `ID: ${meeting.googleDriveFolderId}`
-              : "Not created",
+            value:
+              meeting.googleDriveFolderId !== null
+                ? `ID: ${meeting.googleDriveFolderId}`
+                : "Not created",
             inline: true,
           },
         ]);
 
-      if (meeting.driveUploadCompletedAt) {
+      if (meeting.driveUploadCompletedAt !== null) {
         embed.addFields([
           {
             name: "Completed At",
@@ -121,14 +122,15 @@ const command: SlashCommand = new StaticCommand(
 
       for (const meeting of recentMeetings.slice(0, 5)) {
         const status = meeting.filesUploadedToDrive ? "✅" : "⏳";
-        const completedText = meeting.driveUploadCompletedAt
-          ? `\nCompleted: ${meeting.driveUploadCompletedAt.toLocaleString()}`
-          : "\nNot uploaded yet";
+        const completedText =
+          meeting.driveUploadCompletedAt !== null
+            ? `\nCompleted: ${meeting.driveUploadCompletedAt.toLocaleString()}`
+            : "\nNot uploaded yet";
 
         embed.addFields([
           {
-            name: `${status} Meeting ${meeting.id}: ${meeting.name || "Unnamed"}`,
-            value: `Finished: ${meeting.finishedAt?.toLocaleString() || "Unknown"}${completedText}`,
+            name: `${status} Meeting ${meeting.id}: ${meeting.name ?? "Unnamed"}`,
+            value: `Finished: ${meeting.finishedAt?.toLocaleString() ?? "Unknown"}${completedText}`,
             inline: true,
           },
         ]);

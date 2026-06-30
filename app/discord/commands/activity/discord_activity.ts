@@ -11,7 +11,7 @@ function parseDate(dateString: string): Date | null {
   const dateRegex = /^(\d{4})-(\d{2})-(\d{2})$/;
   const match = dateRegex.exec(dateString);
 
-  if (!match) {
+  if (match === null) {
     return null;
   }
 
@@ -23,7 +23,7 @@ function parseDate(dateString: string): Date | null {
   );
 
   // Check if date is valid
-  if (isNaN(date.getTime())) {
+  if (Number.isNaN(date.getTime())) {
     return null;
   }
 
@@ -72,11 +72,11 @@ const command: SlashCommand = new StaticCommand(
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const user = interaction.options.get("user")?.user;
-    const member = interaction.guild?.members.cache.get(user?.id || "");
+    const member = interaction.guild?.members.cache.get(user?.id ?? "");
     const startDateStr = interaction.options.getString("start_date");
     const endDateStr = interaction.options.getString("end_date");
 
-    if (!user || !member) {
+    if (user === undefined || member === undefined) {
       await interaction.editReply({ content: "❌ Invalid user specified." });
       return;
     }
@@ -85,9 +85,9 @@ const command: SlashCommand = new StaticCommand(
     let startDate: Date | null = null;
     let endDate: Date | null = null;
 
-    if (startDateStr) {
+    if (startDateStr !== null) {
       startDate = parseDate(startDateStr);
-      if (!startDate) {
+      if (startDate === null) {
         await interaction.editReply({
           content: `❌ Invalid start date format: \`${startDateStr}\`. Please use YYYY-MM-DD format (e.g., 2025-01-15).`,
         });
@@ -95,9 +95,9 @@ const command: SlashCommand = new StaticCommand(
       }
     }
 
-    if (endDateStr) {
+    if (endDateStr !== null) {
       endDate = parseDate(endDateStr);
-      if (!endDate) {
+      if (endDate === null) {
         await interaction.editReply({
           content: `❌ Invalid end date format: \`${endDateStr}\`. Please use YYYY-MM-DD format (e.g., 2025-10-19).`,
         });
@@ -110,7 +110,7 @@ const command: SlashCommand = new StaticCommand(
     }
 
     // Validate start_date < end_date
-    if (startDate && endDate && startDate > endDate) {
+    if (startDate !== null && startDate > endDate) {
       await interaction.editReply({
         content: `❌ Start date (\`${startDateStr}\`) must be before or equal to end date (\`${endDateStr}\`).`,
       });
@@ -120,44 +120,46 @@ const command: SlashCommand = new StaticCommand(
     // Build query
     let query = DiscordActivity.query().where("discord_id", user.id);
 
-    if (startDate) {
+    if (startDate !== null) {
       query = query.where("date", ">=", startDate);
     }
 
-    if (endDate) {
-      query = query.where("date", "<=", endDate);
-    }
+    query = query.where("date", "<=", endDate);
 
-    const activity = await query
+    const activity: (DiscordActivity & {
+      $extras: { sum_count: number; avg_count: number; max_count: number };
+    })[] = (await query
       .sum("message_count as sum_count")
       .avg("message_count as avg_count")
-      .max("message_count as max_count");
+      .max("message_count as max_count")) as unknown as (DiscordActivity & {
+      $extras: { sum_count: number; avg_count: number; max_count: number };
+    })[];
 
-    const messageCount = activity[0]?.$extras.sum_count || 0;
-    const displayName = member.nickname || user.username;
+    const messageCount = activity[0]?.$extras.sum_count ?? 0;
+    const displayName = member.nickname ?? user.username;
 
     // Format period description
     let periodDesc = "all time";
-    if (startDate && endDate) {
+    if (startDate !== null) {
       periodDesc = `${startDateStr} to ${endDateStr}`;
-    } else if (startDate) {
+    } else if (startDateStr !== null) {
       periodDesc = `since ${startDateStr}`;
-    } else if (endDateStr) {
+    } else if (endDateStr !== null) {
       periodDesc = `up to ${endDateStr}`;
     }
 
     // Calculate number of days
     const daysDiff =
-      startDate && endDate
+      startDate !== null
         ? Math.ceil(
             (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
           ) + 1
         : null;
 
     let extraStats = "";
-    if (daysDiff && daysDiff > 1) {
-      const avgPerDay = Number(activity[0]?.$extras.avg_count) || 0;
-      const maxPerDay = activity[0]?.$extras.max_count || 0;
+    if (daysDiff !== null && daysDiff > 1) {
+      const avgPerDay = activity[0]?.$extras.avg_count ?? 0;
+      const maxPerDay = activity[0]?.$extras.max_count ?? 0;
       extraStats = `\n🗓️ Avg per day: **${avgPerDay.toFixed(1)}**, Max in a day: **${maxPerDay}**`;
     }
 

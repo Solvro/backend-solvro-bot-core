@@ -22,7 +22,7 @@ const command: SlashCommand = new StaticCommand(
       .where("channelId", interaction.channelId)
       .first();
 
-    if (!existingWidget) {
+    if (existingWidget === null) {
       await interaction.editReply({
         content: "❌ This channel doesn't have a camera widget",
       });

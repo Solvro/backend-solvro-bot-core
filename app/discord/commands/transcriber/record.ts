@@ -29,8 +29,8 @@ const command: SlashCommand = new StaticCommand(
     ),
   async (interaction: ChatInputCommandInteraction) => {
     const optCh = interaction.options.get(OPTION_CHANNEL, true);
-    if (!optCh.channel) {
-      interaction.reply({
+    if (optCh.channel === null || optCh.channel === undefined) {
+      await interaction.reply({
         content: "Invalid channel option",
         flags: MessageFlags.Ephemeral,
       });
@@ -52,7 +52,7 @@ const command: SlashCommand = new StaticCommand(
       body: JSON.stringify({
         channelId: String(channelId),
         meetingId: String(meeting.id),
-        meetingName: optMeetingName?.value ?? "default",
+        meetingName: optMeetingName.value ?? "default",
       }),
       headers: {
         "Content-Type": "application/json",
@@ -62,7 +62,7 @@ const command: SlashCommand = new StaticCommand(
     if (!response.ok) {
       meeting.recordingStatus = RecordingStatus.ERROR;
       await meeting.save();
-      interaction.reply({
+      await interaction.reply({
         content: "Failed to start recording",
         flags: MessageFlags.Ephemeral,
       });
@@ -72,7 +72,7 @@ const command: SlashCommand = new StaticCommand(
     meeting.recordingStatus = RecordingStatus.RECORDING;
     await meeting.save();
 
-    interaction.reply({
+    await interaction.reply({
       content: `Recording audio from channel: *${channel?.name}*`,
     });
   },

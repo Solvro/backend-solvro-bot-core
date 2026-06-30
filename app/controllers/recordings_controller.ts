@@ -20,7 +20,7 @@ export default class RecordingsController {
     const trx = await db.transaction();
 
     const meeting = await Meeting.find(id);
-    if (!meeting) {
+    if (meeting === null) {
       return response.status(404).json({ message: "Recording not found" });
     }
 
@@ -69,7 +69,7 @@ export default class RecordingsController {
       const { summary } = await summaryValidator.validate(request.all());
 
       const meeting = await Meeting.find(id);
-      if (!meeting) {
+      if (meeting === null) {
         return response.status(404).json({ message: "Meeting not found" });
       }
 

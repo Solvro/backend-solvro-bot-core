@@ -44,11 +44,12 @@ export default async function handleMeetingTranscription(
 
   const userNames: Record<string, string> = {};
   for (const chunk of chunks) {
-    if (!userNames[chunk.discordUserId]) {
+    if (!(chunk.discordUserId in userNames)) {
       const member = guild.members.cache.get(chunk.discordUserId);
-      userNames[chunk.discordUserId] = member
-        ? member.displayName
-        : `User#${chunk.discordUserId}`;
+      userNames[chunk.discordUserId] =
+        member !== undefined
+          ? member.displayName
+          : `User#${chunk.discordUserId}`;
     }
   }
 

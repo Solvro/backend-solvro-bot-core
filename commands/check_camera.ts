@@ -16,7 +16,7 @@ export default class CheckCamera extends BaseCommand {
   };
 
   async run() {
-    const camera_messages = await OfficeStatusMessage.all();
+    const cameraMessages = await OfficeStatusMessage.all();
 
     // Check if all messages are older than threshold
     const thresholdMinutes = env.get(
@@ -26,9 +26,9 @@ export default class CheckCamera extends BaseCommand {
     const thresholdMillis = thresholdMinutes * 60 * 1000;
     const now = new Date();
 
-    const allOld = camera_messages.every(
+    const allOld = cameraMessages.every(
       (msg) =>
-        msg.lastUpdate &&
+        msg.lastUpdate !== null &&
         now.getTime() - new Date(msg.lastUpdate.toString()).getTime() >
           thresholdMillis,
     );
@@ -61,8 +61,7 @@ export default class CheckCamera extends BaseCommand {
         await dmMessage.save();
       } catch (err) {
         this.logger.error(
-          `Failed to send DM to user ID: ${dmMessage.discordUserId}`,
-          err,
+          `Failed to send DM to user ID: ${dmMessage.discordUserId}: ${err instanceof Error ? err.message : String(err)}`,
         );
       }
     }

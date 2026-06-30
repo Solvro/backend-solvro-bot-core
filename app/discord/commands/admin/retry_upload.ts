@@ -33,7 +33,7 @@ const command: SlashCommand = new StaticCommand(
     try {
       const meeting = await Meeting.find(meetingId);
 
-      if (!meeting) {
+      if (meeting === null) {
         await interaction.editReply({
           content: `❌ Meeting ${meetingId} not found.`,
         });
@@ -67,10 +67,10 @@ const command: SlashCommand = new StaticCommand(
         return;
       }
 
-      const data: any = await response.json();
+      const data = (await response.json()) as { summary?: string };
       const summary = data.summary?.trim();
 
-      if (!summary) {
+      if (summary === undefined || summary.length === 0) {
         await interaction.editReply({
           content: `❌ Cannot retry upload for meeting ${meetingId}: Empty summary received.`,
         });

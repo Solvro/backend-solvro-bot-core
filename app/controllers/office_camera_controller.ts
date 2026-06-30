@@ -1,9 +1,9 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
-import { inject } from "@adonisjs/core";
 import { HttpContext } from "@adonisjs/core/http";
 import logger from "@adonisjs/core/services/logger";
+import { inject } from "@adonisjs/fold";
 
 import { OfficeCameraService } from "#services/office_camera_service";
 import env from "#start/env";
@@ -25,13 +25,13 @@ export default class OfficeCameraController {
     const imageName = "latest.jpg";
     const fullImagePath = path.join(imageDir, imageName);
 
-    if (image) {
+    if (image !== undefined) {
       try {
         await fs.mkdir(imageDir, { recursive: true });
         // Replace old image with the new one
         await image.move(imageDir, { name: imageName, overwrite: true });
 
-        this.officeCameraService.updateStatusMessages(
+        void this.officeCameraService.updateStatusMessages(
           count,
           timestamp,
           fullImagePath,
@@ -42,7 +42,7 @@ export default class OfficeCameraController {
         logger.error("Failed to save image:", err);
       }
     } else {
-      this.officeCameraService.updateStatusMessages(count, timestamp);
+      void this.officeCameraService.updateStatusMessages(count, timestamp);
     }
 
     response.status(201);

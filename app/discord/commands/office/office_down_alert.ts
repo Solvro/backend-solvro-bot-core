@@ -19,7 +19,7 @@ const command: SlashCommand = new StaticCommand(
       .where("discordUserId", interaction.user.id)
       .first();
 
-    if (downMessage) {
+    if (downMessage !== null) {
       await downMessage.delete();
       await interaction.editReply(
         "You have been unsubscribed from office camera downtime alerts.",

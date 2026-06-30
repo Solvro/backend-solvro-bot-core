@@ -29,16 +29,16 @@ import memberInfoCommand from "#app/discord/commands/utility/member_info";
 import userInfoCommand from "#app/discord/commands/utility/user";
 import weeklyStart from "#app/discord/commands/weekly/weekly_start";
 import weeklyStop from "#app/discord/commands/weekly/weekly_stop";
-import { commandsHandler } from "#app/discord/handlers/commandHandler";
-import { setupInteractionHandler } from "#app/discord/handlers/interactionHandler";
-import { guildMemberAdd } from "#app/discord/handlers/membersHandler";
-import { messagesHandler } from "#app/discord/handlers/messagesHandler";
-import { monitorVoiceState } from "#app/discord/handlers/voiceStateHandler";
+import { commandsHandler } from "#app/discord/handlers/command_handler";
+import { setupInteractionHandler } from "#app/discord/handlers/interaction_handler";
+import { guildMemberAdd } from "#app/discord/handlers/members_handler";
+import { messagesHandler } from "#app/discord/handlers/messages_handler";
+import { monitorVoiceState } from "#app/discord/handlers/voice_state_handler";
 import Meeting, { AttendanceStatus } from "#models/meetings";
 import env from "#start/env";
 
 import type { SlashCommand } from "./commands/commands.js";
-import { ready } from "./handlers/clientReadyHandler.js";
+import { ready } from "./handlers/client_ready_handler.js";
 
 export const commands = [
   userInfoCommand,
@@ -81,7 +81,7 @@ export class DiscordClient extends Client {
         GatewayIntentBits.GuildMembers,
       ],
     });
-    if (slashCommands) {
+    if (slashCommands !== undefined) {
       this.commands = new Collection(
         slashCommands.map((command) => [command.name(), command]),
       );
@@ -97,7 +97,7 @@ export class DiscordClient extends Client {
     const meeting = await Meeting.findBy({
       attendanceStatus: AttendanceStatus.MONITORING,
     });
-    if (meeting && this.listeners("voiceStateUpdate").length === 0) {
+    if (meeting !== null && this.listeners("voiceStateUpdate").length === 0) {
       this.on("voiceStateUpdate", monitorVoiceState);
       logger.debug("Registered attendance monitoring listener");
     }

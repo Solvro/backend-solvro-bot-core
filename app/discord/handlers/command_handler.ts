@@ -14,7 +14,7 @@ export async function commandsHandler(interaction: Interaction<CacheType>) {
     interaction.commandName,
   );
 
-  if (!command) {
+  if (command === undefined) {
     logger.error(`No command matching ${interaction.commandName} was found.`);
     return;
   }

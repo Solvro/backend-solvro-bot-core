@@ -40,11 +40,11 @@ export default async function handleMeetingAttendance(
 
   const meeting = await Meeting.query()
     .where("id", meetingId)
-    .where("attendance_status", AttendanceStatus.FINISHED_MONITORING)
+    .where("attendance_status", AttendanceStatus.FinishedMonitoring)
     .preload("members")
     .first();
 
-  if (!meeting) {
+  if (meeting === null) {
     await interaction.update({
       content:
         "There is no meeting with given ID and a completed attendance list",
@@ -71,11 +71,11 @@ export default async function handleMeetingAttendance(
   // Cache all users
   await guild.members.fetch();
 
-  const userInfo = await getUserNicknamesFromIds(uniqueDiscordIds, guild);
+  const userInfo = getUserNicknamesFromIds(uniqueDiscordIds, guild);
   let memberList = userInfo
     .slice(0, 11)
     .map((i) => {
-      return `• <@${i.discordId}> ${i.nickname ?? ""}`;
+      return `• <@${i.discordId}> ${i.nickname}`;
     })
     .join("\n");
 

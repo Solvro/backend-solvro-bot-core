@@ -20,7 +20,7 @@ const command: SlashCommand = new StaticCommand(
 
     const member = await Member.query().where("discord_id", user.id).first();
 
-    if (!member) {
+    if (member === null) {
       await interaction.editReply({
         content: `❌ No member data found for ${user.tag}`,
       });
@@ -49,34 +49,30 @@ const command: SlashCommand = new StaticCommand(
           `\n🎯 **Role:** ${member.currentRole ?? "N/A"}`,
       )
       .addFields(
-        ...(member.indexNumber
+        ...(member.indexNumber !== null
           ? [{ name: "🎓 Index", value: member.indexNumber, inline: true }]
           : []),
-        ...(member.faculty
+        ...(member.faculty !== null
           ? [{ name: "🏫 Faculty", value: member.faculty, inline: true }]
           : []),
-        ...(member.fieldOfStudy
+        ...(member.fieldOfStudy !== null
           ? [{ name: "📘 Field", value: member.fieldOfStudy, inline: true }]
           : []),
-        ...(member.studyYear
+        ...(member.studyYear !== null
           ? [{ name: "📅 Year", value: member.studyYear, inline: true }]
           : []),
-        ...(member.joinDate
-          ? [
-              {
-                name: "📆 Joined",
-                value: member.joinDate.toDateString(),
-                inline: true,
-              },
-            ]
-          : []),
-        ...(member.email
+        {
+          name: "📆 Joined",
+          value: member.joinDate.toDateString(),
+          inline: true,
+        },
+        ...(member.email !== null
           ? [{ name: "📧 Email", value: member.email, inline: true }]
           : []),
-        ...(member.phone
+        ...(member.phone !== null
           ? [{ name: "📞 Phone", value: member.phone, inline: true }]
           : []),
-        ...(member.messengerUrl
+        ...(member.messengerUrl !== null
           ? [
               {
                 name: "💬 Messenger",
@@ -85,7 +81,7 @@ const command: SlashCommand = new StaticCommand(
               },
             ]
           : []),
-        ...(member.githubUrl
+        ...(member.githubUrl !== null
           ? [
               {
                 name: "💻 GitHub",

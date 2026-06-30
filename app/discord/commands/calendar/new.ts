@@ -164,20 +164,27 @@ const command: StaticCommand = new StaticCommand(
           rangeEnd,
         );
 
-        const locationKeyword =
-          location === "office" ? "biuro" : "konferencyjna";
-        const sameLocationEvents = existingEvents.filter((event) =>
-          event.location?.toLowerCase().includes(locationKeyword),
+        const locationKeyword = "biuro";
+        const sameLocationEvents = existingEvents.filter(
+          (event: { location?: string }) =>
+            event.location?.toLowerCase().includes(locationKeyword) ?? false,
         );
 
-        const hasConflict = sameLocationEvents.some((event) => {
-          const existingStart = new Date(
-            event.start?.dateTime || event.start?.date,
-          );
-          const existingEnd = new Date(event.end?.dateTime || event.end?.date);
+        const hasConflict = sameLocationEvents.some(
+          (event: {
+            start?: { dateTime?: string; date?: string };
+            end?: { dateTime?: string; date?: string };
+          }) => {
+            const existingStart = new Date(
+              event.start?.dateTime ?? event.start?.date ?? "",
+            );
+            const existingEnd = new Date(
+              event.end?.dateTime ?? event.end?.date ?? "",
+            );
 
-          return eventStartDate < existingEnd && eventEndDate > existingStart;
-        });
+            return eventStartDate < existingEnd && eventEndDate > existingStart;
+          },
+        );
 
         if (hasConflict) {
           await interaction.editReply({
@@ -208,10 +215,10 @@ const command: StaticCommand = new StaticCommand(
         attendees,
       };
 
-      const createdEvent = await googleCalendarService.createEvent(
+      const createdEvent = (await googleCalendarService.createEvent(
         event,
         env.get("GOOGLE_CALENDAR_ID"),
-      );
+      )) as { htmlLink?: string };
 
       const attendeesText =
         attendees.length > 0
@@ -223,20 +230,26 @@ const command: StaticCommand = new StaticCommand(
       await interaction.editReply({
         content: `✅ **Event created successfully!**\n\n📅 **${title}**\n🕒 ${date} ${startTime} - ${endTime}${endDateDisplay}\n📝 ${description}\n📍 ${locationText}${attendeesText}\n\n🔗 [View in Calendar](${createdEvent.htmlLink})`,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error("Error creating calendar event:", error);
 
-      if (
-        error.message?.includes("invalid_grant") ||
-        error.message?.includes("unauthorized")
-      ) {
-        await interaction.editReply({
-          content:
-            "❌ Google Calendar authentication failed. Please re-authorize the bot.",
-        });
+      if (error instanceof Error) {
+        if (
+          error.message.includes("invalid_grant") ||
+          error.message.includes("unauthorized")
+        ) {
+          await interaction.editReply({
+            content:
+              "❌ Google Calendar authentication failed. Please re-authorize the bot.",
+          });
+        } else {
+          await interaction.editReply({
+            content: `❌ Failed to create calendar event: ${error.message}`,
+          });
+        }
       } else {
         await interaction.editReply({
-          content: `❌ Failed to create calendar event: ${error.message}`,
+          content: "❌ Failed to create calendar event: Unknown error",
         });
       }
     }

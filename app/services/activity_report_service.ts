@@ -63,15 +63,15 @@ export class ActivityReportService {
     logger.info("Starting activity report generation", { config });
 
     // Parse dates
-    const startDate = config.startDate ? new Date(config.startDate) : null;
-    const endDate = config.endDate ? new Date(config.endDate) : new Date();
+    const startDate =
+      config.startDate !== undefined ? new Date(config.startDate) : null;
+    const endDate =
+      config.endDate !== undefined ? new Date(config.endDate) : new Date();
 
-    if (startDate) {
+    if (startDate !== null) {
       startDate.setHours(0, 0, 0, 0);
     }
-    if (endDate) {
-      endDate.setHours(23, 59, 59, 999);
-    }
+    endDate.setHours(23, 59, 59, 999);
 
     // Fetch all active/new members
     const members = await Member.query()
@@ -91,14 +91,14 @@ export class ActivityReportService {
 
       const stats: MemberStats = {
         firstName:
-          member.firstName ||
-          userInfo?.nickname ||
-          userInfo?.globalName ||
+          member.firstName ??
+          userInfo?.nickname ??
+          userInfo?.globalName ??
           "N/A",
-        lastName: member.lastName || "N/A",
-        indexNumber: member.indexNumber || "N/A",
-        section: member.currentSection || "N/A",
-        project: member.currentProjects || "N/A",
+        lastName: member.lastName ?? "N/A",
+        indexNumber: member.indexNumber ?? "N/A",
+        section: member.currentSection ?? "N/A",
+        project: member.currentProjects ?? "N/A",
         status: member.status,
       };
 
@@ -166,10 +166,10 @@ export class ActivityReportService {
   ): Promise<number> {
     let query = DiscordActivity.query().where("discordId", discordId);
 
-    if (startDate) {
+    if (startDate !== null) {
       query = query.where("date", ">=", startDate);
     }
-    if (endDate) {
+    if (endDate !== null) {
       query = query.where("date", "<=", endDate);
     }
 
@@ -191,7 +191,7 @@ export class ActivityReportService {
     reviews: number;
     total: number;
   }> {
-    if (!githubId) {
+    if (githubId === null) {
       return { commits: 0, prs: 0, issues: 0, reviews: 0, total: 0 };
     }
 
@@ -199,10 +199,10 @@ export class ActivityReportService {
       .where("authorGithubId", githubId)
       .select("type");
 
-    if (startDate) {
+    if (startDate !== null) {
       query = query.where("date", ">=", startDate);
     }
-    if (endDate) {
+    if (endDate !== null) {
       query = query.where("date", "<=", endDate);
     }
 
@@ -250,20 +250,20 @@ export class ActivityReportService {
     // Get all meetings in the date range
     let meetingsQuery = Meeting.query().where(
       "attendanceStatus",
-      AttendanceStatus.FINISHED_MONITORING,
+      AttendanceStatus.FinishedMonitoring,
     );
 
-    if (startDate) {
+    if (startDate !== null) {
       meetingsQuery = meetingsQuery.where("finishedAt", ">=", startDate);
     }
-    if (endDate) {
+    if (endDate !== null) {
       meetingsQuery = meetingsQuery.where("finishedAt", "<=", endDate);
     }
 
     const totalMeetings = await meetingsQuery.count("* as total");
     const total = Number(totalMeetings[0].$extras.total);
 
-    console.log("Total meetings in range:", total);
+    console.warn("Total meetings in range:", total);
 
     if (total === 0) {
       return { attended: 0, total: 0, percentage: 100 };
@@ -271,25 +271,26 @@ export class ActivityReportService {
 
     // Get meetings this member attended
     const member = await Member.find(memberId);
-    if (!member) {
+    if (member === null) {
       return { attended: 0, total: 0, percentage: 0 };
     }
 
     const attendedQuery = member
       .related("meetings")
       .query()
-      .where("attendanceStatus", AttendanceStatus.FINISHED_MONITORING);
+      .where("attendanceStatus", AttendanceStatus.FinishedMonitoring);
 
-    if (startDate) {
-      attendedQuery.where("meetings.finished_at", ">=", startDate);
+    if (startDate !== null) {
+      await attendedQuery.where("meetings.finished_at", ">=", startDate);
     }
-    if (endDate) {
-      attendedQuery.where("meetings.finished_at", "<=", endDate);
+    if (endDate !== null) {
+      await attendedQuery.where("meetings.finished_at", "<=", endDate);
     }
 
-    const attended = (await attendedQuery.distinct("meetings.id")).length;
+    const result = await attendedQuery.distinct("meetings.id");
+    const attended = result.length;
 
-    console.log("Total meetings attended by member:", attended);
+    console.warn("Total meetings attended by member:", attended);
 
     const percentage = total > 0 ? Math.round((attended / total) * 100) : 100;
 
@@ -306,7 +307,7 @@ export class ActivityReportService {
   ): Promise<number> {
     let query = TranscriptionPart.query().where("discordUserId", discordId);
 
-    if (startDate || endDate) {
+    if (startDate !== null || endDate !== null) {
       // Join with meetings to filter by date
       query = query.join(
         "meetings",
@@ -314,10 +315,10 @@ export class ActivityReportService {
         "meetings.id",
       );
 
-      if (startDate) {
+      if (startDate !== null) {
         query = query.where("meetings.finished_at", ">=", startDate);
       }
-      if (endDate) {
+      if (endDate !== null) {
         query = query.where("meetings.finished_at", "<=", endDate);
       }
     }
@@ -388,25 +389,25 @@ export class ActivityReportService {
       ];
 
       if (config.stats.includes("discord")) {
-        row.push(String(stats.discordMessages || 0));
+        row.push(String(stats.discordMessages ?? 0));
       }
       if (config.stats.includes("github")) {
         row.push(
-          String(stats.githubCommits || 0),
-          String(stats.githubPRs || 0),
-          String(stats.githubIssues || 0),
-          String(stats.githubReviews || 0),
-          String(stats.githubTotal || 0),
+          String(stats.githubCommits ?? 0),
+          String(stats.githubPRs ?? 0),
+          String(stats.githubIssues ?? 0),
+          String(stats.githubReviews ?? 0),
+          String(stats.githubTotal ?? 0),
         );
       }
       if (config.stats.includes("attendance")) {
         row.push(
-          String(stats.attendanceCount || 0),
-          String(stats.attendancePercentage || 0),
+          String(stats.attendanceCount ?? 0),
+          String(stats.attendancePercentage ?? 0),
         );
       }
       if (config.stats.includes("words")) {
-        row.push(String(stats.wordCount || 0));
+        row.push(String(stats.wordCount ?? 0));
       }
 
       lines.push(row.join(","));
@@ -416,11 +417,11 @@ export class ActivityReportService {
     const buffer = Buffer.from(csvContent, "utf-8");
 
     const dateRange =
-      config.startDate && config.endDate
+      config.startDate !== undefined && config.endDate !== undefined
         ? `_${config.startDate}_to_${config.endDate}`
-        : config.startDate
+        : config.startDate !== undefined
           ? `_from_${config.startDate}`
-          : config.endDate
+          : config.endDate !== undefined
             ? `_to_${config.endDate}`
             : "_all_time";
 
@@ -445,7 +446,7 @@ export class ActivityReportService {
     const csvAttachment = this.generateCSV(memberStats, config);
 
     const filename =
-      csvAttachment.name?.replace(".csv", ".xlsx") || "activity_report.xlsx";
+      csvAttachment.name?.replace(".csv", ".xlsx") ?? "activity_report.xlsx";
 
     return new AttachmentBuilder(csvAttachment.attachment, {
       name: filename,

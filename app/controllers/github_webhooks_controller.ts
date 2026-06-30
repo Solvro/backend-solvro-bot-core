@@ -32,14 +32,14 @@ export default class GithubWebhooksController {
     const signature = request.header("X-Hub-Signature-256");
 
     // validate request with signature
-    if (!signature) {
+    if (signature === undefined) {
       logger.debug("Github webhook: Missing signature");
       return response.unauthorized("Missing signature");
     }
 
     // Get the raw body first for signature validation
     const rawBody = request.raw();
-    if (!rawBody) {
+    if (rawBody === null) {
       logger.debug("Github webhook: Missing request body");
       return response.badRequest("Missing request body");
     }
@@ -51,9 +51,9 @@ export default class GithubWebhooksController {
     }
 
     // Parse the raw body as JSON for debugging and validation
-    let parsedBody;
+    let parsedBody: Record<string, unknown>;
     try {
-      parsedBody = JSON.parse(rawBody.toString());
+      parsedBody = JSON.parse(rawBody.toString()) as Record<string, unknown>;
     } catch (error) {
       logger.error("Github webhook: Failed to parse JSON body", error);
       return response.badRequest("Invalid JSON body");
@@ -61,10 +61,7 @@ export default class GithubWebhooksController {
 
     // Add debugging BEFORE validation
     logger.debug("Raw payload before validation:", JSON.stringify(parsedBody));
-    logger.debug(
-      "Repository in raw payload:",
-      parsedBody?.repository?.full_name,
-    );
+    logger.debug("Repository in raw payload:", parsedBody.repository);
 
     // Manually set the parsed body for validation since raw() might have consumed the stream
     request.updateBody(parsedBody);
@@ -74,14 +71,11 @@ export default class GithubWebhooksController {
 
     // Add debugging AFTER validation
     logger.debug("Payload after validation:", JSON.stringify(payload));
-    logger.debug(
-      "Repository after validation:",
-      payload?.repository?.full_name,
-    );
+    logger.debug("Repository after validation:", payload.repository.full_name);
 
     const fullRepoName = payload.repository.full_name;
 
-    if (!event || !fullRepoName) {
+    if (event === undefined || fullRepoName.length === 0) {
       logger.debug("Github webhook: Missing event header or repository data.");
       logger.debug("Event:", event);
       logger.debug("Full repo name:", fullRepoName);
@@ -91,8 +85,8 @@ export default class GithubWebhooksController {
     try {
       switch (event) {
         case "push": {
-          const commits = payload.commits || [];
-          const authorId = payload.sender?.id || "unknown";
+          const commits = payload.commits ?? [];
+          const authorId = payload.sender.id;
 
           logger.debug(
             `Github webhook event: ${event}, user ${authorId} pushed ${
@@ -110,7 +104,7 @@ export default class GithubWebhooksController {
               .where("type", "commit")
               .first();
 
-            if (!exists) {
+            if (exists === null) {
               await GithubActivity.create({
                 githubId,
                 type: "commit",
@@ -125,12 +119,12 @@ export default class GithubWebhooksController {
         }
 
         case "issues": {
-          const issue = payload.issue || null;
-          const action = payload.action || "";
+          const issue = payload.issue ?? null;
+          const action = payload.action ?? "";
 
-          if (["opened", "edited"].includes(action) && issue) {
+          if (["opened", "edited"].includes(action) && issue !== null) {
             const githubId = issue.node_id;
-            const authorId = issue.user?.id?.toString() || "unknown";
+            const authorId = issue.user.id;
             const message = issue.title;
             const date = issue.created_at;
 
@@ -145,7 +139,7 @@ export default class GithubWebhooksController {
               .where("type", "issue")
               .first();
 
-            if (!exists) {
+            if (exists === null) {
               await GithubActivity.create({
                 githubId,
                 type: "issue",
@@ -160,12 +154,15 @@ export default class GithubWebhooksController {
         }
 
         case "pull_request": {
-          const pr = payload.pull_request || null;
-          const action = payload.action || "";
+          const pr = payload.pull_request ?? null;
+          const action = payload.action ?? "";
 
-          if (["opened", "reopened", "edited"].includes(action) && pr) {
+          if (
+            ["opened", "reopened", "edited"].includes(action) &&
+            pr !== null
+          ) {
             const githubId = pr.node_id;
-            const authorId = pr.user?.id?.toString() || "unknown";
+            const authorId = pr.user.id;
             const message = pr.title;
             const date = pr.created_at;
 
@@ -180,7 +177,7 @@ export default class GithubWebhooksController {
               .where("type", "pr")
               .first();
 
-            if (!exists) {
+            if (exists === null) {
               await GithubActivity.create({
                 githubId,
                 type: "pr",
@@ -195,13 +192,13 @@ export default class GithubWebhooksController {
         }
 
         case "pull_request_review": {
-          const review = payload.review || null;
-          if (!review) {
+          const review = payload.review ?? null;
+          if (review === null) {
             break;
           }
 
           const githubId = review.node_id;
-          const authorId = review.user?.id?.toString() || "unknown";
+          const authorId = review.user.id;
           const message = `Review state: ${review.state}`;
           const date = review.submitted_at;
 
@@ -216,7 +213,7 @@ export default class GithubWebhooksController {
             .where("type", "review")
             .first();
 
-          if (!exists) {
+          if (exists === null) {
             await GithubActivity.create({
               githubId,
               type: "review",

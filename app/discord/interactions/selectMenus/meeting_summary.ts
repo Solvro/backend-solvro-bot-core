@@ -73,7 +73,7 @@ export default async function handleMeetingSummary(
       `${env.get("TRANSCRIBER_URL")}/summary/${meetingId}`,
     );
 
-    if (response.status == 404) {
+    if (response.status === 404) {
       await interaction.update({
         content: "❌ Looks like there is no summary for this meeting.",
         components: [],
@@ -83,10 +83,10 @@ export default async function handleMeetingSummary(
       throw new Error("Failed to fetch");
     }
 
-    const data: any = await response.json();
+    const data = (await response.json()) as { summary?: string };
     const summary = data.summary?.trim();
 
-    if (!summary) {
+    if (summary === undefined) {
       throw new Error("Missing summary in response");
     }
 

@@ -10,7 +10,7 @@ export async function monitorVoiceState(
   newState: VoiceState,
 ): Promise<void> {
   logger.debug(`monitorVoiceState ${JSON.stringify(newState, null, 2)}`);
-  if (!newState.member || !newState.channelId) {
+  if (newState.member === null || newState.channelId === null) {
     return;
   }
   if (newState.member.user.bot) {
@@ -22,7 +22,7 @@ export async function monitorVoiceState(
     .andWhere("discord_channel_id", newState.channelId)
     .orderBy("created_at", "desc") // Get the *latest* matching meeting
     .first();
-  if (!meeting) {
+  if (meeting === null) {
     return;
   }
 

@@ -59,12 +59,12 @@ const command: StaticCommand = new StaticCommand(
 
       const weekOffset =
         (interaction.options.get("week")?.value as number) || 0;
-      const startHour =
-        (interaction.options.get("start-hour")?.value as number) ?? 0;
-      const endHour =
-        (interaction.options.get("end-hour")?.value as number) ?? 24;
-      const interval =
-        (interaction.options.get("interval")?.value as number) ?? 15;
+      const startHour = (interaction.options.get("start-hour")?.value ??
+        0) as number;
+      const endHour = (interaction.options.get("end-hour")?.value ??
+        24) as number;
+      const interval = (interaction.options.get("interval")?.value ??
+        15) as number;
 
       if (startHour >= endHour) {
         await interaction.editReply({
@@ -92,9 +92,9 @@ const command: StaticCommand = new StaticCommand(
       );
 
       const officeEvents = events.filter(
-        (event) =>
-          event.location?.toLowerCase().includes("biuro") ||
-          event.location?.toLowerCase().includes("office"),
+        (event: { location?: string }) =>
+          (event.location?.toLowerCase().includes("biuro") ?? false) ||
+          (event.location?.toLowerCase().includes("office") ?? false),
       );
 
       const imageBuffer = googleCalendarService.generateCalendarImage(
@@ -122,20 +122,26 @@ const command: StaticCommand = new StaticCommand(
         content: `📅 **Office Availability - ${weekLabel}**\n⏰ Hours: ${startHour}:00 - ${endHour}:00 (${interval}min intervals)`,
         files: [attachment],
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error checking office availability:", error);
 
-      if (
-        error.message?.includes("invalid_grant") ||
-        error.message?.includes("unauthorized")
-      ) {
-        await interaction.editReply({
-          content:
-            "❌ Google Calendar authentication failed. Please contact an administrator to re-authorize the bot.",
-        });
+      if (error instanceof Error) {
+        if (
+          error.message.includes("invalid_grant") ||
+          error.message.includes("unauthorized")
+        ) {
+          await interaction.editReply({
+            content:
+              "❌ Google Calendar authentication failed. Please contact an administrator to re-authorize the bot.",
+          });
+        } else {
+          await interaction.editReply({
+            content: `❌ Failed to check office availability: ${error.message}`,
+          });
+        }
       } else {
         await interaction.editReply({
-          content: `❌ Failed to check office availability: ${error.message}`,
+          content: "❌ Failed to check office availability: Unknown error",
         });
       }
     }

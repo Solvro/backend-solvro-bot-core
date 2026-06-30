@@ -1,7 +1,7 @@
 import { MessageFlags, SlashCommandBuilder } from "discord.js";
 import type { CommandInteraction } from "discord.js";
 
-import { monitorVoiceState } from "#app/discord/handlers/voiceStateHandler";
+import { monitorVoiceState } from "#app/discord/handlers/voice_state_handler";
 import { client } from "#app/discord/index";
 import Meeting, { AttendanceStatus } from "#models/meetings";
 
@@ -17,9 +17,9 @@ const command: SlashCommand = new StaticCommand(
 
     await Meeting.query()
       .where("attendance_status", AttendanceStatus.MONITORING)
-      .update({ attendanceStatus: AttendanceStatus.FINISHED_MONITORING });
+      .update({ attendanceStatus: AttendanceStatus.FinishedMonitoring });
 
-    interaction.reply({
+    await interaction.reply({
       content: "Stopped monitoring voice channel for attendance",
       flags: MessageFlags.Ephemeral,
     });

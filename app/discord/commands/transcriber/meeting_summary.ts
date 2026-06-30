@@ -22,7 +22,7 @@ const command: SlashCommand = new StaticCommand(
     );
 
     if (completedMeetings.length === 0) {
-      interaction.reply({
+      await interaction.reply({
         content: "No completed meetings found.",
         flags: MessageFlags.Ephemeral,
       });

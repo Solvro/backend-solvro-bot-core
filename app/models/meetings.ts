@@ -15,9 +15,9 @@ export enum RecordingStatus {
 }
 
 export enum AttendanceStatus {
-  NOT_MONITORED = "not_monitored",
+  NotMonitored = "not_monitored",
   MONITORING = "monitoring",
-  FINISHED_MONITORING = "finished_monitoring",
+  FinishedMonitoring = "finished_monitoring",
 }
 
 export default class Meeting extends BaseModel {

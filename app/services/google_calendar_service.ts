@@ -20,6 +20,17 @@ export interface CalendarEvent {
   attendees?: { email: string }[];
 }
 
+interface CalendarEventResult {
+  id?: string;
+  summary?: string;
+  description?: string;
+  location?: string;
+  htmlLink?: string;
+  start?: { dateTime?: string; date?: string; timeZone?: string };
+  end?: { dateTime?: string; date?: string; timeZone?: string };
+  attendees?: { email: string }[];
+}
+
 // TODO: jak bedzie baza czlonkow - updatowac dostepy do googla przy dodawaniu/usuwaniu osob
 
 export class GoogleCalendarService {
@@ -34,7 +45,7 @@ export class GoogleCalendarService {
     );
 
     const refreshToken = env.get("GOOGLE_REFRESH_TOKEN");
-    if (refreshToken) {
+    if (refreshToken !== undefined) {
       this.auth.setCredentials({
         refresh_token: refreshToken,
       });
@@ -46,21 +57,25 @@ export class GoogleCalendarService {
   async createEvent(
     event: CalendarEvent,
     calendarId = "primary",
-  ): Promise<any> {
+  ): Promise<CalendarEventResult> {
     try {
       const response = await this.calendar.events.insert({
         calendarId,
         requestBody: event,
       });
 
-      return response.data;
+      return response.data as CalendarEventResult;
     } catch (error) {
       logger.error("Error creating calendar event:", error);
-      throw new Error(`Failed to create calendar event: ${error.message}`);
+      throw new Error(
+        `Failed to create calendar event: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
-  async getUpcomingEvent(calendarId = "primary"): Promise<any | null> {
+  async getUpcomingEvent(
+    calendarId = "primary",
+  ): Promise<CalendarEventResult | null> {
     try {
       const response = await this.calendar.events.list({
         calendarId,
@@ -70,11 +85,15 @@ export class GoogleCalendarService {
         orderBy: "startTime",
       });
 
-      const events = response.data.items || [];
-      return events.length > 0 ? events[0] : null;
+      const events = response.data.items;
+      return events !== undefined && events.length > 0
+        ? (events[0] as CalendarEventResult)
+        : null;
     } catch (error) {
       logger.error("Error getting upcoming event:", error);
-      throw new Error(`Failed to get upcoming event: ${error.message}`);
+      throw new Error(
+        `Failed to get upcoming event: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -82,7 +101,7 @@ export class GoogleCalendarService {
     calendarId = "primary",
     startDate: Date,
     endDate: Date,
-  ): Promise<any[]> {
+  ): Promise<CalendarEventResult[]> {
     try {
       const response = await this.calendar.events.list({
         calendarId,
@@ -92,16 +111,18 @@ export class GoogleCalendarService {
         orderBy: "startTime",
       });
 
-      return response.data.items || [];
+      return (response.data.items ?? []) as CalendarEventResult[];
     } catch (error) {
       logger.error("Error getting events in range:", error);
-      throw new Error(`Failed to get events: ${error.message}`);
+      throw new Error(
+        `Failed to get events: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
   generateCalendarImage(
     startDate: Date,
-    events: any[],
+    events: CalendarEventResult[],
     options: {
       workStartHour?: number;
       workEndHour?: number;
@@ -133,11 +154,13 @@ export class GoogleCalendarService {
 
     const grid: boolean[][] = Array(7)
       .fill(null)
-      .map(() => Array(totalSlots).fill(false));
+      .map(() => Array(totalSlots).fill(false)) as boolean[][];
 
     events.forEach((event) => {
-      const eventStart = new Date(event.start?.dateTime || event.start?.date);
-      const eventEnd = new Date(event.end?.dateTime || event.end?.date);
+      const eventStart = new Date(
+        event.start?.dateTime ?? event.start?.date ?? "",
+      );
+      const eventEnd = new Date(event.end?.dateTime ?? event.end?.date ?? "");
 
       const startDaysDiff = Math.floor(
         (eventStart.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
@@ -147,13 +170,13 @@ export class GoogleCalendarService {
       );
 
       const startTime = this.parseRFC3339Time(
-        event.start?.dateTime || event.start?.date,
+        event.start?.dateTime ?? event.start?.date ?? "",
       );
       const endTime = this.parseRFC3339Time(
-        event.end?.dateTime || event.end?.date,
+        event.end?.dateTime ?? event.end?.date ?? "",
       );
 
-      if (!startTime || !endTime) {
+      if (startTime === null || endTime === null) {
         return;
       }
 
@@ -327,7 +350,7 @@ export class GoogleCalendarService {
     dateTimeStr: string,
   ): { hours: number; minutes: number } | null {
     const match = /T(\d{2}):(\d{2})/.exec(dateTimeStr);
-    if (!match) {
+    if (match === null) {
       return null;
     }
 

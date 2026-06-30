@@ -44,6 +44,7 @@
     "@adonisjs/auth": "^9.3.1",
     "@adonisjs/core": "^6.17.2",
     "@adonisjs/cors": "^2.2.1",
+    "@adonisjs/fold": "^10.2.1",
     "@adonisjs/lucid": "^21.6.0",
     "@vinejs/vine": "^3.0.0",
     "adonis-autoswagger": "^3.72.0",

@@ -25,8 +25,8 @@ const command: SlashCommand = new StaticCommand(
     ),
   async (interaction: ChatInputCommandInteraction) => {
     const optCh = interaction.options.get("channel", true);
-    if (!optCh.channel) {
-      interaction.reply({
+    if (optCh.channel === null || optCh.channel === undefined) {
+      await interaction.reply({
         content: "Invalid channel option",
         flags: MessageFlags.Ephemeral,
       });
@@ -39,7 +39,7 @@ const command: SlashCommand = new StaticCommand(
       discordChannelId: channelId,
       recordingStatus: null,
     });
-    interaction.reply({
+    await interaction.reply({
       content: `Meeting ${optMeetingName.value} created in channel ${optCh.channel.name}`,
       flags: MessageFlags.Ephemeral,
     });

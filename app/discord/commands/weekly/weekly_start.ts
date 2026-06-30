@@ -3,7 +3,7 @@ import type { ChatInputCommandInteraction } from "discord.js";
 
 import logger from "@adonisjs/core/services/logger";
 
-import { monitorVoiceState } from "#app/discord/handlers/voiceStateHandler";
+import { monitorVoiceState } from "#app/discord/handlers/voice_state_handler";
 import { client } from "#app/discord/index";
 import Meeting, { AttendanceStatus, RecordingStatus } from "#models/meetings";
 import Member from "#models/member";
@@ -35,8 +35,8 @@ const command: SlashCommand = new StaticCommand(
     await interaction.deferReply({});
 
     const optCh = interaction.options.get("channel", true);
-    if (!optCh.channel) {
-      interaction.editReply({
+    if (optCh.channel === null || optCh.channel === undefined) {
+      await interaction.editReply({
         content: "❌ Invalid channel option",
       });
       return;
@@ -48,8 +48,8 @@ const command: SlashCommand = new StaticCommand(
     const channelId = optCh.channel.id;
     const channel = await guild.channels.fetch(channelId);
 
-    if (!channel?.isVoiceBased()) {
-      interaction.editReply({
+    if (channel?.isVoiceBased() !== true) {
+      await interaction.editReply({
         content: "❌ Invalid channel option",
       });
       return;
@@ -60,8 +60,8 @@ const command: SlashCommand = new StaticCommand(
       .where("recording_status", RecordingStatus.RECORDING)
       .first();
 
-    if (ongoingMeeting) {
-      interaction.editReply({
+    if (ongoingMeeting !== null) {
+      await interaction.editReply({
         content:
           "❌ There is already an ongoing weekly meeting. Please stop it before starting a new one.",
       });
@@ -72,7 +72,7 @@ const command: SlashCommand = new StaticCommand(
       name: String(optMeetingName.value),
       discordChannelId: channel.id,
       recordingStatus: RecordingStatus.PENDING,
-      attendanceStatus: AttendanceStatus.NOT_MONITORED,
+      attendanceStatus: AttendanceStatus.NotMonitored,
     });
 
     // Send request to start transcription
@@ -81,7 +81,7 @@ const command: SlashCommand = new StaticCommand(
       body: JSON.stringify({
         channelId: String(channel.id),
         meetingId: String(newMeeting.id),
-        meetingName: optMeetingName?.value ?? "default",
+        meetingName: optMeetingName.value ?? "default",
       }),
       headers: {
         "Content-Type": "application/json",
@@ -93,7 +93,7 @@ const command: SlashCommand = new StaticCommand(
       await newMeeting.save();
 
       logger.error("Error starting recording");
-      interaction.editReply({
+      await interaction.editReply({
         content: "❌ Failed to start recording",
       });
       return;

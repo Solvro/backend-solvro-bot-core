@@ -46,7 +46,7 @@ const command: SlashCommand = new StaticCommand(
       const endDateInput = interaction.options.getString("end_date");
 
       // Validate dates if provided
-      if (startDateInput) {
+      if (startDateInput !== null) {
         const dateRegex = /^(\d{4})-(\d{2})-(\d{2})$/;
         if (!dateRegex.test(startDateInput)) {
           await interaction.reply({
@@ -57,7 +57,7 @@ const command: SlashCommand = new StaticCommand(
         }
       }
 
-      if (endDateInput) {
+      if (endDateInput !== null) {
         const dateRegex = /^(\d{4})-(\d{2})-(\d{2})$/;
         if (!dateRegex.test(endDateInput)) {
           await interaction.reply({
@@ -69,7 +69,7 @@ const command: SlashCommand = new StaticCommand(
       }
 
       // Validate start_date < end_date
-      if (startDateInput && endDateInput) {
+      if (startDateInput !== null && endDateInput !== null) {
         const start = new Date(startDateInput);
         const end = new Date(endDateInput);
         if (start > end) {
@@ -118,7 +118,7 @@ const command: SlashCommand = new StaticCommand(
         );
 
       const reply = await interaction.reply({
-        content: `📊 **Activity Report Generator**\n\n**Format:** ${fileType.toUpperCase()}\n**Date Range:** ${startDateInput || "All time"} → ${endDateInput || "Today"}\n\nPlease select the statistics you want to include:`,
+        content: `📊 **Activity Report Generator**\n\n**Format:** ${fileType.toUpperCase()}\n**Date Range:** ${startDateInput ?? "All time"} → ${endDateInput ?? "Today"}\n\nPlease select the statistics you want to include:`,
         components: [statsRow],
         flags: MessageFlags.Ephemeral,
         fetchReply: true,
@@ -128,8 +128,8 @@ const command: SlashCommand = new StaticCommand(
       const { getConfig } =
         await import("../../interactions/shared/activity_report_config.js");
       const config = getConfig(interaction.user.id, reply.id);
-      config.startDate = startDateInput || undefined;
-      config.endDate = endDateInput || undefined;
+      config.startDate = startDateInput ?? undefined;
+      config.endDate = endDateInput ?? undefined;
       config.fileType = fileType;
     } catch (err) {
       console.error("Error showing activity report:", err);

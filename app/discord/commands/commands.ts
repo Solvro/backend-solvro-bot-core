@@ -1,8 +1,11 @@
-import type { Interaction, SharedSlashCommand } from "discord.js";
+import type { SharedSlashCommand } from "discord.js";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ExecuteFn = (interaction: any) => Promise<void>;
 
 export abstract class SlashCommand {
-  execute: (interaction: Interaction) => Promise<void>;
-  constructor(execute: (interaction: any) => Promise<void>) {
+  execute: ExecuteFn;
+  constructor(execute: ExecuteFn) {
     this.execute = execute;
   }
   abstract cmd(): Promise<SharedSlashCommand>;
@@ -11,10 +14,7 @@ export abstract class SlashCommand {
 
 export class StaticCommand extends SlashCommand {
   data: SharedSlashCommand;
-  constructor(
-    data: SharedSlashCommand,
-    execute: (interaction: any) => Promise<void>,
-  ) {
+  constructor(data: SharedSlashCommand, execute: ExecuteFn) {
     super(execute);
     this.data = data;
   }
@@ -32,7 +32,7 @@ export class DynamicCommand extends SlashCommand {
   constructor(
     name: string,
     fn: () => Promise<SharedSlashCommand>,
-    execute: (interaction: any) => Promise<void>,
+    execute: ExecuteFn,
   ) {
     super(execute);
     this.fn = fn;

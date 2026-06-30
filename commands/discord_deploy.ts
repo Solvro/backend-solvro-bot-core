@@ -49,8 +49,8 @@ export default class DeployCommands extends BaseCommand {
       this.logger.info(
         `Successfully reloaded ${data.length} application (/) commands.`,
       );
-    } catch (error) {
-      this.logger.error(error);
+    } catch (error: unknown) {
+      this.logger.error(error instanceof Error ? error.message : String(error));
     }
   }
 }

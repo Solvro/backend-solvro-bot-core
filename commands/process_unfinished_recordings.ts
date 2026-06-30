@@ -43,9 +43,9 @@ export default class ProcessUnfinishedRecordings extends BaseCommand {
             `Failed to trigger processing for recording ID: ${recording.id}. Status: ${response.status}`,
           );
         }
-      } catch (error) {
+      } catch (error: unknown) {
         this.logger.error(
-          `Error processing recording ID: ${recording.id}. Error: ${error.message}`,
+          `Error processing recording ID: ${recording.id}. Error: ${error instanceof Error ? error.message : String(error)}`,
         );
       }
     }

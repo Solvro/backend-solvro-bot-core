@@ -17,6 +17,9 @@ importers:
       '@adonisjs/cors':
         specifier: ^2.2.1
         version: 2.2.1(@adonisjs/core@6.19.1(@adonisjs/assembler@7.8.2(typescript@5.7.3))(@vinejs/vine@3.0.1))
+      '@adonisjs/fold':
+        specifier: ^10.2.1
+        version: 10.2.1
       '@adonisjs/lucid':
         specifier: ^21.6.0
         version: 21.8.1(@adonisjs/assembler@7.8.2(typescript@5.7.3))(@adonisjs/core@6.19.1(@adonisjs/assembler@7.8.2(typescript@5.7.3))(@vinejs/vine@3.0.1))(@vinejs/vine@3.0.1)(luxon@3.7.2)(pg@8.16.3)

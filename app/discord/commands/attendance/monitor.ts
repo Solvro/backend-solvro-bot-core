@@ -3,7 +3,7 @@ import type { ChatInputCommandInteraction } from "discord.js";
 
 import logger from "@adonisjs/core/services/logger";
 
-import { monitorVoiceState } from "#app/discord/handlers/voiceStateHandler";
+import { monitorVoiceState } from "#app/discord/handlers/voice_state_handler";
 import { client } from "#app/discord/index";
 import Meeting, { AttendanceStatus } from "#models/meetings";
 import Member from "#models/member";
@@ -25,8 +25,8 @@ const command: SlashCommand = new StaticCommand(
     ),
   async (interaction: ChatInputCommandInteraction) => {
     const voiceChannelId = await getVoiceChannelId(interaction);
-    if (!voiceChannelId) {
-      interaction.reply({
+    if (voiceChannelId === null) {
+      await interaction.reply({
         content:
           "Please specify a voice channel or join one to use this command.",
         flags: MessageFlags.Ephemeral,
@@ -39,8 +39,8 @@ const command: SlashCommand = new StaticCommand(
       .orderBy("id", "desc")
       .where("discord_channel_id", voiceChannelId)
       .first();
-    if (!meeting) {
-      interaction.reply({
+    if (meeting === null) {
+      await interaction.reply({
         content: "No meeting found in this channel",
         flags: MessageFlags.Ephemeral,
       });
@@ -49,7 +49,7 @@ const command: SlashCommand = new StaticCommand(
 
     // save users currently in vc channel
     const channel = await client.channels.fetch(voiceChannelId);
-    if (channel?.isVoiceBased()) {
+    if (channel?.isVoiceBased() === true) {
       channel.members.forEach(async (member) => {
         if (member.user.bot) {
           return;
@@ -73,7 +73,7 @@ const command: SlashCommand = new StaticCommand(
       client.on("voiceStateUpdate", monitorVoiceState);
     }
 
-    interaction.reply({
+    await interaction.reply({
       content: "Monitoring voice channel for attendance",
       flags: MessageFlags.Ephemeral,
     });
@@ -84,12 +84,15 @@ async function getVoiceChannelId(
   interaction: ChatInputCommandInteraction,
 ): Promise<string | null> {
   const optChannel = interaction.options.get(OPTION_CHANNEL, false)?.channel;
-  if (optChannel) {
+  if (optChannel !== null && optChannel !== undefined) {
     return optChannel.id;
   }
 
   const member = await interaction.guild?.members.fetch(interaction.user.id);
-  if (member?.voice.channelId) {
+  if (
+    member?.voice.channelId !== null &&
+    member?.voice.channelId !== undefined
+  ) {
     return member.voice.channelId;
   }
 

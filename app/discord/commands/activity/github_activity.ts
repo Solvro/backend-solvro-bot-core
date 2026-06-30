@@ -12,7 +12,7 @@ function parseDate(dateString: string): Date | null {
   const dateRegex = /^(\d{4})-(\d{2})-(\d{2})$/;
   const match = dateRegex.exec(dateString);
 
-  if (!match) {
+  if (match === null) {
     return null;
   }
 
@@ -24,7 +24,7 @@ function parseDate(dateString: string): Date | null {
   );
 
   // Check if date is valid
-  if (isNaN(date.getTime())) {
+  if (Number.isNaN(date.getTime())) {
     return null;
   }
 
@@ -76,7 +76,7 @@ const command: SlashCommand = new StaticCommand(
     const startDateStr = interaction.options.getString("start_date");
     const endDateStr = interaction.options.getString("end_date");
 
-    if (!userDiscordId) {
+    if (userDiscordId === undefined) {
       await interaction.editReply({ content: "❌ Invalid user specified." });
       return;
     }
@@ -85,7 +85,14 @@ const command: SlashCommand = new StaticCommand(
       .where("discord_id", userDiscordId)
       .first();
 
-    if (!user?.githubId) {
+    if (user === null) {
+      await interaction.editReply({
+        content: "❌ User not found in the database or has no GitHub ID.",
+      });
+      return;
+    }
+
+    if (user.githubId === null) {
       await interaction.editReply({
         content: "❌ User not found in the database or has no GitHub ID.",
       });
@@ -96,9 +103,9 @@ const command: SlashCommand = new StaticCommand(
     let startDate: Date | null = null;
     let endDate: Date | null = null;
 
-    if (startDateStr) {
+    if (startDateStr !== null) {
       startDate = parseDate(startDateStr);
-      if (!startDate) {
+      if (startDate === null) {
         await interaction.editReply({
           content: `❌ Invalid start date format: \`${startDateStr}\`. Please use YYYY-MM-DD format (e.g., 2025-01-15).`,
         });
@@ -106,9 +113,9 @@ const command: SlashCommand = new StaticCommand(
       }
     }
 
-    if (endDateStr) {
+    if (endDateStr !== null) {
       endDate = parseDate(endDateStr);
-      if (!endDate) {
+      if (endDate === null) {
         await interaction.editReply({
           content: `❌ Invalid end date format: \`${endDateStr}\`. Please use YYYY-MM-DD format (e.g., 2025-10-19).`,
         });
@@ -121,7 +128,7 @@ const command: SlashCommand = new StaticCommand(
     }
 
     // Validate start_date < end_date
-    if (startDate && endDate && startDate > endDate) {
+    if (startDate !== null && startDate > endDate) {
       await interaction.editReply({
         content: `❌ Start date (\`${startDateStr}\`) must be before or equal to end date (\`${endDateStr}\`).`,
       });
@@ -133,23 +140,24 @@ const command: SlashCommand = new StaticCommand(
       .select("type")
       .where("author_github_id", user.githubId);
 
-    if (startDate) {
+    if (startDate !== null) {
       query = query.where("date", ">=", startDate);
     }
 
-    if (endDate) {
-      query = query.where("date", "<=", endDate);
-    }
+    query = query.where("date", "<=", endDate);
 
-    const activity = await query.count("github_id as count").groupBy("type");
+    const activity: (GithubActivity & { $extras: { count: number } })[] =
+      (await query
+        .count("github_id as count")
+        .groupBy("type")) as unknown as (GithubActivity & {
+        $extras: { count: number };
+      })[];
 
     // Format period description
     let periodDesc = "all time";
-    if (startDate && endDate) {
+    if (startDate !== null) {
       periodDesc = `${startDateStr} to ${endDateStr}`;
-    } else if (startDate) {
-      periodDesc = `since ${startDateStr}`;
-    } else if (endDateStr) {
+    } else if (endDateStr !== null) {
       periodDesc = `up to ${endDateStr}`;
     }
 

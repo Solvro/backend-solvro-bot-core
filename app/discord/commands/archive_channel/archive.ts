@@ -17,7 +17,7 @@ const command = new StaticCommand(
     const channel = interaction.channel;
     const guild = interaction.guild;
 
-    if (!guild || !channel?.isTextBased()) {
+    if (guild === null || channel?.isTextBased() !== true) {
       return;
     }
 
@@ -36,7 +36,7 @@ const command = new StaticCommand(
         ch.name.toLowerCase() === "archived",
     );
 
-    if (!archivedCategory) {
+    if (archivedCategory === undefined) {
       await interaction.reply({
         content: 'Category "ARCHIVED" not found.',
         ephemeral: true,

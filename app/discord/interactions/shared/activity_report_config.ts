@@ -17,10 +17,12 @@ export function getConfigKey(userId: string, messageId: string): string {
 
 export function getConfig(userId: string, messageId: string): ReportConfig {
   const key = getConfigKey(userId, messageId);
-  if (!reportConfigs.has(key)) {
-    reportConfigs.set(key, { stats: [], messageId });
+  let config = reportConfigs.get(key);
+  if (config === undefined) {
+    config = { stats: [], messageId };
+    reportConfigs.set(key, config);
   }
-  return reportConfigs.get(key)!;
+  return config;
 }
 
 export function deleteConfig(userId: string, messageId: string): void {

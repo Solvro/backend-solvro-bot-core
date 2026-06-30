@@ -1,10 +1,13 @@
-import axios from "axios";
-
 import { BaseCommand } from "@adonisjs/core/ace";
 import type { CommandOptions } from "@adonisjs/core/types/ace";
 
 import Member from "#models/member";
 import env from "#start/env";
+
+interface GithubUserResponse {
+  id: number;
+  login: string;
+}
 
 export default class GetGithubIds extends BaseCommand {
   static commandName = "github:ids";
@@ -15,17 +18,16 @@ export default class GetGithubIds extends BaseCommand {
   };
 
   async run() {
-    let headers;
-    if (env.get("GITHUB_TOKEN")) {
-      headers = {
-        Authorization: `Bearer ${env.get("GITHUB_TOKEN")}`,
-        Accept: "application/vnd.github+json",
-      };
-    } else {
-      headers = {
-        Accept: "application/vnd.github+json",
-      };
-    }
+    const token = env.get("GITHUB_TOKEN");
+    const headers: Record<string, string> =
+      token !== undefined
+        ? {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/vnd.github+json",
+          }
+        : {
+            Accept: "application/vnd.github+json",
+          };
 
     const members = await Member.query()
       .whereNull("github_id")
@@ -35,7 +37,7 @@ export default class GetGithubIds extends BaseCommand {
       const profileUrl = member.githubUrl;
 
       const match = profileUrl?.match(/github\.com\/([^/]+)/);
-      if (!match) {
+      if (match === null || match === undefined) {
         this.logger.error("❌ Invalid GitHub profile URL format.");
         continue;
       }
@@ -43,15 +45,14 @@ export default class GetGithubIds extends BaseCommand {
       const [_, user] = match;
       this.logger.info(`🔍 Syncing GitHub ID for: ${user}`);
 
-      const profileRes = await axios.get(
-        `https://api.github.com/users/${user}`,
-        { headers },
-      );
-      const data = profileRes.data;
+      const response = await fetch(`https://api.github.com/users/${user}`, {
+        headers,
+      });
+      const data = (await response.json()) as GithubUserResponse;
 
       const ghId = data.id;
 
-      member.githubId = ghId;
+      member.githubId = String(ghId);
       await member.save();
     }
   }

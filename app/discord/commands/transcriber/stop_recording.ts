@@ -14,8 +14,8 @@ const command: SlashCommand = new StaticCommand(
     const meeting = await Meeting.query()
       .where("recording_status", RecordingStatus.RECORDING)
       .first();
-    if (!meeting) {
-      interaction.reply({
+    if (meeting === null) {
+      await interaction.reply({
         content: "No recording in progress",
         flags: MessageFlags.Ephemeral,
       });
@@ -27,7 +27,7 @@ const command: SlashCommand = new StaticCommand(
       method: "POST",
     });
     if (!response.ok) {
-      interaction.reply({
+      await interaction.reply({
         content: "Failed to stop recording",
         flags: MessageFlags.Ephemeral,
       });
@@ -36,7 +36,7 @@ const command: SlashCommand = new StaticCommand(
       return;
     }
 
-    interaction.reply({ content: "Stopped recording" });
+    await interaction.reply({ content: "Stopped recording" });
   },
 );
 export default command;

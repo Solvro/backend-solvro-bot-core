@@ -36,7 +36,9 @@ export default class BootstrapEnv extends BaseCommand {
         "Please update the .env file with your environment variables.",
       );
     } catch (error) {
-      this.logger.error("Failed to create .env file:", error.message);
+      this.logger.error(
+        `Failed to create .env file: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 }

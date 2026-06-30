@@ -24,11 +24,11 @@ export default class SyncMembers extends BaseCommand {
       return null;
     }
     // Try to find user by username
-    const member = await guild.members.cache.find(
+    const member = guild.members.cache.find(
       (m) => m.user.username.toLowerCase() === username.toLowerCase(),
     );
 
-    if (!member) {
+    if (member === undefined) {
       this.logger.warning(`⚠️ Could not resolve Discord username: ${username}`);
       return null;
     }
@@ -71,101 +71,102 @@ export default class SyncMembers extends BaseCommand {
       }
 
       const trx = await db.transaction();
-      for (const row of rows) {
+      for (const row of rows as string[][]) {
         const [
-          firstName,
-          lastName,
-          indexNumber,
-          email,
-          joinDate,
-          _knowledge,
-          faculty,
-          fieldOfStudy,
-          studyYear,
-          messengerUrl,
-          discordUsername,
-          githubUrl,
-          currentSection,
-          currentProjects,
-          currentRole,
-          otherProjects,
-          otherExperiences,
+          firstName = "",
+          lastName = "",
+          indexNumber = "",
+          email = "",
+          joinDate = "",
+          _knowledge = "",
+          faculty = "",
+          fieldOfStudy = "",
+          studyYear = "",
+          messengerUrl = "",
+          discordUsername = "",
+          githubUrl = "",
+          currentSection = "",
+          currentProjects = "",
+          currentRole = "",
+          otherProjects = "",
+          otherExperiences = "",
         ] = row;
 
         let discordId: string | null = null;
 
-        if (discordUsername) {
+        if (discordUsername !== "") {
           const existing = await Member.query()
             .where("discord_id", discordUsername)
             .orWhere("email", email)
             .orWhere("index_number", indexNumber)
             .first();
 
-          if (existing) {
+          if (existing !== null) {
             discordId = existing.discordId;
           } else {
             discordId = await this.resolveDiscordId(guild, discordUsername);
           }
         }
 
-        if (!discordId) {
+        if (discordId === null) {
           this.logger.warning(
             `Skipping ${firstName} ${lastName} (no discordId resolved)`,
           );
           continue;
         }
 
-        const githubUsername = githubUrl ? githubUrl.split("/").pop() : null;
+        const githubUsername =
+          githubUrl !== "" ? (githubUrl.split("/").pop() ?? null) : null;
 
-        const member = await Member.firstOrCreate(
+        const member = await Member.firstOrCreate<typeof Member>(
           { discordId },
           {
-            firstName,
-            lastName,
-            indexNumber,
-            email,
-            joinDate,
-            faculty,
-            fieldOfStudy,
-            studyYear,
-            messengerUrl,
-            githubUrl,
+            firstName: firstName !== "" ? firstName : null,
+            lastName: lastName !== "" ? lastName : null,
+            indexNumber: indexNumber !== "" ? indexNumber : null,
+            email: email !== "" ? email : null,
+            joinDate: joinDate !== "" ? new Date(joinDate) : undefined,
+            faculty: faculty !== "" ? faculty : null,
+            fieldOfStudy: fieldOfStudy !== "" ? fieldOfStudy : null,
+            studyYear: studyYear !== "" ? studyYear : null,
+            messengerUrl: messengerUrl !== "" ? messengerUrl : null,
+            githubUrl: githubUrl !== "" ? githubUrl : null,
             githubUsername,
             status,
-            currentSection,
-            currentRole,
-            otherProjects,
-            otherExperiences,
-            currentProjects,
+            currentSection: currentSection !== "" ? currentSection : null,
+            currentRole: currentRole !== "" ? currentRole : null,
+            otherProjects: otherProjects !== "" ? otherProjects : null,
+            otherExperiences: otherExperiences !== "" ? otherExperiences : null,
+            currentProjects: currentProjects !== "" ? currentProjects : null,
           },
         );
 
         member.merge({
-          firstName,
-          lastName,
-          indexNumber,
-          email,
-          joinDate,
-          faculty,
-          fieldOfStudy,
-          studyYear,
-          messengerUrl,
-          githubUrl,
+          firstName: firstName !== "" ? firstName : null,
+          lastName: lastName !== "" ? lastName : null,
+          indexNumber: indexNumber !== "" ? indexNumber : null,
+          email: email !== "" ? email : null,
+          joinDate: joinDate !== "" ? new Date(joinDate) : undefined,
+          faculty: faculty !== "" ? faculty : null,
+          fieldOfStudy: fieldOfStudy !== "" ? fieldOfStudy : null,
+          studyYear: studyYear !== "" ? studyYear : null,
+          messengerUrl: messengerUrl !== "" ? messengerUrl : null,
+          githubUrl: githubUrl !== "" ? githubUrl : null,
           githubUsername,
           status,
-          currentSection,
-          currentRole,
-          otherProjects,
-          otherExperiences,
-          currentProjects,
+          currentSection: currentSection !== "" ? currentSection : null,
+          currentRole: currentRole !== "" ? currentRole : null,
+          otherProjects: otherProjects !== "" ? otherProjects : null,
+          otherExperiences: otherExperiences !== "" ? otherExperiences : null,
+          currentProjects: currentProjects !== "" ? currentProjects : null,
         });
         await member.useTransaction(trx).save();
       }
 
-      trx.commit();
+      await trx.commit();
     }
 
-    discord.client.destroy();
+    await discord.client.destroy();
 
     this.logger.success("✅ Members synced from Google Sheets");
   }

@@ -15,7 +15,7 @@ export async function handleStatsSelect(
 
 **Configuration:**
 • **Format:** ${config.fileType?.toUpperCase()}
-• **Date Range:** ${config.startDate || "All time"} → ${config.endDate || "Today"}
+• **Date Range:** ${config.startDate ?? "All time"} → ${config.endDate ?? "Today"}
 • **Statistics:** ${config.stats.join(", ")}
 
 🔄 Generating your activity report (might take a few seconds)...`,
@@ -24,9 +24,9 @@ export async function handleStatsSelect(
 
   try {
     // Generate the report
-    const activityReportService = (
-      await import("#services/activity_report_service")
-    ).default;
+    const activityReportModule =
+      await import("#services/activity_report_service");
+    const activityReportService = activityReportModule.default;
     const reportFile = await activityReportService.generateReport({
       fileType: config.fileType as "csv" | "excel",
       startDate: config.startDate,
@@ -36,7 +36,7 @@ export async function handleStatsSelect(
 
     // Send the report file
     await interaction.followUp({
-      content: `📊 **Activity Report Generated Successfully!**\n\n**Summary:**\n• Format: ${config.fileType?.toUpperCase()}\n• Date Range: ${config.startDate || "All time"} → ${config.endDate || "Today"}\n• Statistics: ${config.stats.join(", ")}\n\nYour report is attached below.`,
+      content: `📊 **Activity Report Generated Successfully!**\n\n**Summary:**\n• Format: ${config.fileType?.toUpperCase()}\n• Date Range: ${config.startDate ?? "All time"} → ${config.endDate ?? "Today"}\n• Statistics: ${config.stats.join(", ")}\n\nYour report is attached below.`,
       files: [reportFile],
       ephemeral: true,
     });
@@ -45,11 +45,11 @@ export async function handleStatsSelect(
       userId: interaction.user.id,
       config,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error("Failed to generate activity report", { error, config });
 
     await interaction.followUp({
-      content: `❌ **Report Generation Failed**\n\nAn error occurred while generating the report. Please try again or contact an administrator.\n\nError: ${error.message}`,
+      content: `❌ **Report Generation Failed**\n\nAn error occurred while generating the report. Please try again or contact an administrator.\n\nError: ${error instanceof Error ? error.message : String(error)}`,
       ephemeral: true,
     });
   } finally {

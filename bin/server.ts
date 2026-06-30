@@ -29,14 +29,14 @@ const IMPORTER = (filePath: string) => {
   return import(filePath);
 };
 
-new Ignitor(APP_ROOT, { importer: IMPORTER })
+void new Ignitor(APP_ROOT, { importer: IMPORTER })
   .tap((app) => {
     app.booting(async () => {
       await import("#start/env");
     });
-    app.ready(async () => {
+    void app.ready(async () => {
       const discord = await import("#app/discord/index");
-      await discord.client.start();
+      void discord.client.start();
     });
     app.listen("SIGTERM", () => app.terminate());
     app.listenIf(app.managedByPm2, "SIGINT", () => app.terminate());
@@ -45,5 +45,5 @@ new Ignitor(APP_ROOT, { importer: IMPORTER })
   .start()
   .catch((error) => {
     process.exitCode = 1;
-    prettyPrintError(error);
+    void prettyPrintError(error);
   });

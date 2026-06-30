@@ -60,7 +60,7 @@ export class ActivityReportService {
    * Generate activity report for all active/new members
    */
   async generateReport(config: ReportConfig): Promise<AttachmentBuilder> {
-    logger.info("Starting activity report generation", { config });
+    logger.info({ config }, "Starting activity report generation");
 
     // Parse dates
     const startDate =

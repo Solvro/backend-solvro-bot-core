@@ -43,15 +43,15 @@ export async function handleStatsSelect(
       ephemeral: true,
     });
 
-    logger.info("Activity report generated and sent successfully", {
-      userId: interaction.user.id,
-      config,
-    });
+    logger.info(
+      { userId: interaction.user.id, config },
+      "Activity report generated and sent successfully",
+    );
   } catch (error: unknown) {
-    logger.error("Failed to generate activity report", {
-      err: toError(error),
-      config,
-    });
+    logger.error(
+      { err: toError(error), config },
+      "Failed to generate activity report",
+    );
 
     await interaction.followUp({
       content: `❌ **Report Generation Failed**\n\nAn error occurred while generating the report. Please try again or contact an administrator.\n\nError: ${error instanceof Error ? error.message : String(error)}`,

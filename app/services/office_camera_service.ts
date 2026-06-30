@@ -5,6 +5,7 @@ import { DateTime } from "luxon";
 import logger from "@adonisjs/core/services/logger";
 
 import { client } from "#app/discord/index";
+import { toError } from "#app/helpers/error";
 import OfficeStatusMessage from "#models/office_status_message";
 
 export class OfficeCameraService {
@@ -141,7 +142,10 @@ export class OfficeCameraService {
           );
         }
       } catch (err) {
-        logger.error({ err }, `Failed to update message ${msg.messageId}`);
+        logger.error(
+          { err: toError(err) },
+          `Failed to update message ${msg.messageId}`,
+        );
       }
     }
   }

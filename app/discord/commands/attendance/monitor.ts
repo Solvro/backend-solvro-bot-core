@@ -5,6 +5,7 @@ import logger from "@adonisjs/core/services/logger";
 
 import { monitorVoiceState } from "#app/discord/handlers/voice_state_handler";
 import { client } from "#app/discord/index";
+import { toError } from "#app/helpers/error";
 import Meeting, { AttendanceStatus } from "#models/meetings";
 import Member from "#models/member";
 
@@ -60,7 +61,10 @@ const command: SlashCommand = new StaticCommand(
         try {
           await memberRecord.related("meetings").attach([meeting.id]);
         } catch (error) {
-          logger.error({ err: error }, "Error attaching member to meeting");
+          logger.error(
+            { err: toError(error) },
+            "Error attaching member to meeting",
+          );
         }
       });
     }

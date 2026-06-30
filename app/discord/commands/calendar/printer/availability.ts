@@ -7,6 +7,7 @@ import type { ChatInputCommandInteraction } from "discord.js";
 
 import logger from "@adonisjs/core/services/logger";
 
+import { toError } from "#app/helpers/error";
 import env from "#start/env";
 
 import { StaticCommand } from "../../commands.js";
@@ -124,7 +125,10 @@ const command: StaticCommand = new StaticCommand(
         files: [attachment],
       });
     } catch (error: unknown) {
-      logger.error({ err: error }, "Error checking printer availability");
+      logger.error(
+        { err: toError(error) },
+        "Error checking printer availability",
+      );
 
       if (error instanceof Error) {
         if (

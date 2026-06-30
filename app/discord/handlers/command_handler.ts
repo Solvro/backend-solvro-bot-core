@@ -3,6 +3,8 @@ import type { CacheType, Interaction } from "discord.js";
 
 import logger from "@adonisjs/core/services/logger";
 
+import { toError } from "#app/helpers/error";
+
 import type { DiscordClient } from "../index.js";
 
 export async function commandsHandler(interaction: Interaction<CacheType>) {
@@ -22,7 +24,7 @@ export async function commandsHandler(interaction: Interaction<CacheType>) {
   try {
     await command.execute(interaction);
   } catch (error) {
-    logger.error({ err: error }, "Error executing command");
+    logger.error({ err: toError(error) }, "Error executing command");
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp({
         content: "There was an error while executing this command!",

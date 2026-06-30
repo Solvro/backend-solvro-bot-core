@@ -3,6 +3,7 @@ import type { StringSelectMenuInteraction } from "discord.js";
 
 import logger from "@adonisjs/core/services/logger";
 
+import { toError } from "#app/helpers/error";
 import env from "#start/env";
 
 /**
@@ -126,7 +127,7 @@ export default async function handleMeetingSummary(
       });
     }
   } catch (err) {
-    logger.error({ err }, "Failed to fetch meeting summary");
+    logger.error({ err: toError(err) }, "Failed to fetch meeting summary");
     await interaction.update({
       content:
         "❌ Failed to fetch summary. It may still be generating. Try again later.",

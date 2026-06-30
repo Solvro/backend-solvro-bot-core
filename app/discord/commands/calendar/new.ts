@@ -3,6 +3,7 @@ import type { ChatInputCommandInteraction } from "discord.js";
 
 import logger from "@adonisjs/core/services/logger";
 
+import { toError } from "#app/helpers/error";
 import type { CalendarEvent } from "#services/google_calendar_service";
 import env from "#start/env";
 
@@ -231,7 +232,7 @@ const command: StaticCommand = new StaticCommand(
         content: `✅ **Event created successfully!**\n\n📅 **${title}**\n🕒 ${date} ${startTime} - ${endTime}${endDateDisplay}\n📝 ${description}\n📍 ${locationText}${attendeesText}\n\n🔗 [View in Calendar](${createdEvent.htmlLink})`,
       });
     } catch (error: unknown) {
-      logger.error({ err: error }, "Error creating calendar event");
+      logger.error({ err: toError(error) }, "Error creating calendar event");
 
       if (error instanceof Error) {
         if (

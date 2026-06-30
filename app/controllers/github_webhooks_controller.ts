@@ -3,6 +3,7 @@ import crypto from "node:crypto";
 
 import type { HttpContext } from "@adonisjs/core/http";
 
+import { toError } from "#app/helpers/error";
 import GithubActivity from "#models/github_activity";
 import env from "#start/env";
 import { githubWebhookValidator } from "#validators/github_webhook";
@@ -55,7 +56,10 @@ export default class GithubWebhooksController {
       parsedBody = JSON.parse(rawBody.toString()) as Record<string, unknown>;
     } catch (error) {
       logger.error(
-        { err: error, body: rawBody.toString() },
+        {
+          err: toError(error),
+          body: rawBody.toString(),
+        },
         "GitHub webhook: Failed to parse JSON body",
       );
       return response.badRequest("Invalid JSON body");
@@ -235,7 +239,10 @@ export default class GithubWebhooksController {
 
       return response.ok("Webhook processed.");
     } catch (error) {
-      logger.error({ err: error }, "GitHub webhook: Error processing webhook");
+      logger.error(
+        { err: toError(error) },
+        "GitHub webhook: Error processing webhook",
+      );
       return response.internalServerError("Error processing GitHub webhook.");
     }
   }

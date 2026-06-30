@@ -5,6 +5,7 @@ import { Readable } from "node:stream";
 import logger from "@adonisjs/core/services/logger";
 
 import { client } from "#app/discord/index";
+import { toError } from "#app/helpers/error";
 import type Meeting from "#models/meetings";
 import env from "#start/env";
 
@@ -60,7 +61,7 @@ export class GoogleDriveService {
       return fileId;
     } catch (error) {
       logger.error(
-        { err: error },
+        { err: toError(error) },
         `Failed to upload file to Google Drive: ${name}`,
       );
       throw error;
@@ -303,7 +304,7 @@ export class GoogleDriveService {
       logger.info(`Successfully uploaded all files for meeting ${meeting.id}`);
     } catch (error) {
       logger.error(
-        { err: error },
+        { err: toError(error) },
         `Failed to upload files for meeting ${meeting.id}`,
       );
       throw error;
@@ -330,7 +331,7 @@ export class GoogleDriveService {
       return response.data.files?.map((file) => file.name ?? "") ?? [];
     } catch (error) {
       logger.error(
-        { err: error },
+        { err: toError(error) },
         `Failed to get uploaded files for meeting ${meeting.id}`,
       );
       return [];
@@ -360,7 +361,7 @@ export class GoogleDriveService {
       return true;
     } catch (error) {
       logger.error(
-        { err: error },
+        { err: toError(error) },
         "Google Drive service authentication failed",
       );
       return false;

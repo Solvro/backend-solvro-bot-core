@@ -4,6 +4,7 @@ import { DateTime } from "luxon";
 import type { HttpContext } from "@adonisjs/core/http";
 import db from "@adonisjs/lucid/services/db";
 
+import { toError } from "#app/helpers/error";
 import Meeting, { RecordingStatus } from "#models/meetings";
 import GoogleDriveService from "#services/google_drive_service";
 import { updateMeetingValidator } from "#validators/recording";
@@ -85,7 +86,7 @@ export default class RecordingsController {
           );
         } catch (error) {
           logger.error(
-            { err: error },
+            { err: toError(error) },
             `Failed to upload files to Google Drive for meeting ${id}`,
           );
           // don't fail the webhook
@@ -100,7 +101,7 @@ export default class RecordingsController {
         .status(200)
         .json({ message: "Summary received and files uploaded" });
     } catch (error) {
-      logger.error({ err: error }, "Error processing summary webhook");
+      logger.error({ err: toError(error) }, "Error processing summary webhook");
       return response.status(500).json({ message: "Internal server error" });
     }
   }

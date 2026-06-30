@@ -66,8 +66,8 @@ export default class GithubWebhooksController {
     }
 
     // Add debugging BEFORE validation
-    logger.debug("Raw payload before validation:", JSON.stringify(parsedBody));
-    logger.debug("Repository in raw payload:", parsedBody.repository);
+    logger.debug({ body: parsedBody }, "Raw payload before validation");
+    logger.debug({ repo: parsedBody.repository }, "Repository in raw payload");
 
     // Manually set the parsed body for validation since raw() might have consumed the stream
     request.updateBody(parsedBody);
@@ -76,15 +76,19 @@ export default class GithubWebhooksController {
     const payload = await request.validateUsing(githubWebhookValidator);
 
     // Add debugging AFTER validation
-    logger.debug("Payload after validation:", JSON.stringify(payload));
-    logger.debug("Repository after validation:", payload.repository.full_name);
+    logger.debug({ payload }, "Payload after validation");
+    logger.debug(
+      { repo: payload.repository.full_name },
+      "Repository after validation",
+    );
 
     const fullRepoName = payload.repository.full_name;
 
     if (event === undefined || fullRepoName.length === 0) {
-      logger.debug("GitHub webhook: Missing event header or repository data.");
-      logger.debug("Event:", event);
-      logger.debug("Full repo name:", fullRepoName);
+      logger.debug(
+        { event, fullRepoName },
+        "GitHub webhook: Missing event header or repository data",
+      );
       return response.badRequest("Missing event header or repository data.");
     }
 
@@ -92,7 +96,7 @@ export default class GithubWebhooksController {
       switch (event) {
         case "push": {
           const commits = payload.commits ?? [];
-          const authorId = payload.sender.id;
+          const authorId = String(payload.sender.id);
 
           logger.debug(
             `GitHub webhook event: ${event}, user ${authorId} pushed ${
@@ -130,7 +134,7 @@ export default class GithubWebhooksController {
 
           if (["opened", "edited"].includes(action) && issue !== null) {
             const githubId = issue.node_id;
-            const authorId = issue.user.id;
+            const authorId = String(issue.user.id);
             const message = issue.title;
             const date = issue.created_at;
 
@@ -168,7 +172,7 @@ export default class GithubWebhooksController {
             pr !== null
           ) {
             const githubId = pr.node_id;
-            const authorId = pr.user.id;
+            const authorId = String(pr.user.id);
             const message = pr.title;
             const date = pr.created_at;
 
@@ -204,7 +208,7 @@ export default class GithubWebhooksController {
           }
 
           const githubId = review.node_id;
-          const authorId = review.user.id;
+          const authorId = String(review.user.id);
           const message = `Review state: ${review.state}`;
           const date = review.submitted_at;
 

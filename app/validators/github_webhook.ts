@@ -6,7 +6,7 @@ export const githubWebhookValidator = vine.compile(
       full_name: vine.string(),
     }),
     sender: vine.object({
-      id: vine.string(),
+      id: vine.number(),
       login: vine.string(),
     }),
     commits: vine
@@ -23,7 +23,7 @@ export const githubWebhookValidator = vine.compile(
         node_id: vine.string(),
         title: vine.string(),
         user: vine.object({
-          id: vine.string(),
+          id: vine.number(),
           login: vine.string(),
         }),
         created_at: vine.string(),
@@ -35,7 +35,7 @@ export const githubWebhookValidator = vine.compile(
         node_id: vine.string(),
         title: vine.string(),
         user: vine.object({
-          id: vine.string(),
+          id: vine.number(),
           login: vine.string(),
         }),
         created_at: vine.string(),
@@ -47,7 +47,7 @@ export const githubWebhookValidator = vine.compile(
         body: vine.string().nullable(),
         state: vine.string(),
         user: vine.object({
-          id: vine.string(),
+          id: vine.number(),
           login: vine.string(),
         }),
         submitted_at: vine.string(),

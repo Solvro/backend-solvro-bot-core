@@ -1,92 +1,100 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column, hasMany, manyToMany } from '@adonisjs/lucid/orm'
-import Meeting from './meetings.js'
-import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
-import DiscordActivity from './discord_activity.js'
-import GithubActivity from './github_activity.js'
+import { DateTime } from "luxon";
+
+import { BaseModel, column, hasMany, manyToMany } from "@adonisjs/lucid/orm";
+import type { HasMany, ManyToMany } from "@adonisjs/lucid/types/relations";
+
+import DiscordActivity from "./discord_activity.js";
+import GithubActivity from "./github_activity.js";
+import Meeting from "./meetings.js";
 
 export enum MemberStatus {
-  NEW = 'new',
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
+  NEW = "new",
+  ACTIVE = "active",
+  INACTIVE = "inactive",
 }
 
 export default class Member extends BaseModel {
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column()
-  declare firstName: string | null
+  declare firstName: string | null;
 
   @column()
-  declare lastName: string | null
+  declare lastName: string | null;
 
   @column()
-  declare email: string | null
+  declare email: string | null;
 
   @column()
-  declare phone: string | null
+  declare phone: string | null;
 
   @column()
-  declare indexNumber: string | null
+  declare indexNumber: string | null;
 
   @column()
-  declare joinDate: Date
+  declare joinDate: Date;
 
   @column()
-  declare faculty: string | null
+  declare faculty: string | null;
 
   @column()
-  declare fieldOfStudy: string | null
+  declare fieldOfStudy: string | null;
 
   @column()
-  declare studyYear: string | null
+  declare studyYear: string | null;
 
   @column()
-  declare messengerUrl: string | null
+  declare messengerUrl: string | null;
 
   @column()
-  declare currentSection: string | null
+  declare currentSection: string | null;
 
   @column()
-  declare currentRole: string | null
+  declare currentRole: string | null;
 
   @column()
-  declare currentProjects: string | null
+  declare currentProjects: string | null;
 
   @column()
-  declare otherProjects: string | null
+  declare otherProjects: string | null;
 
   @column()
-  declare otherExperiences: string | null
+  declare otherExperiences: string | null;
 
   @column()
-  declare status: MemberStatus
+  declare status: MemberStatus;
 
   @column()
-  declare discordId: string
+  declare discordId: string;
 
   @column()
-  declare githubUsername: string | null
+  declare githubUsername: string | null;
 
   @column()
-  declare githubUrl: string | null
+  declare githubUrl: string | null;
 
   @column()
-  declare githubId: string | null
+  declare githubId: string | null;
 
   @manyToMany(() => Meeting)
-  declare meetings: ManyToMany<typeof Meeting>
+  declare meetings: ManyToMany<typeof Meeting>;
 
-  @hasMany(() => DiscordActivity, { localKey: 'discordId', foreignKey: 'discordId' })
-  declare discordActivity: HasMany<typeof DiscordActivity>
+  @hasMany(() => DiscordActivity, {
+    localKey: "discordId",
+    foreignKey: "discordId",
+  })
+  declare discordActivity: HasMany<typeof DiscordActivity>;
 
-  @hasMany(() => GithubActivity, { localKey: 'githubId', foreignKey: 'authorGithubId' })
-  declare githubActivity: HasMany<typeof GithubActivity>
+  @hasMany(() => GithubActivity, {
+    localKey: "githubId",
+    foreignKey: "authorGithubId",
+  })
+  declare githubActivity: HasMany<typeof GithubActivity>;
 
   @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  declare createdAt: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  declare updatedAt: DateTime;
 }

@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Set up AdonisJS environment
+        run: |
+          cp .env.example .env
+          node ace generate:key
+
+      - name: Check commit name
+        if: github.event_name == 'pull_request'
+        run: pnpm exec commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+
+      - name: Check formatting
+        run: pnpm run format:check
+        if: always()
+
+      - name: Lint code
+        run: pnpm run lint
+        if: always()
+
+      - name: Check types
+        run: pnpm run types:check
+        if: always()
+
+      - name: Run tests
+        run: pnpm test
+        if: always()
+
+      - name: Build
+        run: pnpm run build
+        if: always()

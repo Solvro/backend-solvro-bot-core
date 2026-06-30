@@ -1,44 +1,47 @@
-import { Interaction, SharedSlashCommand } from 'discord.js'
+import type { Interaction, SharedSlashCommand } from "discord.js";
 
 export abstract class SlashCommand {
-  execute: (interaction: Interaction) => Promise<void>
+  execute: (interaction: Interaction) => Promise<void>;
   constructor(execute: (interaction: any) => Promise<void>) {
-    this.execute = execute
+    this.execute = execute;
   }
-  abstract cmd(): Promise<SharedSlashCommand>
-  abstract name(): string
+  abstract cmd(): Promise<SharedSlashCommand>;
+  abstract name(): string;
 }
 
 export class StaticCommand extends SlashCommand {
-  data: SharedSlashCommand
-  constructor(data: SharedSlashCommand, execute: (interaction: any) => Promise<void>) {
-    super(execute)
-    this.data = data
+  data: SharedSlashCommand;
+  constructor(
+    data: SharedSlashCommand,
+    execute: (interaction: any) => Promise<void>,
+  ) {
+    super(execute);
+    this.data = data;
   }
   async cmd(): Promise<SharedSlashCommand> {
-    return this.data
+    return this.data;
   }
   name(): string {
-    return this.data.name
+    return this.data.name;
   }
 }
 
 export class DynamicCommand extends SlashCommand {
-  fn: () => Promise<SharedSlashCommand>
-  commandName: string
+  fn: () => Promise<SharedSlashCommand>;
+  commandName: string;
   constructor(
     name: string,
     fn: () => Promise<SharedSlashCommand>,
-    execute: (interaction: any) => Promise<void>
+    execute: (interaction: any) => Promise<void>,
   ) {
-    super(execute)
-    this.fn = fn
-    this.commandName = name
+    super(execute);
+    this.fn = fn;
+    this.commandName = name;
   }
   async cmd(): Promise<SharedSlashCommand> {
-    return await this.fn()
+    return await this.fn();
   }
   name(): string {
-    return this.commandName
+    return this.commandName;
   }
 }

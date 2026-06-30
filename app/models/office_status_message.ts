@@ -1,31 +1,32 @@
-import { DateTime } from 'luxon'
-import { BaseModel, column } from '@adonisjs/lucid/orm'
+import { DateTime } from "luxon";
+
+import { BaseModel, column } from "@adonisjs/lucid/orm";
 
 export default class OfficeStatusMessage extends BaseModel {
   @column({ isPrimary: true })
-  declare id: number
+  declare id: number;
 
   @column()
-  declare channelId: string
+  declare channelId: string;
 
   @column()
-  declare messageId: string
+  declare messageId: string;
 
   @column()
-  declare count: number | null
+  declare count: number | null;
 
   @column()
-  declare lastPresence: DateTime | null
+  declare lastPresence: DateTime | null;
 
   @column()
-  declare lastUpdate: DateTime | null
+  declare lastUpdate: DateTime | null;
 
   @column()
-  declare imagePath: string | null
+  declare imagePath: string | null;
 
   @column.dateTime({ autoCreate: true })
-  declare createdAt: DateTime
+  declare createdAt: DateTime;
 
   @column.dateTime({ autoCreate: true, autoUpdate: true })
-  declare updatedAt: DateTime
+  declare updatedAt: DateTime;
 }

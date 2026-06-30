@@ -2,9 +2,9 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 import { HttpContext } from "@adonisjs/core/http";
-import logger from "@adonisjs/core/services/logger";
 import { inject } from "@adonisjs/fold";
 
+import { toError } from "#app/helpers/error";
 import { OfficeCameraService } from "#services/office_camera_service";
 import env from "#start/env";
 import { officeCameraPollValidator } from "#validators/office_camera";
@@ -13,7 +13,7 @@ import { officeCameraPollValidator } from "#validators/office_camera";
 export default class OfficeCameraController {
   constructor(protected officeCameraService: OfficeCameraService) {}
 
-  async update({ request, response }: HttpContext) {
+  async update({ request, response, logger }: HttpContext) {
     const {
       count,
       timestamp,
@@ -39,7 +39,7 @@ export default class OfficeCameraController {
 
         logger.debug(`Image saved to: ${fullImagePath}`);
       } catch (err) {
-        logger.error("Failed to save image:", err);
+        logger.error({ err: toError(err) }, "Failed to save image");
       }
     } else {
       void this.officeCameraService.updateStatusMessages(count, timestamp);

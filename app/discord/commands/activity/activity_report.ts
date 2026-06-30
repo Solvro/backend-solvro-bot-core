@@ -6,6 +6,10 @@ import {
 } from "discord.js";
 import type { ChatInputCommandInteraction } from "discord.js";
 
+import logger from "@adonisjs/core/services/logger";
+
+import { toError } from "#app/helpers/error";
+
 import { StaticCommand } from "../commands.js";
 import type { SlashCommand } from "../commands.js";
 
@@ -132,7 +136,7 @@ const command: SlashCommand = new StaticCommand(
       config.endDate = endDateInput ?? undefined;
       config.fileType = fileType;
     } catch (err) {
-      console.error("Error showing activity report:", err);
+      logger.error({ err: toError(err) }, "Error showing activity report");
       if (!interaction.replied && !interaction.deferred) {
         await interaction.reply({
           content: "❌ Failed to start activity report generation.",

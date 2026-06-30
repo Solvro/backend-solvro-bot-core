@@ -2,6 +2,7 @@ import type { VoiceState } from "discord.js";
 
 import logger from "@adonisjs/core/services/logger";
 
+import { toError } from "#app/helpers/error";
 import Meeting, { AttendanceStatus } from "#models/meetings";
 import Member from "#models/member";
 
@@ -36,6 +37,6 @@ export async function monitorVoiceState(
   try {
     await member.related("meetings").attach([meeting.id]);
   } catch (error) {
-    logger.error("Error attaching member to meeting:", error);
+    logger.error({ err: toError(error) }, "Error attaching member to meeting");
   }
 }

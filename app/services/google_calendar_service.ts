@@ -3,6 +3,7 @@ import { google } from "googleapis";
 
 import logger from "@adonisjs/core/services/logger";
 
+import { toError } from "#app/helpers/error";
 import env from "#start/env";
 
 export interface CalendarEvent {
@@ -66,7 +67,7 @@ export class GoogleCalendarService {
 
       return response.data as CalendarEventResult;
     } catch (error) {
-      logger.error("Error creating calendar event:", error);
+      logger.error({ err: toError(error) }, "Error creating calendar event");
       throw new Error(
         `Failed to create calendar event: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -90,7 +91,7 @@ export class GoogleCalendarService {
         ? (events[0] as CalendarEventResult)
         : null;
     } catch (error) {
-      logger.error("Error getting upcoming event:", error);
+      logger.error({ err: toError(error) }, "Error getting upcoming event");
       throw new Error(
         `Failed to get upcoming event: ${error instanceof Error ? error.message : String(error)}`,
       );
@@ -113,7 +114,7 @@ export class GoogleCalendarService {
 
       return (response.data.items ?? []) as CalendarEventResult[];
     } catch (error) {
-      logger.error("Error getting events in range:", error);
+      logger.error({ err: toError(error) }, "Error getting events in range");
       throw new Error(
         `Failed to get events: ${error instanceof Error ? error.message : String(error)}`,
       );

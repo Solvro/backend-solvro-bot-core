@@ -2,6 +2,8 @@ import type { StringSelectMenuInteraction } from "discord.js";
 
 import logger from "@adonisjs/core/services/logger";
 
+import { toError } from "#app/helpers/error";
+
 import { deleteConfig, getConfig } from "../shared/activity_report_config.js";
 
 export async function handleStatsSelect(
@@ -46,7 +48,10 @@ export async function handleStatsSelect(
       config,
     });
   } catch (error: unknown) {
-    logger.error("Failed to generate activity report", { error, config });
+    logger.error("Failed to generate activity report", {
+      err: toError(error),
+      config,
+    });
 
     await interaction.followUp({
       content: `❌ **Report Generation Failed**\n\nAn error occurred while generating the report. Please try again or contact an administrator.\n\nError: ${error instanceof Error ? error.message : String(error)}`,

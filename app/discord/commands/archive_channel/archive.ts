@@ -5,6 +5,10 @@ import {
 } from "discord.js";
 import type { CommandInteraction, TextChannel } from "discord.js";
 
+import logger from "@adonisjs/core/services/logger";
+
+import { toError } from "#app/helpers/error";
+
 import { StaticCommand } from "../commands.js";
 
 const command = new StaticCommand(
@@ -51,7 +55,7 @@ const command = new StaticCommand(
         ephemeral: true,
       });
     } catch (error) {
-      console.error(error);
+      logger.error({ err: toError(error) }, "Failed to archive channel");
       await interaction.reply({
         content: "Failed to archive the channel.",
         ephemeral: true,

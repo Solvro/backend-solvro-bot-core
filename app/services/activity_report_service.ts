@@ -263,7 +263,7 @@ export class ActivityReportService {
     const totalMeetings = await meetingsQuery.count("* as total");
     const total = Number(totalMeetings[0].$extras.total);
 
-    console.warn("Total meetings in range:", total);
+    logger.warn({ total }, "Total meetings in range");
 
     if (total === 0) {
       return { attended: 0, total: 0, percentage: 100 };
@@ -290,7 +290,7 @@ export class ActivityReportService {
     const result = await attendedQuery.distinct("meetings.id");
     const attended = result.length;
 
-    console.warn("Total meetings attended by member:", attended);
+    logger.warn({ attended }, "Total meetings attended by member");
 
     const percentage = total > 0 ? Math.round((attended / total) * 100) : 100;
 

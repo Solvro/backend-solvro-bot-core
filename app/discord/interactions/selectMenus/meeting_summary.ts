@@ -1,6 +1,9 @@
 import { AttachmentBuilder, MessageFlags } from "discord.js";
 import type { StringSelectMenuInteraction } from "discord.js";
 
+import logger from "@adonisjs/core/services/logger";
+
+import { toError } from "#app/helpers/error";
 import env from "#start/env";
 
 /**
@@ -124,7 +127,7 @@ export default async function handleMeetingSummary(
       });
     }
   } catch (err) {
-    console.error(err);
+    logger.error({ err: toError(err) }, "Failed to fetch meeting summary");
     await interaction.update({
       content:
         "❌ Failed to fetch summary. It may still be generating. Try again later.",

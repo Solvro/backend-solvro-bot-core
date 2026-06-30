@@ -60,7 +60,7 @@ const command: SlashCommand = new StaticCommand(
         try {
           await memberRecord.related("meetings").attach([meeting.id]);
         } catch (error) {
-          logger.error("Error attaching member to meeting:", error);
+          logger.error({ err: error }, "Error attaching member to meeting");
         }
       });
     }

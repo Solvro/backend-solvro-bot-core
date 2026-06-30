@@ -59,7 +59,10 @@ export class GoogleDriveService {
       logger.info(`Uploaded file to Google Drive: ${name} (ID: ${fileId})`);
       return fileId;
     } catch (error) {
-      logger.error(`Failed to upload file to Google Drive: ${name}`, error);
+      logger.error(
+        { err: error },
+        `Failed to upload file to Google Drive: ${name}`,
+      );
       throw error;
     }
   }
@@ -299,7 +302,10 @@ export class GoogleDriveService {
 
       logger.info(`Successfully uploaded all files for meeting ${meeting.id}`);
     } catch (error) {
-      logger.error(`Failed to upload files for meeting ${meeting.id}:`, error);
+      logger.error(
+        { err: error },
+        `Failed to upload files for meeting ${meeting.id}`,
+      );
       throw error;
     }
   }
@@ -324,8 +330,8 @@ export class GoogleDriveService {
       return response.data.files?.map((file) => file.name ?? "") ?? [];
     } catch (error) {
       logger.error(
-        `Failed to get uploaded files for meeting ${meeting.id}:`,
-        error,
+        { err: error },
+        `Failed to get uploaded files for meeting ${meeting.id}`,
       );
       return [];
     }
@@ -353,7 +359,10 @@ export class GoogleDriveService {
       });
       return true;
     } catch (error) {
-      logger.error("Google Drive service authentication failed", error);
+      logger.error(
+        { err: error },
+        "Google Drive service authentication failed",
+      );
       return false;
     }
   }

@@ -2,7 +2,6 @@ import { DateTime } from "luxon";
 import crypto from "node:crypto";
 
 import type { HttpContext } from "@adonisjs/core/http";
-import logger from "@adonisjs/core/services/logger";
 
 import GithubActivity from "#models/github_activity";
 import env from "#start/env";
@@ -27,7 +26,7 @@ function isValidHmacSignature(
 }
 
 export default class GithubWebhooksController {
-  async webhook({ request, response }: HttpContext) {
+  async webhook({ request, response, logger }: HttpContext) {
     const event = request.header("X-GitHub-Event");
     const signature = request.header("X-Hub-Signature-256");
 
@@ -55,7 +54,7 @@ export default class GithubWebhooksController {
     try {
       parsedBody = JSON.parse(rawBody.toString()) as Record<string, unknown>;
     } catch (error) {
-      logger.error("Github webhook: Failed to parse JSON body", error);
+      logger.error({ err: error }, "Github webhook: Failed to parse JSON body");
       return response.badRequest("Invalid JSON body");
     }
 
@@ -233,7 +232,7 @@ export default class GithubWebhooksController {
 
       return response.ok("Webhook processed.");
     } catch (error) {
-      logger.error(error);
+      logger.error({ err: error }, "Github webhook: Error processing webhook");
       return response.internalServerError("Error processing GitHub webhook.");
     }
   }

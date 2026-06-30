@@ -161,7 +161,7 @@ const command: StaticCommand = new StaticCommand(
         content: `✅ **Event created successfully!**\n\n📅 **${summary}**\n🕒 ${startDateInput} - ${endDateInput}\n📝 ${description}\n\n🔗 [View in Calendar](${createdEvent.htmlLink})`,
       });
     } catch (error: unknown) {
-      logger.error("Error creating calendar event:", error);
+      logger.error({ err: error }, "Error creating calendar event");
 
       if (error instanceof Error) {
         if (

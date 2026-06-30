@@ -2,7 +2,6 @@ import vine from "@vinejs/vine";
 import { DateTime } from "luxon";
 
 import type { HttpContext } from "@adonisjs/core/http";
-import logger from "@adonisjs/core/services/logger";
 import db from "@adonisjs/lucid/services/db";
 
 import Meeting, { RecordingStatus } from "#models/meetings";
@@ -55,7 +54,7 @@ export default class RecordingsController {
    * Webhook for when transcriber service completes summary generation
    * At this point, we assume both transcription and summary are ready
    */
-  async summary({ request, params, response }: HttpContext) {
+  async summary({ request, params, response, logger }: HttpContext) {
     const schema = vine.object({ id: vine.number() });
     const summarySchema = vine.object({
       summary: vine.string().trim(),
@@ -86,8 +85,8 @@ export default class RecordingsController {
           );
         } catch (error) {
           logger.error(
-            `Failed to upload files to Google Drive for meeting ${id}:`,
-            error,
+            { err: error },
+            `Failed to upload files to Google Drive for meeting ${id}`,
           );
           // don't fail the webhook
         }
@@ -101,7 +100,7 @@ export default class RecordingsController {
         .status(200)
         .json({ message: "Summary received and files uploaded" });
     } catch (error) {
-      logger.error(`Error processing summary webhook:`, error);
+      logger.error({ err: error }, "Error processing summary webhook");
       return response.status(500).json({ message: "Internal server error" });
     }
   }

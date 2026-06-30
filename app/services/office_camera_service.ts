@@ -141,7 +141,7 @@ export class OfficeCameraService {
           );
         }
       } catch (err) {
-        logger.error(`Failed to update message ${msg.messageId}`, err);
+        logger.error({ err }, `Failed to update message ${msg.messageId}`);
       }
     }
   }
